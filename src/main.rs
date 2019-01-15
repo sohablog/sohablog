@@ -1,6 +1,5 @@
 #![feature(proc_macro_hygiene,decl_macro)]
 
-mod enums;
 mod db;
 mod routes;
 
