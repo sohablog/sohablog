@@ -1,12 +1,17 @@
-use crate::schema::user;
-
 use diesel::prelude::*;
-use diesel::deserialize;
+use serde_derive::*;
 
-type ConstantIntegerFromSql=deserialize::FromSql<diesel::sql_types::Integer,diesel::mysql::Mysql>;
+use crate::schema::*;
+use super::{
+	Error,
+	Result
+};
 
-#[derive(Identifiable,Debug,Queryable,QueryableByName)]
-#[has_many(content)]
+use bcrypt;
+
+#[derive(Identifiable,Debug,Queryable,Clone)]
+#[primary_key(id)]
+#[table_name="user"]
 pub struct User{
 	pub id: i32,
 	pub username: String,
@@ -22,6 +27,22 @@ pub struct User{
 	pub last_login_time: chrono::NaiveDateTime,
 	pub status: UserStatus
 }
+impl User{
+	pub fn generate_password_hash(pwd: &str)->Result<String>{
+		bcrypt::hash(pwd,12).map_err(Error::from)
+	}
+}
+
+// integer constants
+
+use diesel::{
+	deserialize::{
+		FromSql,
+		self
+	},
+	sql_types::Integer,
+	mysql::Mysql,
+};
 
 #[derive(Copy,Clone,Serialize,Deserialize,Debug,FromSqlRow)]
 #[repr(u8)]
@@ -30,12 +51,12 @@ pub enum UserStatus{
 	Normal=0,
 	Deleted=1
 }
-impl ConstantIntegerFromSql for UserStatus{
+impl FromSql<Integer,Mysql> for UserStatus{
 	fn from_sql(bytes: Option<&[u8]>)->deserialize::Result<Self>{
-		match <i32 as ConstantIntegerFromSql>::from_sql(bytes)?{
+		match <i32 as FromSql<Integer,Mysql>>::from_sql(bytes)?{
 			0=>Ok(UserStatus::Normal),
 			1=>Ok(UserStatus::Deleted),
-			n=>Err(format!("Unknown UserStatus: {}",n))
+			n=>Err(format!("Unknown UserStatus: {}",n).into())
 		}
 	}
 }

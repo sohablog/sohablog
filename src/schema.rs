@@ -1,11 +1,13 @@
 table! {
+	use diesel::sql_types::*;
     content (id) {
         id -> Integer,
         user -> Integer,
         created_at -> Datetime,
         modified_at -> Datetime,
         title -> Nullable<Varchar>,
-        content -> Longtext,
+		#[sql_name = "content"]
+        content_ -> Longtext,
         order_level -> Integer,
         #[sql_name = "type"]
         type_ -> Integer,
@@ -18,6 +20,7 @@ table! {
 }
 
 table! {
+	use diesel::sql_types::*;	
     user (id) {
         id -> Integer,
         username -> Varchar,

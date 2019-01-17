@@ -1,6 +1,11 @@
-#![feature(proc_macro_hygiene,decl_macro)]
+#![feature(proc_macro_hygiene,decl_macro,custom_attribute)]
+#![allow(proc_macro_derive_resolution_fallback)]
+
+#[macro_use] extern crate diesel;
 
 mod db;
+mod schema;
+mod models;
 mod routes;
 
 fn main(){
@@ -16,7 +21,8 @@ fn main(){
 		Ok(_)=>{
 			rocket::ignite()
 				.mount("/",routes![
-					router::root::index
+					router::root::index,
+					router::root::dev_test
 				])
 				.manage(db)
 				.launch();
