@@ -1,4 +1,4 @@
-use crate::schema::content;
+use crate::schema::user;
 
 use diesel::prelude::*;
 use diesel::deserialize;
