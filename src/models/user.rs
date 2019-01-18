@@ -2,6 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use crate::schema::*;
+use crate::db::Database;
 use super::{
 	Error,
 	Result
@@ -27,9 +28,32 @@ pub struct User{
 	pub last_login_time: chrono::NaiveDateTime,
 	pub status: UserStatus
 }
+#[derive(Insertable)]
+#[table_name="user"]
+pub struct NewUser{
+	pub username: String,
+	pub email: String,
+	pub username_lower: String,
+	pub email_lower: String,
+	pub password_hash: String,
+	pub name: String,
+	pub permission: u32
+}
 impl User{
+	insert!(user,NewUser);
+	find_pk!(user);
+	find_one_by!(user,find_by_username,username as &str);
+
 	pub fn generate_password_hash(pwd: &str)->Result<String>{
 		bcrypt::hash(pwd,12).map_err(Error::from)
+	}
+
+	pub fn set_password_hash(&self,db: &Database,pwd: &str)->Result<()>{
+		diesel::update(self).set(user::password_hash.eq(pwd)).execute(&*db.pool().get()?).map(|_| ()).map_err(Error::from)
+	}
+
+	pub fn verify_password_hash(&self,pwd: &str)->bool{
+		bcrypt::verify(pwd,self.password_hash.as_ref()).unwrap_or(false)
 	}
 }
 

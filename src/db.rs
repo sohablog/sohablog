@@ -46,8 +46,8 @@ impl From<r2d2::Error> for Error{
 type DatabasePool=Pool<ConnectionManager<MysqlConnection>>;
 
 pub struct Database{
-	pub pool: Option<DatabasePool>,
-	pub conn_url: String
+	pool: Option<DatabasePool>,
+	conn_url: String
 }
 impl Database{
 	pub fn new(conn_url: &str)->Database{
