@@ -1,8 +1,7 @@
 use rocket_codegen::*;
 
 use rocket::{
-	State,
-	Response
+	State
 };
 use crate::db::Database;
 

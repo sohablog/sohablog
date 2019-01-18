@@ -1,0 +1,13 @@
+{% extends "base" %}
+
+{% block title %}Login {{ super() }}{% endblock %}
+
+{% block main %}
+	<form method="POST">
+		<input type="text" placeholder="Username" name="username" />
+		<br />
+		<input type="password" placeholder="Password" name="password" />
+		<br />
+		<input type="submit" />
+	</form>
+{% endblock %}

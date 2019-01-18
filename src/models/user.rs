@@ -16,11 +16,11 @@ use bcrypt;
 pub struct User{
 	pub id: i32,
 	pub username: String,
+	pub password_hash: String,
+	pub name: String,
 	pub email: String,
 	pub username_lower: String,
 	pub email_lower: String,
-	pub password_hash: String,
-	pub name: String,
 	pub avatar_url: Option<String>,
 	pub permission: u32,
 	pub created_at: chrono::NaiveDateTime,

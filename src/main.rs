@@ -9,7 +9,11 @@ mod models;
 mod routes;
 
 fn main(){
-	use rocket::routes;
+	use rocket::{
+		self,
+		routes
+	};
+	use rocket_contrib;
 	
 	use crate::db::Database;
 	use crate::routes as router;
@@ -22,8 +26,10 @@ fn main(){
 			rocket::ignite()
 				.mount("/",routes![
 					router::root::index,
-					router::root::dev_test
+					router::user::login_get,
+					router::user::login_post
 				])
+				.attach(rocket_contrib::templates::Template::fairing())
 				.manage(db)
 				.launch();
 		},
