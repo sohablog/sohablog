@@ -27,7 +27,8 @@ fn main(){
 				.mount("/",routes![
 					router::root::index,
 					router::user::login_get,
-					router::user::login_post
+					router::user::login_post,
+					router::admin::root::index
 				])
 				.attach(rocket_contrib::templates::Template::fairing())
 				.manage(db)

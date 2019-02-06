@@ -1,0 +1,9 @@
+{% extends "base" %}
+
+{% block title %}Admin | {{super()}}{% endblock %}
+{% block main %}
+	Admin - {{currentUser.username}} |
+	<hr>
+	{% block admin_main %}
+	{% endblock %}
+{% endblock %}

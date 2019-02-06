@@ -1,11 +1,12 @@
 use rocket_codegen::*;
-
-use rocket::{
-	State
+use rocket_contrib::{
+	templates::Template
 };
-use crate::db::Database;
+use crate::models::{user::User};
 
 #[get("/admin")]
-pub fn index()->&'static str{
-	"2333"
+pub fn index(user: User)->Template{
+	let mut ctx=tera::Context::new();
+	ctx.insert("currentUser",&user);
+	Template::render("admin/index",&ctx)
 }

@@ -16,7 +16,7 @@ use crate::db::Database;
 use crate::models::{user};
 
 #[get("/user/login")]
-pub fn login_get(_db: State<Database>)->Template{
+pub fn login_get()->Template{
 	Template::render("user/login",&tera::Context::new())
 }
 

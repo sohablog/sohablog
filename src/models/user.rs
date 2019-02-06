@@ -10,7 +10,7 @@ use super::{
 
 use bcrypt;
 
-#[derive(Identifiable,Debug,Queryable,Clone)]
+#[derive(Identifiable,Debug,Queryable,Clone,Serialize)]
 #[primary_key(id)]
 #[table_name="user"]
 pub struct User{

@@ -1,6 +1,6 @@
 {% extends "base" %}
 
-{% block title %}Login {{ super() }}{% endblock %}
+{% block title %}Login {{super()}}{% endblock %}
 
 {% block main %}
 	{% if error %}
