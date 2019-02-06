@@ -33,5 +33,10 @@ pub fn login_post(db: State<Database>,mut cookies: Cookies,form: LenientForm<Log
 			return Ok(Redirect::to("/"));
 		}
 	}
-	Err(Template::render("user/login",&tera::Context::new()))
+	let mut ctx=tera::Context::new();
+	let mut error=tera::Context::new();
+	error.insert("message","Wrong username or password");
+	ctx.insert("error",&error);
+	ctx.insert("username",&form.username);
+	Err(Template::render("user/login",&ctx))
 }

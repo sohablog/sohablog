@@ -3,8 +3,13 @@
 {% block title %}Login {{ super() }}{% endblock %}
 
 {% block main %}
+	{% if error %}
+		<div style="border: 1px solid red;">
+			<p>{{error.message|default(value="There is an error but we don't know what it is.")}}</p>
+		</div>
+	{% endif %}
 	<form method="POST">
-		<input type="text" placeholder="Username" name="username" />
+		<input type="text" placeholder="Username" name="username"{% if username %} value="{{username}}"{% endif %}/>
 		<br />
 		<input type="password" placeholder="Password" name="password" />
 		<br />
