@@ -83,8 +83,8 @@ macro_rules! find_pk {
  * User::find_by_username(db,"soha");
  */
 macro_rules! find_one_by {
-	($table:ident, $fn:ident, $($col:ident as $type:ty),+) => {
-		pub fn $fn(db: &crate::db::Database,$($col: $type),+) -> Result<Self> {
+	($table:ident, $fn:ident, $($col:ident as $type:ty),+)=>{
+		pub fn $fn(db: &crate::db::Database,$($col: $type),+)->Result<Self>{
 			$table::table$(.filter($table::$col.eq($col)))+.limit(1).load::<Self>(&*db.pool().get()?)?.into_iter().next().ok_or(Error::NotFound)
 		}
 	};
