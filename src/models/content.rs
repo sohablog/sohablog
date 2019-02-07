@@ -16,6 +16,7 @@ pub struct Content{
 	pub created_at: chrono::NaiveDateTime,
 	pub modified_at: chrono::NaiveDateTime,
 	pub title: Option<String>,
+	pub slug: Option<String>,
 	pub content: String,
 	pub order_level: i32,
 	pub r#type: ContentType,

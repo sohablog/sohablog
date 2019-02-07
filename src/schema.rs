@@ -6,6 +6,7 @@ table! {
         created_at -> Datetime,
         modified_at -> Datetime,
         title -> Nullable<Varchar>,
+        slug -> Nullable<Varchar>,
 		#[sql_name = "content"]
         content_ -> Longtext,
         order_level -> Integer,

@@ -33,6 +33,7 @@ CREATE TABLE `content` (
   `allow_comment` tinyint(1) NOT NULL DEFAULT '1',
   `allow_feed` tinyint(1) NOT NULL DEFAULT '1',
   `parent` int(11) DEFAULT NULL,
+  `slug` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `content_user_idx` (`user`) USING BTREE,
   KEY `content_parent_idx` (`parent`) USING BTREE,
