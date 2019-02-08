@@ -9,7 +9,10 @@ use rocket::{
 		Outcome
 	}
 };
-use pulldown_cmark::Parser;
+use comrak::{
+	markdown_to_html,
+	ComrakOptions
+};
 use crate::models::user;
 
 #[derive(Debug)]
@@ -40,10 +43,26 @@ impl<'a,'r> FromRequest<'a,'r> for GlobalVariable{
 	}
 }
 
+const COMRAK_OPTIONS:ComrakOptions=ComrakOptions{
+	hardbreaks: false,
+	smart: true,
+	github_pre_lang: true,
+	width: 0,
+	default_info_string: None,
+	unsafe_: true,
+	ext_strikethrough: true,
+	ext_tagfilter: true,
+	ext_table: true,
+	ext_autolink: true,
+	ext_tasklist: true,
+	ext_superscript: true,
+	ext_header_ids: None,
+	ext_footnotes: true,
+	ext_description_lists: true
+};
+
 pub fn tera_filter_markdown(value: tera::Value,_: HashMap<String,tera::Value>)->tera::Result<tera::Value>{
-    let s=try_get_value!("markdown","value",String,value);
-	let md_parser=Parser::new(s.as_str());
-	let mut html=String::new();
-	pulldown_cmark::html::push_html(&mut html,md_parser);
-    Ok(to_value(html).unwrap())
+	let s=try_get_value!("markdown","value",String,value);
+	let html=markdown_to_html(s.as_str(),&COMRAK_OPTIONS);
+	Ok(to_value(html).unwrap())
 }

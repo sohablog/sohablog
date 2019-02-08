@@ -6,7 +6,7 @@
 	<h1>{{post.title|default(value="Untitled")}}</h1>
 	<p><small>{{post.time|date}}</small></p>
 	<article>
-		{{post.content|markdown}}
+		{{post.content|safe|markdown}}
 	</article>
 	{# <hr>
 	{{post|json_encode}} #}
