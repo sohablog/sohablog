@@ -1,5 +1,5 @@
 {% extends "admin/base" %}
 
-{% block admin_main %}
+{% block main %}
 	<h1>Hello, {{currentUser.username}}!</h1>
 {% endblock %}

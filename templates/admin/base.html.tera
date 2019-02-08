@@ -1,9 +1,16 @@
-{% extends "base" %}
-
-{% block title %}Admin | {{super()}}{% endblock %}
-{% block main %}
-	Admin - {{currentUser.username}} |
-	<hr>
-	{% block admin_main %}
-	{% endblock %}
-{% endblock %}
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		{% block title %}Admin | SohaBlog{% endblock %}
+{% block meta %}{% endblock %}
+{% block stylesheet %}{% endblock %}
+	</head>
+	<body>
+		Admin - {{currentUser.username}} |
+		<hr>
+{% block main %}{% endblock %}
+{% block script %}{% endblock %}
+	</body>
+</html>

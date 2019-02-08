@@ -17,7 +17,7 @@ use crate::models::{user};
 
 #[get("/user/login")]
 pub fn login_get()->Template{
-	Template::render("user/login",&tera::Context::new())
+	Template::render("theme/basic/user/login",&tera::Context::new())
 }
 
 #[derive(Default,FromForm,Debug)]
@@ -38,5 +38,5 @@ pub fn login_post(db: State<Database>,mut cookies: Cookies,form: LenientForm<Log
 	error.insert("message","Wrong username or password");
 	ctx.insert("error",&error);
 	ctx.insert("username",&form.username);
-	Err(Template::render("user/login",&ctx))
+	Err(Template::render("theme/basic/user/login",&ctx))
 }
