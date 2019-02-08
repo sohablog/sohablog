@@ -28,17 +28,6 @@ pub struct User{
 	pub last_login_time: chrono::NaiveDateTime,
 	pub status: UserStatus
 }
-#[derive(Insertable)]
-#[table_name="user"]
-pub struct NewUser{
-	pub username: String,
-	pub email: String,
-	pub username_lower: String,
-	pub email_lower: String,
-	pub password_hash: String,
-	pub name: String,
-	pub permission: u32
-}
 impl User{
 	insert!(user,NewUser);
 	find_pk!(user);
@@ -55,6 +44,18 @@ impl User{
 	pub fn verify_password_hash(&self,pwd: &str)->bool{
 		bcrypt::verify(pwd,self.password_hash.as_ref()).unwrap_or(false)
 	}
+}
+
+#[derive(Insertable)]
+#[table_name="user"]
+pub struct NewUser{
+	pub username: String,
+	pub email: String,
+	pub username_lower: String,
+	pub email_lower: String,
+	pub password_hash: String,
+	pub name: String,
+	pub permission: u32
 }
 
 #[derive(Debug)]
