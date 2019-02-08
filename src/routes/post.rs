@@ -6,13 +6,17 @@ use rocket::{
 use rocket_contrib::{
 	templates::Template
 };
+use crate::render;
 use crate::db::Database;
 use crate::models::content;
 use super::error::Error;
 
 #[get("/post/<path>")]
-pub fn post_show(db: State<Database>,path: String)->Result<String,Error>{
+pub fn post_show(db: State<Database>,global_var: render::GlobalVariable,path: String)->Result<Template,Error>{
 	let slug=path.replace(".html","");
 	let post=content::Content::find_by_slug(&db,&slug)?;
-	Ok(format!("{:?}\n{:?}",slug,post))
+	
+	let mut ctx=tera::Context::new();
+	ctx.insert("post",&post);
+	Ok(render::theme_render("post",global_var,Some(ctx))?)
 }

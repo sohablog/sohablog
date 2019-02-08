@@ -7,6 +7,7 @@ mod db;
 mod schema;
 mod models;
 mod routes;
+mod render;
 
 fn main(){
 	use rocket::{
