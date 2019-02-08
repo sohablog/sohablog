@@ -5,6 +5,7 @@ table! {
         user -> Integer,
         created_at -> Datetime,
         modified_at -> Datetime,
+		time -> Datetime,
         title -> Nullable<Varchar>,
         slug -> Nullable<Varchar>,
 		#[sql_name = "content"]

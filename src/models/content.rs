@@ -17,6 +17,7 @@ pub struct Content{
 	pub user: i32,
 	pub created_at: chrono::NaiveDateTime,
 	pub modified_at: chrono::NaiveDateTime,
+	pub time: chrono::NaiveDateTime,
 	pub title: Option<String>,
 	pub slug: Option<String>,
 	pub content: String,
@@ -38,6 +39,7 @@ impl Content{
 #[table_name="content"]
 pub struct NewContent{
 	pub user: i32,
+	pub time: chrono::NaiveDateTime,
 	pub title: Option<String>,
 	pub slug: Option<String>,
 	#[column_name="content_"]
