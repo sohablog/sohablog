@@ -58,29 +58,8 @@ pub struct NewUser{
 	pub permission: u32
 }
 
-#[derive(Debug)]
-pub struct OptionUser(Option<User>);
-
 use rocket::request::{Outcome,FromRequest};
 use rocket::outcome::IntoOutcome;
-impl<'a,'r> FromRequest<'a,'r> for OptionUser{
-	type Error=();
-	fn from_request(request: &'a rocket::request::Request<'r>)->Outcome<OptionUser,()>{
-		let db=request.guard::<rocket::State<Database>>()?;
-		let cookie_value:Option<String>=request.cookies().get_private("user_id").and_then(|cookie| cookie.value().parse().ok());
-		Outcome::Success(match cookie_value{
-			Some(uid)=>match uid.parse::<i32>(){
-				Ok(uid)=>match User::get(&db,uid){
-					Ok(u)=>OptionUser(Some(u)),
-					Err(_)=>OptionUser(None)
-				},
-				Err(_)=>OptionUser(None)
-			},
-			None=>OptionUser(None)
-		})
-	}
-}
-
 impl<'a,'r> FromRequest<'a,'r> for User{
 	type Error=();
 	fn from_request(request: &'a rocket::request::Request<'r>)->Outcome<User,()>{
