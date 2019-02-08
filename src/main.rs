@@ -28,7 +28,8 @@ fn main(){
 					router::root::index,
 					router::user::login_get,
 					router::user::login_post,
-					router::admin::root::index
+					router::admin::root::index,
+					router::post::post_show
 				])
 				.attach(rocket_contrib::templates::Template::fairing())
 				.manage(db)
