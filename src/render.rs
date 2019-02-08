@@ -1,4 +1,6 @@
-use tera::Context;
+use tera::*;
+use std::result::Result;
+use std::collections::HashMap;
 use rocket_contrib::templates::Template;
 use rocket::{
 	Request,
@@ -7,6 +9,7 @@ use rocket::{
 		Outcome
 	}
 };
+use pulldown_cmark::Parser;
 use crate::models::user;
 
 #[derive(Debug)]
@@ -35,4 +38,12 @@ impl<'a,'r> FromRequest<'a,'r> for GlobalVariable{
 			current_user: user
 		})
 	}
+}
+
+pub fn tera_filter_markdown(value: tera::Value,_: HashMap<String,tera::Value>)->tera::Result<tera::Value>{
+    let s=try_get_value!("markdown","value",String,value);
+	let md_parser=Parser::new(s.as_str());
+	let mut html=String::new();
+	pulldown_cmark::html::push_html(&mut html,md_parser);
+    Ok(to_value(html).unwrap())
 }

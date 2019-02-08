@@ -32,7 +32,9 @@ fn main(){
 					router::admin::root::index,
 					router::post::post_show
 				])
-				.attach(rocket_contrib::templates::Template::fairing())
+				.attach(rocket_contrib::templates::Template::custom(|engines| {
+					engines.tera.register_filter("markdown", render::tera_filter_markdown);
+				}))
 				.manage(db)
 				.launch();
 		},
