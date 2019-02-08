@@ -16,6 +16,7 @@ serde_derive = "1.0.84"
 serde_json = "1.0.36"
 bcrypt = "0.2.1"
 tera = "0.11.20"
+pulldown-cmark = { version = "0.2.0", default-features = false }
 
 [patch.crates-io]
 mysqlclient-sys = { git = 'https://github.com/sgrif/mysqlclient-sys' }
