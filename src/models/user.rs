@@ -64,7 +64,7 @@ impl<'a,'r> FromRequest<'a,'r> for User{
 	type Error=();
 	fn from_request(request: &'a rocket::request::Request<'r>)->Outcome<User,()>{
 		let db=request.guard::<rocket::State<Database>>()?;
-		request.cookies().get_private("user_id").and_then(|cookie| cookie.value().parse().ok()).and_then(|id| User::get(&db,id).ok()).or_forward(())
+		request.cookies().get_private("user_id").and_then(|cookie| cookie.value().parse().ok()).and_then(|id| User::find(&db,id).ok()).or_forward(())
 	}
 }
 

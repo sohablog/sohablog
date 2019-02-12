@@ -69,7 +69,7 @@ macro_rules! last {
  */
 macro_rules! find_pk {
 	($table:ident)=>{
-		pub fn get(db: &crate::db::Database,id: i32)->Result<Self>{
+		pub fn find(db: &crate::db::Database,id: i32)->Result<Self>{
 			$table::table.filter($table::id.eq(id)).limit(1).load::<Self>(&*db.pool().get()?)?.into_iter().next().ok_or(Error::NotFound)
 		}
 	};
