@@ -2,6 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use crate::schema::*;
+use crate::db::Database;
 use super::{
 	Error,
 	Result,
@@ -12,6 +13,7 @@ use super::{
 #[primary_key(id)]
 #[table_name="content"]
 #[belongs_to(User,foreign_key="user")]
+#[belongs_to(Content,foreign_key="parent")]
 pub struct Content{
 	pub id: i32,
 	pub user: i32,
@@ -33,6 +35,10 @@ impl Content{
 	insert!(content,NewContent);
 	find_pk!(content);
 	find_one_by!(content,find_by_slug,slug as &str);
+
+	pub fn get_user(&self,db: &Database)->Result<User>{
+		User::find(db,self.user)
+	}
 }
 
 #[derive(Insertable)]
@@ -69,7 +75,7 @@ use diesel::{
 	mysql::Mysql,
 };
 
-#[derive(Copy,Clone,Serialize,Deserialize,Debug,FromSqlRow,AsExpression)]
+#[derive(Copy,Clone,Serialize,Deserialize,Debug,FromSqlRow,AsExpression,PartialEq)]
 #[repr(u8)]
 #[sql_type="Integer"]
 #[serde(rename_all="lowercase")]
@@ -94,7 +100,7 @@ impl ToSql<Integer,Mysql> for ContentStatus{
 	}
 }
 
-#[derive(Copy,Clone,Serialize,Deserialize,Debug,FromSqlRow,AsExpression)]
+#[derive(Copy,Clone,Serialize,Deserialize,Debug,FromSqlRow,AsExpression,PartialEq)]
 #[repr(u8)]
 #[serde(rename_all="lowercase")]
 #[sql_type="Integer"]
