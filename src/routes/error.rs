@@ -14,11 +14,15 @@ use rocket::{
 #[derive(Debug)]
 pub enum Error{
 	Model(models::Error),
-	Render(render::Error)
+	Render(render::Error),
+	NotFound
 }
 impl From<models::Error> for Error{
 	fn from(err: models::Error)->Error{
-		Error::Model(err)
+		match err{
+			models::Error::NotFound=>Error::NotFound,
+			_=>Error::Model(err)
+		}
 	}
 }
 impl From<render::Error> for Error{
@@ -29,10 +33,7 @@ impl From<render::Error> for Error{
 impl<'a> Responder<'a> for Error{
 	fn respond_to(self,_req: &Request)->response::Result<'a>{
 		match self{
-			Error::Model(e)=>match e{
-				models::Error::NotFound=>Err(rocket::http::Status::NotFound),
-				_=>Err(Status::InternalServerError)
-			},
+			Error::NotFound=>Err(rocket::http::Status::NotFound),
 			_=>Err(Status::InternalServerError)
 		}
 	}
