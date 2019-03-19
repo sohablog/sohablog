@@ -21,13 +21,23 @@ pub enum Error{
 	TemplateRender
 }
 
-pub fn theme_render(name: &str,global_var: GlobalVariable,context: Option<Context>)->Result<Template,Error>{
+fn create_final_context(global_var: GlobalVariable,context: Option<Context>)->Context{
 	let mut ctx=Context::new();
 	ctx.insert("currentUser",&global_var.current_user);
 	if let Some(context) = context {
 		ctx.extend(context);
 	};
+	ctx
+}
+
+pub fn theme_render(name: &str,global_var: GlobalVariable,context: Option<Context>)->Result<Template,Error>{
+	let ctx=create_final_context(global_var, context);
 	Ok(Template::render(format!("theme/{}/{}","basic",name), &ctx))
+}
+
+pub fn render(name: &'static str,global_var: GlobalVariable,context: Option<Context>)->Result<Template,Error>{
+	let ctx=create_final_context(global_var, context);
+	Ok(Template::render(name, &ctx))
 }
 
 pub struct GlobalVariable{

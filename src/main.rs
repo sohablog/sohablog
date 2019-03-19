@@ -30,7 +30,8 @@ fn main(){
 					router::user::login_get,
 					router::user::login_post,
 					router::admin::root::index,
-					router::post::post_show
+					router::post::post_show,
+					router::root::page_show
 				])
 				.attach(rocket_contrib::templates::Template::custom(|engines| {
 					engines.tera.register_filter("markdown", render::tera_filter_markdown);

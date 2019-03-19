@@ -2,11 +2,13 @@ use rocket_codegen::*;
 use rocket_contrib::{
 	templates::Template
 };
-use crate::models::{user::User};
+use crate::{
+	render,
+	models::{user::User}
+};
+use super::super::error::Error;
 
 #[get("/admin")]
-pub fn index(user: User)->Template{
-	let mut ctx=tera::Context::new();
-	ctx.insert("currentUser",&user);
-	Template::render("admin/index",&ctx)
+pub fn index(global_var: render::GlobalVariable,_user: User)->Result<Template,Error>{
+	Ok(render::render("admin/index",global_var,None)?)
 }
