@@ -30,7 +30,7 @@ pub fn login_post(db: State<Database>,mut cookies: Cookies,form: LenientForm<Log
 	if let Ok(user)=user::User::find_by_username(&db,form.username.as_str()){
 		if user.verify_password_hash(form.password.as_str()){
 			cookies.add_private(Cookie::new("user_id", user.id.to_string()));
-			return Ok(Redirect::to("/"));
+			return Ok(Redirect::to("/admin"));
 		}
 	}
 	let mut ctx=tera::Context::new();

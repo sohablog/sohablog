@@ -1,0 +1,38 @@
+{% extends "admin/base" %}
+
+{% block title %}{% if post %}Edit {{post.title|default(value='Untitled')}}{% else %}New Post{% endif %} | {{super()}}{% endblock %}
+
+{% block main %}
+	<form method="POST">
+		<input type="text" placeholder="Title" name="title"{% if post %} value="{{post.title}}"{% endif %} />
+		<br />
+		<input type="text" placeholder="Slug" name="slug"{% if post %} value="{{post.slug}}"{% endif %} />
+		<br />
+		<div style="height: 600px;">
+			<div id="content-mp"></div>
+		</div>
+		<textarea style="display: none;" id="content" name="content">{% if post %}{{post.content}}{% endif %}</textarea>
+		<br />
+		<input type="text" placeholder="Time" name="time" value="{% if post %}{{post.time|date(format='%Y-%m-%d %H:%M:%S')}}{% else %}{{now()|date(format='%Y-%m-%d %H:%M:%S')}}{% endif %}" />
+		<br />
+		<input type="submit" id="submit" />
+	</form>
+{% endblock %}
+
+{% block stylesheet %}
+		<link href="https://unpkg.com/markdown-palettes@latest/dist/markdown-palettes.css" rel="stylesheet" />
+{% endblock %}
+
+{% block script %}
+		<script src="https://unpkg.com/markdown-palettes@latest/dist/markdown-palettes.min.js"></script>
+		<script>
+			var mpContent=new MarkdownPalettes("#content-mp");
+			document.getElementById('submit').onclick=function (){
+				document.getElementById('content').value=mpContent.content;
+				return true;
+			};
+			document.addEventListener('DOMContentLoaded',function (){
+				mpContent.content=document.getElementById('content').value;
+			},false);
+		</script>
+{% endblock %}

@@ -31,6 +31,9 @@ fn main(){
 					router::user::login_post,
 					router::admin::root::index,
 					router::admin::post::list,
+					router::admin::post::new_get,
+					router::admin::post::edit_get,
+					router::admin::post::edit_post,
 					router::post::post_show,
 					router::root::page_show
 				])

@@ -15,7 +15,7 @@
 			<tr>
 				<td>{{post.id}}</td>
 				<td>{{post.title|default(value='Untitled')}}</td>
-				<td>{{post.time|date}}</td>
+				<td>{{post.time|date(format='%Y-%m-%d %H:%M')}}</td>
 			</tr>{% endfor %}
 		</tbody>
 	</table>

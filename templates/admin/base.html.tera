@@ -8,10 +8,11 @@
 {% block stylesheet %}{% endblock %}
 	</head>
 	<body>
-{% block main %}
-	Admin - {{currentUser.username}} |
-	<hr>
+{% block nav %}
+		Admin - {{currentUser.username}} | <a href="/admin/post">Post</a>
+		<hr>
 {% endblock %}
+{% block main %}{% endblock %}
 {% block script %}{% endblock %}
 	</body>
 </html>

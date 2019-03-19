@@ -1,6 +1,7 @@
 {% extends "admin/base" %}
 
 {% block title %}Login | {{super()}}{% endblock %}
+{% block nav %}{% endblock %}
 
 {% block main %}
 	{% if error %}
