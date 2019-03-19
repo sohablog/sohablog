@@ -18,6 +18,7 @@ pub fn post_show(db: State<Database>,global_var: render::GlobalVariable,path: St
 	if post.status==content::ContentStatus::Deleted || post.r#type!=content::ContentType::Article{
 		return Err(Error::NotFound)
 	}
+	// TODO: Password check when `view_password` exists
 	let poster=post.get_user(&db)?;
 	let mut ctx=tera::Context::new();
 	ctx.insert("post",&post);

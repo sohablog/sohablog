@@ -106,7 +106,8 @@ impl ToSql<Integer,Mysql> for ContentStatus{
 #[sql_type="Integer"]
 pub enum ContentType{
 	Article=0,
-	Draft=1
+	Draft=1,
+	SinglePage=2
 }
 impl FromSql<Integer,Mysql> for ContentType{
 	fn from_sql(bytes: Option<&[u8]>)->deserialize::Result<Self>{

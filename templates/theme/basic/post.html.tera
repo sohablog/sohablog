@@ -4,7 +4,7 @@
 
 {% block main %}
 	<h1>{{post.title|default(value="Untitled")}}</h1>
-	<p><small>{{post.time|date}}</small></p>
+	<p><b>{{poster.name}}</b>&nbsp;<small>{{post.time|date}}</small></p>
 	<article>
 		{{post.content|safe|markdown}}
 	</article>
