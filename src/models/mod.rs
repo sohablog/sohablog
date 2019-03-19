@@ -7,7 +7,8 @@ pub enum Error{
 	Database(diesel::result::Error),
 	Bcrypt(bcrypt::BcryptError),
 	Pool(r2d2::Error),
-	NotFound
+	NotFound,
+	UserHasNoPermission
 }
 impl From<bcrypt::BcryptError> for Error{
 	fn from(e: bcrypt::BcryptError)->Self{

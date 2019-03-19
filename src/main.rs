@@ -30,6 +30,7 @@ fn main(){
 					router::user::login_get,
 					router::user::login_post,
 					router::admin::root::index,
+					router::admin::post::list,
 					router::post::post_show,
 					router::root::page_show
 				])

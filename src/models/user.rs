@@ -10,6 +10,11 @@ use super::{
 
 use bcrypt;
 
+#[allow(dead_code)] pub const PERM_LOGIN:u32=1<<0; // login only
+#[allow(dead_code)] pub const PERM_POST_VIEW:u32=1<<1; // view all posts (such as hidden post)
+#[allow(dead_code)] pub const PERM_POST_EDIT:u32=1<<2; // create & edit post
+#[allow(dead_code)] pub const PERM_POST_DELETE:u32=1<<3; // delete post
+
 #[derive(Identifiable,Debug,Queryable,Clone,Serialize)]
 #[primary_key(id)]
 #[table_name="user"]
@@ -43,6 +48,17 @@ impl User{
 
 	pub fn verify_password_hash(&self,pwd: &str)->bool{
 		bcrypt::verify(pwd,self.password_hash.as_ref()).unwrap_or(false)
+	}
+
+	pub fn has_permission(&self,perm: u32)->bool{
+		(self.permission&perm)!=0
+	}
+
+	pub fn check_permission(&self,perm: u32)->Result<()>{
+		match self.has_permission(perm){
+			true=>Ok(()),
+			false=>Err(Error::UserHasNoPermission)
+		}
 	}
 }
 

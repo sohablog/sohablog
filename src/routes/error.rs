@@ -15,12 +15,15 @@ use rocket::{
 pub enum Error{
 	Model(models::Error),
 	Render(render::Error),
-	NotFound
+	NotFound,
+	NoPermission
 }
+
 impl From<models::Error> for Error{
 	fn from(err: models::Error)->Error{
 		match err{
 			models::Error::NotFound=>Error::NotFound,
+			models::Error::UserHasNoPermission=>Error::NoPermission,
 			_=>Error::Model(err)
 		}
 	}
@@ -30,10 +33,12 @@ impl From<render::Error> for Error{
 		Error::Render(err)
 	}
 }
+
 impl<'a> Responder<'a> for Error{
 	fn respond_to(self,_req: &Request)->response::Result<'a>{
 		match self{
 			Error::NotFound=>Err(rocket::http::Status::NotFound),
+			Error::NoPermission=>Err(rocket::http::Status::Forbidden),
 			_=>Err(Status::InternalServerError)
 		}
 	}

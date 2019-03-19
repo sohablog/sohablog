@@ -1,0 +1,22 @@
+{% extends "admin/base" %}
+
+{% block title %}Post List | {{super()}}{% endblock %}
+
+{% block main %}
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Time</th>
+			</tr>
+		</thead>
+		<tbody>{% for post in posts %}
+			<tr>
+				<td>{{post.id}}</td>
+				<td>{{post.title|default(value='Untitled')}}</td>
+				<td>{{post.time|date}}</td>
+			</tr>{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
