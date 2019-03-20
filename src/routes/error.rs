@@ -42,6 +42,7 @@ impl From<chrono::ParseError> for Error{
 
 impl<'a> Responder<'a> for Error{
 	fn respond_to(self,_req: &Request)->response::Result<'a>{
+		println!("{:?}",&self);
 		match self{
 			Error::NotFound=>Err(rocket::http::Status::NotFound),
 			Error::NoPermission=>Err(rocket::http::Status::Forbidden),

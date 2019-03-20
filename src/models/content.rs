@@ -9,9 +9,10 @@ use super::{
 	user::User
 };
 
-#[derive(Identifiable,Debug,Queryable,Associations,Clone,Serialize)]
-#[primary_key(id)]
+#[derive(Debug,Queryable,Associations,Clone,Serialize,Identifiable,AsChangeset)]
+#[changeset_options(treat_none_as_null = "true")]
 #[table_name="content"]
+#[primary_key(id)]
 #[belongs_to(User,foreign_key="user")]
 #[belongs_to(Content,foreign_key="parent")]
 pub struct Content{
@@ -22,8 +23,10 @@ pub struct Content{
 	pub time: chrono::NaiveDateTime,
 	pub title: Option<String>,
 	pub slug: Option<String>,
+	#[column_name="content_"]
 	pub content: String,
 	pub order_level: i32,
+	#[column_name="type_"]
 	pub r#type: ContentType,
 	pub status: ContentStatus,
 	pub view_password: Option<String>,
@@ -35,6 +38,7 @@ impl Content{
 	insert!(content,NewContent);
 	find_pk!(content);
 	find_one_by!(content,find_by_slug,slug as &str);
+	update!();
 
 	pub fn get_user(&self,db: &Database)->Result<User>{
 		User::find(db,self.user)

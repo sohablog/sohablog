@@ -46,6 +46,22 @@ macro_rules! insert {
 	};
 }
 /**
+ * Update a new row
+ * 
+ * impl User{
+ *     update!();
+ * }
+ * user.update(db);
+ */
+macro_rules! update {
+	()=>{
+		pub fn update(&self,db: &crate::db::Database)->Result<()>{
+			diesel::update(self).set(self).execute(&*db.pool().get()?)?;
+			Ok(())
+		}
+	};
+}
+/**
  * Get last row
  * 
  * impl User{
