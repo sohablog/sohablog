@@ -15,6 +15,7 @@ use rocket::{
 pub enum Error{
 	Model(models::Error),
 	Render(render::Error),
+	ChronoParse(chrono::ParseError),
 	NotFound,
 	NoPermission
 }
@@ -31,6 +32,11 @@ impl From<models::Error> for Error{
 impl From<render::Error> for Error{
 	fn from(err: render::Error)->Error{
 		Error::Render(err)
+	}
+}
+impl From<chrono::ParseError> for Error{
+	fn from(err: chrono::ParseError)->Error{
+		Error::ChronoParse(err)
 	}
 }
 

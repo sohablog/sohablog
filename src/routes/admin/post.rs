@@ -4,6 +4,7 @@ use rocket_contrib::{
 };
 use rocket::{
 	State,
+	response::Redirect,
 	request::LenientForm
 };
 use crate::{
@@ -42,16 +43,56 @@ pub fn edit_get(post_id:i32,db: State<Database>,global_var: render::GlobalVariab
 	Ok(render::render("admin/post/edit",global_var,Some(ctx))?)
 }
 #[derive(Default,FromForm,Debug)]
-pub struct LoginForm {
-	pub username: String,
-	pub password: String
+pub struct PostForm{
+	pub id: Option<i32>,
+	pub title: Option<String>,
+	pub content: String,
+	pub slug: Option<String>,
+	pub time: String
 }
 #[post("/admin/post/_edit",data="<form>")]
-pub fn edit_post(db: State<Database>,form: LenientForm<LoginForm>)->Result<Template,Template>{
-	let mut ctx=tera::Context::new();
-	let mut error=tera::Context::new();
-	error.insert("message","Wrong username or password");
-	ctx.insert("error",&error);
-	ctx.insert("username",&form.username);
-	Err(Template::render("admin/user/login",&ctx))
+pub fn edit_post(db: State<Database>,form: LenientForm<PostForm>,current_user: User)->Result<String,Error>{
+	current_user.check_permission(user::PERM_POST_EDIT)?;
+	match form.id{
+		Some(id)=>{
+			let post:Content=Content::find(&db,id)?;
+			if post.status==content::ContentStatus::Deleted || post.r#type!=content::ContentType::Article{
+				return Err(Error::NotFound)
+			}
+			Ok(format!("{:?}",post))
+		},
+		None=>{
+			// TODO: set view_password
+			let content=content::NewContent{
+				user: current_user.id,
+				time: chrono::NaiveDateTime::parse_from_str(form.time.as_str(),"%Y-%m-%d %H:%M:%S")?,
+				title: match &form.title{
+					Some(title)=>if title.trim().len()==0{
+						None
+					}else{
+						Some(title.to_owned())
+					},
+					None=>None
+				},
+				slug: match &form.slug{
+					Some(slug)=>if slug.trim().len()==0{
+						None
+					}else{
+						Some(slug.to_owned())
+					},
+					None=>None
+				},
+				content: form.content.to_owned(),
+				order_level: 0,
+				r#type: content::ContentType::Article,
+				status: content::ContentStatus::Normal,
+				allow_comment: true,
+				allow_feed: true,
+				parent: None,
+				view_password: None
+			};
+			Ok(format!("{:?}",content))
+		}
+	}
+	// Ok(format!("{:?}",form))
 }

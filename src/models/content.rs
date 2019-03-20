@@ -52,7 +52,7 @@ impl Content{
 	}
 }
 
-#[derive(Insertable)]
+#[derive(Insertable,Debug)]
 #[table_name="content"]
 pub struct NewContent{
 	pub user: i32,

@@ -3,7 +3,10 @@
 {% block title %}{% if post %}Edit {{post.title|default(value='Untitled')}}{% else %}New Post{% endif %} | {{super()}}{% endblock %}
 
 {% block main %}
-	<form method="POST">
+	<form action="/admin/post/_edit" method="POST">
+		{% if post %}
+		<input type="hidden" name="id" value="{{post.id}}" />
+		{% endif %}
 		<input type="text" placeholder="Title" name="title"{% if post %} value="{{post.title}}"{% endif %} />
 		<br />
 		<input type="text" placeholder="Slug" name="slug"{% if post %} value="{{post.slug}}"{% endif %} />
