@@ -69,7 +69,7 @@ pub fn edit_post(db: State<Database>,form: LenientForm<PostForm>,current_user: U
 		},
 		None=>None
 	};
-	let post=match form.id{
+	let _post=match form.id{
 		Some(id)=>{
 			let mut post=Content::find(&db,id)?;
 			if post.status==content::ContentStatus::Deleted || post.r#type!=content::ContentType::Article{
