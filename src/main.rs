@@ -15,12 +15,14 @@ fn main(){
 		routes
 	};
 	use rocket_contrib;
-	
+	use dotenv;
+	use std::env;
 	use crate::db::Database;
 	use crate::routes as router;
 
-    let db_url="mysql://dev_local:A1aB2bC3c@127.0.0.1:3306/sohablog";
-	let mut db=Database::new(db_url);
+	dotenv::dotenv().ok();
+	let db_url=env::var("DATABASE_URL").unwrap();
+	let mut db=Database::new(&db_url);
 
 	match db.init(){
 		Ok(_)=>{
