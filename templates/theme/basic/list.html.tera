@@ -10,6 +10,6 @@
 	</div>
 	<hr>
 	{% endfor %}
-	<hr>
-	{{posts|json_encode}}
+	{# <hr>
+	{{posts|json_encode}} #}
 {% endblock %}
