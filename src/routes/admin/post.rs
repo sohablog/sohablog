@@ -51,7 +51,7 @@ pub struct PostForm{
 	pub time: String
 }
 #[post("/admin/post/_edit",data="<form>")]
-pub fn edit_post(db: State<Database>,form: LenientForm<PostForm>,current_user: User)->Result<String,Error>{
+pub fn edit_post(db: State<Database>,form: LenientForm<PostForm>,current_user: User)->Result<Redirect,Error>{
 	current_user.check_permission(user::PERM_POST_EDIT)?;
 	let title=match &form.title{
 		Some(title)=>if title.trim().len()==0{
@@ -101,5 +101,5 @@ pub fn edit_post(db: State<Database>,form: LenientForm<PostForm>,current_user: U
 			Content::insert(&db,content)?
 		}
 	};
-	Ok(format!("{:?}",post))
+	Ok(Redirect::to("/admin/post"))
 }
