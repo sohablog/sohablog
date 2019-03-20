@@ -1,0 +1,15 @@
+{% extends "theme/basic/base" %}
+
+{% block title %}Articles | {{super()}}{% endblock %}
+
+{% block main %}
+	{% for post in posts %}
+	<div>
+		<h2><a href="/post/{% if post.slug %}{{post.slug}}{% else %}{{post.id}}{% endif %}.html">{{post.title|default(value='Untitled')}}</a></h2>
+		<small>{#<b>{{poster.name}}</b> · #}{{post.time|date}}</small>
+	</div>
+	<hr>
+	{% endfor %}
+	<hr>
+	{{posts|json_encode}}
+{% endblock %}

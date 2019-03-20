@@ -12,8 +12,11 @@ use crate::models::content;
 use super::error::Error;
 
 #[get("/")]
-pub fn index()->&'static str{
-	"2333"
+pub fn index(db: State<Database>,global_var: render::GlobalVariable)->Result<Template,Error>{
+	let mut ctx=tera::Context::new();
+	let posts=content::Content::find_posts(&db,(0,10),false)?;
+	ctx.insert("posts",&posts);
+	Ok(render::theme_render("list",global_var,Some(ctx))?)
 }
 
 #[get("/<path>")]
