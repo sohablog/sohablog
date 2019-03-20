@@ -53,35 +53,42 @@ pub struct PostForm{
 #[post("/admin/post/_edit",data="<form>")]
 pub fn edit_post(db: State<Database>,form: LenientForm<PostForm>,current_user: User)->Result<String,Error>{
 	current_user.check_permission(user::PERM_POST_EDIT)?;
-	match form.id{
+	let title=match &form.title{
+		Some(title)=>if title.trim().len()==0{
+			None
+		}else{
+			Some(title.to_owned())
+		},
+		None=>None
+	};
+	let slug=match &form.slug{
+		Some(slug)=>if slug.trim().len()==0{
+			None
+		}else{
+			Some(slug.to_owned())
+		},
+		None=>None
+	};
+	let post=match form.id{
 		Some(id)=>{
-			let post:Content=Content::find(&db,id)?;
+			let mut post=Content::find(&db,id)?;
 			if post.status==content::ContentStatus::Deleted || post.r#type!=content::ContentType::Article{
 				return Err(Error::NotFound)
 			}
-			Ok(format!("{:?}",post))
+			post.title=title;
+			post.slug=slug;
+			post.content=form.content.to_owned();
+			post.time=chrono::NaiveDateTime::parse_from_str(form.time.as_str(),"%Y-%m-%d %H:%M:%S")?;
+			post.update(&db)?;
+			post
 		},
 		None=>{
 			// TODO: set view_password
 			let content=content::NewContent{
 				user: current_user.id,
 				time: chrono::NaiveDateTime::parse_from_str(form.time.as_str(),"%Y-%m-%d %H:%M:%S")?,
-				title: match &form.title{
-					Some(title)=>if title.trim().len()==0{
-						None
-					}else{
-						Some(title.to_owned())
-					},
-					None=>None
-				},
-				slug: match &form.slug{
-					Some(slug)=>if slug.trim().len()==0{
-						None
-					}else{
-						Some(slug.to_owned())
-					},
-					None=>None
-				},
+				title: title,
+				slug: slug,
 				content: form.content.to_owned(),
 				order_level: 0,
 				r#type: content::ContentType::Article,
@@ -91,8 +98,8 @@ pub fn edit_post(db: State<Database>,form: LenientForm<PostForm>,current_user: U
 				parent: None,
 				view_password: None
 			};
-			Ok(format!("{:?}",content))
+			Content::insert(&db,content)?
 		}
-	}
-	// Ok(format!("{:?}",form))
+	};
+	Ok(format!("{:?}",post))
 }
