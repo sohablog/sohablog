@@ -31,6 +31,7 @@ fn main(){
 					router::root::index,
 					router::user::login_get,
 					router::user::login_post,
+					router::admin::root::generate_password_hash,
 					router::admin::root::index,
 					router::admin::post::list,
 					router::admin::post::new_get,
