@@ -1,0 +1,26 @@
+image: docker:latest
+
+services:
+  -
+    name: docker:dind
+    command:
+        - "--registry-mirror=https://docker.mirrors.ustc.edu.cn/"
+
+before_script:
+  - docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_TOKEN" $TIANHAI_REGISTRY
+
+build-master:
+  stage: build
+  script:
+    - docker build --pull -t "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:dev-master" .
+    - docker push "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:dev-master"
+  only:
+    - master
+
+build:
+  stage: build
+  script:
+    - docker build --pull -t "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG" .
+    - docker push "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG"
+  except:
+    - master
