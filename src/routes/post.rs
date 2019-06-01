@@ -23,8 +23,8 @@ pub fn post_show(db: State<Database>,global_var: render::GlobalVariable,path: St
 	}
 	// TODO: Password check when `view_password` exists
 
-	let prev_post=content::Content::find_prev_post(&db,&post)?;
-	let next_post=content::Content::find_next_post(&db,&post)?;
+	let prev_post=content::Content::find_neighbor_post(&db,&post,true,1)?;
+	let next_post=content::Content::find_neighbor_post(&db,&post,false,1)?;
 
 	let poster=post.get_user(&db)?;
 	let mut ctx=tera::Context::new();
