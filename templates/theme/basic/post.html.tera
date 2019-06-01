@@ -8,6 +8,21 @@
 	<article>
 		{{post.content|safe|markdown}}
 	</article>
-	{# <hr>
-	{{post|json_encode}} #}
+	<hr>
+	<p>
+		<b>上一篇: </b>
+		{% if post_prev %}
+		<a href="/post/{% if post_prev.slug %}{{post_prev.slug}}{% else %}{{post_prev.id}}{% endif %}.html">{{post_prev.title}}</a>
+		{% else %}
+		<i>没有了</i>
+		{% endif %}
+	</p>
+	<p>
+		<b>下一篇: </b>
+		{% if post_next %}
+		<a href="/post/{% if post_next.slug %}{{post_next.slug}}{% else %}{{post_next.id}}{% endif %}.html">{{post_next.title}}</a>
+		{% else %}
+		<i>没有了</i>
+		{% endif %}
+	</p>
 {% endblock %}

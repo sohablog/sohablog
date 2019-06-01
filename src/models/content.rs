@@ -60,6 +60,42 @@ impl Content{
 		query=query.offset(min.into()).limit((max-min).into());
 		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
 	}
+
+	pub fn find_prev_post(db: &crate::db::Database,post: &Content)->Result<Option<Self>>{
+		let mut query=content::table.into_boxed();
+
+		query=query
+			.filter(content::type_.eq(ContentType::Article))
+			.filter(content::status.eq(ContentStatus::Normal))
+			.filter(content::id.ne(post.id))
+			.filter(content::time.le(&post.time));
+
+		query=query.order((content::time.desc(),content::id.desc())).limit(1);
+
+		match query.get_result::<Self>(&*db.pool().get()?){
+			Ok(v)=>Ok(Some(v)),
+			Err(diesel::result::Error::NotFound)=>Ok(None),
+			Err(e)=>Err(Error::from(e))
+		}
+	}
+
+	pub fn find_next_post(db: &crate::db::Database,post: &Content)->Result<Option<Self>>{
+		let mut query=content::table.into_boxed();
+
+		query=query
+			.filter(content::type_.eq(ContentType::Article))
+			.filter(content::status.eq(ContentStatus::Normal))
+			.filter(content::id.ne(post.id))
+			.filter(content::time.ge(&post.time));
+
+		query=query.order((content::time.asc(),content::id.asc())).limit(1);
+
+		match query.get_result::<Self>(&*db.pool().get()?){
+			Ok(v)=>Ok(Some(v)),
+			Err(diesel::result::Error::NotFound)=>Ok(None),
+			Err(e)=>Err(Error::from(e))
+		}
+	}
 }
 
 #[derive(Insertable,Debug)]

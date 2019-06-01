@@ -21,7 +21,7 @@ use super::super::error::Error;
 pub fn list(db: State<Database>,global_var: render::GlobalVariable,current_user: User)->Result<Template,Error>{
 	current_user.check_permission(user::PERM_POST_VIEW)?;
 	let mut ctx=tera::Context::new();
-	let posts=Content::find_posts(&db,(0,10),true)?;
+	let posts=Content::find_posts(&db,(0,25),true)?;
 	ctx.insert("posts",&posts);
 	Ok(render::render("admin/post/list",global_var,Some(ctx))?)
 }

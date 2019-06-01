@@ -22,9 +22,15 @@ pub fn post_show(db: State<Database>,global_var: render::GlobalVariable,path: St
 		return Err(Error::NotFound)
 	}
 	// TODO: Password check when `view_password` exists
+
+	let prev_post=content::Content::find_prev_post(&db,&post)?;
+	let next_post=content::Content::find_next_post(&db,&post)?;
+
 	let poster=post.get_user(&db)?;
 	let mut ctx=tera::Context::new();
 	ctx.insert("post",&post);
+	ctx.insert("post_next", &next_post);
+	ctx.insert("post_prev", &prev_post);
 	ctx.insert("poster",&poster);
 	Ok(render::theme_render("post",global_var,Some(ctx))?)
 }
