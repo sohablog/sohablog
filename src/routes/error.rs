@@ -1,52 +1,46 @@
-use crate::{
-	models,
-	render
-};
+use crate::{models, render};
 use rocket::{
+	http::Status,
+	response::{self, Responder},
 	Request,
-	response::{
-		Responder,
-		self
-	},
-	http::Status
 };
 
 #[derive(Debug)]
-pub enum Error{
+pub enum Error {
 	Model(models::Error),
 	Render(render::Error),
 	ChronoParse(chrono::ParseError),
 	NotFound,
-	NoPermission
+	NoPermission,
 }
 
-impl From<models::Error> for Error{
-	fn from(err: models::Error)->Error{
-		match err{
-			models::Error::NotFound=>Error::NotFound,
-			models::Error::UserHasNoPermission=>Error::NoPermission,
-			_=>Error::Model(err)
+impl From<models::Error> for Error {
+	fn from(err: models::Error) -> Error {
+		match err {
+			models::Error::NotFound => Error::NotFound,
+			models::Error::UserHasNoPermission => Error::NoPermission,
+			_ => Error::Model(err),
 		}
 	}
 }
-impl From<render::Error> for Error{
-	fn from(err: render::Error)->Error{
+impl From<render::Error> for Error {
+	fn from(err: render::Error) -> Error {
 		Error::Render(err)
 	}
 }
-impl From<chrono::ParseError> for Error{
-	fn from(err: chrono::ParseError)->Error{
+impl From<chrono::ParseError> for Error {
+	fn from(err: chrono::ParseError) -> Error {
 		Error::ChronoParse(err)
 	}
 }
 
-impl<'a> Responder<'a> for Error{
-	fn respond_to(self,_req: &Request)->response::Result<'a>{
-		println!("{:?}",&self);
-		match self{
-			Error::NotFound=>Err(rocket::http::Status::NotFound),
-			Error::NoPermission=>Err(rocket::http::Status::Forbidden),
-			_=>Err(Status::InternalServerError)
+impl<'a> Responder<'a> for Error {
+	fn respond_to(self, _req: &Request) -> response::Result<'a> {
+		println!("{:?}", &self);
+		match self {
+			Error::NotFound => Err(rocket::http::Status::NotFound),
+			Error::NoPermission => Err(rocket::http::Status::Forbidden),
+			_ => Err(Status::InternalServerError),
 		}
 	}
 }
