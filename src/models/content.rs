@@ -46,10 +46,16 @@ impl Content{
 
 	pub fn find_posts(db: &crate::db::Database,(min,max):(i32,i32),with_hidden:bool)->Result<Vec<Self>>{
 		let mut query=content::table.into_boxed();
-		query=query.filter(content::status.eq(ContentStatus::Normal)).filter(content::type_.eq(ContentType::Article));
+
+		let mut status=vec![ContentStatus::Normal];
 		if let true=with_hidden{
-			query=query.filter(content::status.eq(ContentStatus::Hidden));
+			status.push(ContentStatus::Hidden);
 		}
+
+		query=query
+			.filter(content::type_.eq(ContentType::Article))
+			.filter(content::status.eq_any(status));
+
 		query=query.order(content::time.desc());
 		query=query.offset(min.into()).limit((max-min).into());
 		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
