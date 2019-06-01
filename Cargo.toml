@@ -6,16 +6,16 @@ edition = "2018"
 
 [dependencies]
 diesel = { version = "1.4.2", features = [ "mysql", "r2d2", "chrono" ] }
-r2d2 = "0.8.3"
+r2d2 = "0.8.4"
 mysqlclient-sys = "0.2.4"
-rocket = { version = "0.4.0", features = [ "private-cookies" ] }
-rocket_contrib = { version = "0.4.0", features = [ "tera_templates" ] }
-rocket_codegen = "0.4.0"
+rocket = { version = "0.4.1", features = [ "private-cookies" ] }
+rocket_contrib = { version = "0.4.1", features = [ "tera_templates" ] }
+rocket_codegen = "0.4.1"
 chrono = { version = "0.4.6", features = [ "serde" ] }
-serde = "1.0.89"
-serde_derive = "1.0.89"
+serde = "1.0.91"
+serde_derive = "1.0.91"
 serde_json = "1.0.39"
-bcrypt = "0.3.0"
+bcrypt = "0.4.0"
 tera = "0.11.20"
-comrak = "0.4.4"
-dotenv = "0.13.0"
+comrak = "0.6.2"
+dotenv = "0.14.1"

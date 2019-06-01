@@ -10,12 +10,7 @@ mod routes;
 mod render;
 
 fn main(){
-	use rocket::{
-		self,
-		routes
-	};
-	use rocket_contrib;
-	use dotenv;
+	use rocket::{routes};
 	use std::env;
 	use crate::db::Database;
 	use crate::routes as router;
