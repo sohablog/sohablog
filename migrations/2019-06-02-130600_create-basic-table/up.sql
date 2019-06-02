@@ -19,6 +19,17 @@ CREATE TABLE `user` (
   UNIQUE KEY `uk_email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `category` (
+  `slug` varchar(100) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `description` text,
+  `order` int(11) NOT NULL DEFAULT '0',
+  `parent` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`slug`),
+  KEY `category_fk` (`parent`),
+  CONSTRAINT `category_fk` FOREIGN KEY (`parent`) REFERENCES `category` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `content` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user` int(11) NOT NULL DEFAULT '-1',
@@ -35,14 +46,17 @@ CREATE TABLE `content` (
   `allow_feed` tinyint(1) NOT NULL DEFAULT '1',
   `parent` int(11) DEFAULT NULL,
   `slug` varchar(200) DEFAULT NULL,
+  `category` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `content_user_idx` (`user`) USING BTREE,
   KEY `content_parent_idx` (`parent`) USING BTREE,
   KEY `content_order_level_idx` (`order_level`) USING BTREE,
   KEY `content_type_idx` (`type`) USING BTREE,
   KEY `content_status_idx` (`status`) USING BTREE,
+  KEY `content_category_idx` (`category`) USING BTREE,
   FULLTEXT KEY `content_content_idx` (`content`),
   FULLTEXT KEY `content_title_idx` (`title`),
+  CONSTRAINT `content_category_fk` FOREIGN KEY (`category`) REFERENCES `category` (`slug`),
   CONSTRAINT `content_content_fk` FOREIGN KEY (`parent`) REFERENCES `content` (`id`),
   CONSTRAINT `content_user_fk` FOREIGN KEY (`user`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

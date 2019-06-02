@@ -37,13 +37,29 @@ pub type Result<T> = std::result::Result<T, Error>;
  */
 macro_rules! insert {
 	($table:ident, $from:ident) => {
-		last!($table);
-
 		pub fn insert(db: &crate::db::Database, new: $from) -> Result<Self> {
 			diesel::insert_into($table::table)
 				.values(new)
 				.execute(&*db.pool().get()?)?;
 			Self::last(db)
+		}
+	};
+}
+/**
+ * Insert a new row
+ *
+ * impl User{
+ *     insert!(table,NewUser);
+ * }
+ * User::insert(db,NewUser::new());
+ */
+macro_rules! insert_non_incremental {
+	($table:ident, $from:ident, $pk_field:ident) => {
+		pub fn insert(db: &crate::db::Database, new: $from) -> Result<Self> {
+			diesel::insert_into($table::table)
+				.values(&new)
+				.execute(&*db.pool().get()?)?;
+			Self::find(db, &new.$pk_field)
 		}
 	};
 }
@@ -72,10 +88,11 @@ macro_rules! update {
  * User::last(db);
  */
 macro_rules! last {
-	($table:ident) => {
+	($table:ident) => { last!($table, id); };
+	($table:ident, $field:ident) => {
 		pub fn last(db: &crate::db::Database) -> Result<Self> {
 			$table::table
-				.order_by($table::id.desc())
+				.order_by($table::$field.desc())
 				.limit(1)
 				.load::<Self>(&*db.pool().get()?)?
 				.into_iter()
@@ -93,10 +110,11 @@ macro_rules! last {
  * User::find_pk(db,1);
  */
 macro_rules! find_pk {
-	($table:ident) => {
-		pub fn find(db: &crate::db::Database, id: i32) -> Result<Self> {
+	($table:ident) => { find_pk!($table, id, i32); };
+	($table:ident, $field:ident, $field_type:ty) => {
+		pub fn find(db: &crate::db::Database, pkv: $field_type) -> Result<Self> {
 			$table::table
-				.filter($table::id.eq(id))
+				.filter($table::$field.eq(pkv))
 				.limit(1)
 				.load::<Self>(&*db.pool().get()?)?
 				.into_iter()
@@ -123,3 +141,4 @@ macro_rules! find_one_by {
 
 pub mod content;
 pub mod user;
+pub mod category;

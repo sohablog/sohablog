@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{user::User, Error, Result};
+use super::{user::User, category::Category, Error, Result};
 use crate::db::Database;
 use crate::schema::*;
 
@@ -11,6 +11,7 @@ use crate::schema::*;
 #[primary_key(id)]
 #[belongs_to(User, foreign_key = "user")]
 #[belongs_to(Content, foreign_key = "parent")]
+#[belongs_to(Category, foreign_key = "category")]
 pub struct Content {
 	pub id: i32,
 	pub user: i32,
@@ -29,8 +30,10 @@ pub struct Content {
 	pub allow_comment: bool,
 	pub allow_feed: bool,
 	pub parent: Option<i32>,
+	pub category: Option<String>,
 }
 impl Content {
+	last!(content);
 	insert!(content, NewContent);
 	find_pk!(content);
 	find_one_by!(content, find_by_slug, slug as &str);

@@ -35,6 +35,7 @@ pub struct User {
 	pub status: UserStatus,
 }
 impl User {
+	last!(user);
 	insert!(user, NewUser);
 	find_pk!(user);
 	find_one_by!(user, find_by_username, username as &str);
