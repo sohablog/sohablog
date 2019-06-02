@@ -8,7 +8,9 @@
 	<article>
 		{{post.content|safe|markdown}}
 	</article>
-	<hr>
+	<hr />{% if tags %}
+	<p><i>This article is tagged with</i> {{tags|join(sep=', ')}}.</p>
+	<hr />{% endif %}
 	<p>
 		<b>上一篇: </b>
 		{% if post_prev %}

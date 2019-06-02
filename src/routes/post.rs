@@ -27,6 +27,8 @@ pub fn post_show(
 
 	let prev_post = content::Content::find_neighbor_post(&db, &post, true, 1)?;
 	let next_post = content::Content::find_neighbor_post(&db, &post, false, 1)?;
+	let tags = post.get_tags(&db)?;
+	let tags = tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>();
 
 	let poster = post.get_user(&db)?;
 	let mut ctx = tera::Context::new();
@@ -34,5 +36,6 @@ pub fn post_show(
 	ctx.insert("post_next", &next_post);
 	ctx.insert("post_prev", &prev_post);
 	ctx.insert("poster", &poster);
+	ctx.insert("tags", &tags);
 	Ok(render::theme_render("post", global_var, Some(ctx))?)
 }

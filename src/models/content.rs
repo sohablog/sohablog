@@ -97,8 +97,13 @@ impl Content {
 		}
 	}
 
+	pub fn get_tags(&self, db: &crate::db::Database) -> Result<Vec<Tag>> {
+		let tags = AssocTagContent::find_by_content_id(db, self.id)?;
+		Tag::find_by_id(db, tags.iter().map(|t| t.id).collect::<Vec<i32>>())
+	}
+
 	pub fn set_tags(&self, db: &crate::db::Database, tags: Vec<&str>) -> Result<()> {
-		AssocTagContent::update(db, self.id, Tag::find_tags_by_name(db, tags)?)?;
+		AssocTagContent::update(db, self.id, Tag::find_by_name(db, tags)?)?;
 		Ok(())
 	}
 }

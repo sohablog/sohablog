@@ -19,7 +19,6 @@ impl Tag {
 	last!(tag);
 	insert!(tag, NewTag);
 	find_pk!(tag);
-	find_one_by!(tag, find_by_name, name as &str);
 
 	pub fn new(name: String) -> NewTag {
 		NewTag {
@@ -27,13 +26,19 @@ impl Tag {
 		}
 	}
 
-	pub fn find_tags_by_name(db: &crate::db::Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
-		let tags = tags.iter().map(|&s| Self::new(s.to_string())).collect::<Vec<NewTag>>();
+	pub fn find_by_name(db: &crate::db::Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
+		let tags = tags.iter().filter(|&s| s.len() > 0).map(|&s| Self::new(s.to_string())).collect::<Vec<NewTag>>();
 		diesel::insert_or_ignore_into(tag::table)
 			.values(&tags)
 			.execute(&*db.pool().get()?)?;
 		tag::table.into_boxed()
 			.filter(tag::name.eq_any(tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>()))
+			.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+	}
+
+	pub fn find_by_id(db: &crate::db::Database, tags: Vec<i32>) -> Result<Vec<Tag>> {
+		tag::table.into_boxed()
+			.filter(tag::id.eq_any(tags))
 			.load::<Self>(&*db.pool().get()?).map_err(Error::from)
 	}
 }

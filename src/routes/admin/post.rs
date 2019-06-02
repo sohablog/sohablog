@@ -46,8 +46,11 @@ pub fn edit_get(
 		return Err(Error::NotFound);
 	}
 	let categories = models::category::Category::find_all(&db)?;
+	let tags = post.get_tags(&db)?;
+	let tags = tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>();
 	ctx.insert("post", &post);
 	ctx.insert("categories", &categories);
+	ctx.insert("tags", &tags);
 	Ok(render::render("admin/post/edit", global_var, Some(ctx))?)
 }
 #[derive(Default, FromForm, Debug)]
