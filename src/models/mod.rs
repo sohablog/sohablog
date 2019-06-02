@@ -153,3 +153,4 @@ macro_rules! find_one_by {
 pub mod category;
 pub mod content;
 pub mod user;
+pub mod tag;

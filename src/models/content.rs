@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{category::Category, user::User, Error, Result};
+use super::{tag::{Tag, AssocTagContent}, category::Category, user::User, Error, Result};
 use crate::db::Database;
 use crate::schema::*;
 
@@ -95,6 +95,11 @@ impl Content {
 			Err(diesel::result::Error::NotFound) => Ok(None),
 			Err(e) => Err(Error::from(e)),
 		}
+	}
+
+	pub fn set_tags(&self, db: &crate::db::Database, tags: Vec<&str>) -> Result<()> {
+		let tags = Tag::find_tags_by_name(db, tags)?;
+		Ok(())
 	}
 }
 
