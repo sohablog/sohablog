@@ -58,6 +58,7 @@ pub struct PostForm {
 	pub slug: Option<String>,
 	pub time: String,
 	pub category: Option<i32>,
+	pub tags: Option<String>
 }
 #[post("/admin/post/_edit", data = "<form>")]
 pub fn edit_post(
@@ -93,7 +94,7 @@ pub fn edit_post(
 		}
 		None => None,
 	};
-	let _post = match form.id {
+	let post = match form.id {
 		Some(id) => {
 			let mut post: Content = Content::find(&db, id)?;
 			if post.status == content::ContentStatus::Deleted
@@ -133,5 +134,9 @@ pub fn edit_post(
 			Content::insert(&db, content)?
 		}
 	};
+	if let Some(tags) = &form.tags {
+		let tags:Vec<&str> = tags.split(",").map(|s| s.trim()).collect();
+		post.set_tags(&db, tags)?;
+	}
 	Ok(Redirect::to("/admin/post"))
 }

@@ -98,7 +98,7 @@ impl Content {
 	}
 
 	pub fn set_tags(&self, db: &crate::db::Database, tags: Vec<&str>) -> Result<()> {
-		let tags = Tag::find_tags_by_name(db, tags)?;
+		AssocTagContent::update(db, self.id, Tag::find_tags_by_name(db, tags)?)?;
 		Ok(())
 	}
 }

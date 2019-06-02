@@ -61,9 +61,12 @@ impl AssocTagContent {
 			.load::<Self>(&*db.pool().get()?).map_err(Error::from)
 	}
 
-	pub fn update(db: &crate::db::Database, content_id: i32, tag_ids: Vec<i32>) -> Result<()> {
+	pub fn update(db: &crate::db::Database, content_id: i32, tags: Vec<Tag>) -> Result<()> {
+		let tag_ids = tags.iter().map(|t| t.id).collect::<Vec<i32>>();
+
 		let exist_assocs = Self::find_by_content_id(db, content_id)?;
 		let exist_assocs:Vec<i32> = exist_assocs.iter().map(|o| o.tag).collect();
+		
 		let mut removing_ids:Vec<i32> = Vec::new();
 		for exist_tag_id in exist_assocs {
 			if !tag_ids.contains(&exist_tag_id) {
