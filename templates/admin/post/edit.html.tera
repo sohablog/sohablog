@@ -19,7 +19,7 @@
 		<p><b>Category</b></p>
 		<p>
 			<input type="radio" name="category" value="" {% if not post.category %}checked {% endif %}/>&nbsp;Uncategorized <br />{% for cat in categories %}
-			<input type="radio" name="category" value="{{cat.slug}}" {% if post.category == cat.slug %}checked {% endif %}/>&nbsp;{{cat.name}} <br />
+			<input type="radio" name="category" value="{{cat.id}}" {% if post.category == cat.id %}checked {% endif %}/>&nbsp;{{cat.name}} <br />
 		{% endfor %}</p>
 		<br />
 		<input type="text" placeholder="Time" name="time" value="{% if post %}{{post.time|date(format='%Y-%m-%d %H:%M:%S')}}{% else %}{{now()|date(format='%Y-%m-%d %H:%M:%S')}}{% endif %}" />

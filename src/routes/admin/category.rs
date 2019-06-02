@@ -3,7 +3,7 @@ use crate::{
 	db::Database,
 	models::{
 		user::{self, User},
-		category::{self, Category}
+		category::{Category, NewCategory}
 	},
 	render,
 };
@@ -31,7 +31,7 @@ pub struct PostForm {
 	pub order: i32,
 	pub parent: String,
 	pub description: String,
-	pub target: Option<String>,
+	pub target: Option<i32>,
 }
 #[post("/admin/category/update", data = "<form>")]
 pub fn update(
@@ -41,7 +41,7 @@ pub fn update(
 ) -> Result<Redirect, Error> {
 	current_user.check_permission(user::PERM_CATEGORY_MANAGE)?;
 
-	let new_cat = Category {
+	let new_cat = NewCategory {
 		slug: if form.slug.trim().len() == 0 {
 			return Err(Error::BadRequest("`slug` field is illegal."));
 		} else {
@@ -53,7 +53,8 @@ pub fn update(
 			form.name.trim().to_owned()
 		},
 		parent: if form.parent.trim().len() > 0 {
-			Some(form.parent.trim().to_owned())
+			let cat:Category = Category::find_by_slug(&db, &form.parent.trim())?;
+			Some(cat.id)
 		} else { None },
 		description: if form.description.trim().len() > 0 {
 			Some(form.description.trim().to_owned())
@@ -61,10 +62,15 @@ pub fn update(
 		order: form.order 
 	};
 	
-	match &form.target {
-		Some(slug) => {
-			let cat:Category = Category::find(&db, slug.as_str())?;
-			cat.replace(&db, &new_cat)?;
+	match form.target {
+		Some(id) => {
+			let mut cat:Category = Category::find(&db, id)?;
+			cat.slug = new_cat.slug;
+			cat.name = new_cat.name;
+			cat.parent = new_cat.parent;
+			cat.description = new_cat.description;
+			cat.order = new_cat.order;
+			cat.update(&db)?;
 		}
 		None => {
 			Category::insert(&db, new_cat)?;

@@ -1,11 +1,12 @@
 table! {
-	category (slug) {
-		slug -> Varchar,
-		name -> Varchar,
-		description -> Nullable<Text>,
-		order -> Integer,
-		parent -> Nullable<Varchar>,
-	}
+    category (id) {
+        id -> Integer,
+        slug -> Varchar,
+        name -> Varchar,
+        description -> Nullable<Text>,
+        order -> Integer,
+        parent -> Nullable<Integer>,
+    }
 }
 
 table! {
@@ -28,12 +29,11 @@ table! {
         allow_comment -> Bool,
         allow_feed -> Bool,
         parent -> Nullable<Integer>,
-        category -> Nullable<Varchar>,
+        category -> Nullable<Integer>,
     }
 }
 
 table! {
-	use diesel::sql_types::*;	
     user (id) {
         id -> Integer,
         username -> Varchar,
@@ -55,7 +55,7 @@ joinable!(content -> category (category));
 joinable!(content -> user (user));
 
 allow_tables_to_appear_in_same_query!(
-	category,
+    category,
     content,
     user,
 );

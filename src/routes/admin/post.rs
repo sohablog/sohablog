@@ -57,7 +57,7 @@ pub struct PostForm {
 	pub content: String,
 	pub slug: Option<String>,
 	pub time: String,
-	pub category: Option<String>,
+	pub category: Option<i32>,
 }
 #[post("/admin/post/_edit", data = "<form>")]
 pub fn edit_post(
@@ -86,14 +86,10 @@ pub fn edit_post(
 		}
 		None => None,
 	};
-	let category = match &form.category {
-		Some(cat_slug) => {
-			if cat_slug.trim().len() == 0 {
-				None
-			} else {
-				let cat:models::category::Category = models::category::Category::find(&db, cat_slug)?;
-				Some(cat.slug.to_owned())
-			}
+	let category = match form.category {
+		Some(cat_id) => {
+			let cat:models::category::Category = models::category::Category::find(&db, cat_id)?;
+			Some(cat.id)
 		},
 		None => None
 	};

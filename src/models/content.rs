@@ -30,7 +30,7 @@ pub struct Content {
 	pub allow_comment: bool,
 	pub allow_feed: bool,
 	pub parent: Option<i32>,
-	pub category: Option<String>,
+	pub category: Option<i32>,
 }
 impl Content {
 	last!(content);
@@ -115,7 +115,7 @@ pub struct NewContent {
 	pub allow_comment: bool,
 	pub allow_feed: bool,
 	pub parent: Option<i32>,
-	pub category: Option<String>,
+	pub category: Option<i32>,
 }
 
 //integer constants

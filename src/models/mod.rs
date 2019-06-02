@@ -59,6 +59,7 @@ macro_rules! insert {
  * }
  * User::insert(db,NewUser::new());
  */
+#[allow(unused_macros)]
 macro_rules! insert_non_incremental {
 	($table:ident, $from:ident, $pk_field:ident) => {
 		pub fn insert(db: &crate::db::Database, new: $from) -> Result<Self> {
@@ -81,14 +82,6 @@ macro_rules! update {
 	()=>{
 		pub fn update(&self,db: &crate::db::Database)->Result<()>{
 			diesel::update(self).set(self).execute(&*db.pool().get()?)?;
-			Ok(())
-		}
-	};
-}
-macro_rules! replace {
-	()=>{
-		pub fn replace(&self,db: &crate::db::Database,new: &Self)->Result<()>{
-			diesel::update(self).set(new).execute(&*db.pool().get()?)?;
 			Ok(())
 		}
 	};

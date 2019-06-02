@@ -17,7 +17,7 @@
 		<tbody>{% for cat in categories %}
 			<tr>
 				<form method="POST" action="/admin/category/update">
-					<input type="hidden" name="target" value="{{cat.slug}}" />
+					<input type="hidden" name="target" value="{{cat.id}}" />
 					<td><input type="text" name="slug" value="{{cat.slug}}" /></td>
 					<td><input type="text" name="name" value="{{cat.name}}" /></td>
 					<td><textarea name="description">{{cat.description}}</textarea></td>
