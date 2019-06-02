@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{user::User, category::Category, Error, Result};
+use super::{category::Category, user::User, Error, Result};
 use crate::db::Database;
 use crate::schema::*;
 

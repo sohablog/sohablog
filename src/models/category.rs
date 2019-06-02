@@ -1,7 +1,7 @@
-use diesel::prelude::*;
-use serde_derive::*;
 use super::{Error, Result};
 use crate::schema::*;
+use diesel::prelude::*;
+use serde_derive::*;
 
 #[derive(Identifiable, Debug, Associations, Queryable, Clone, Serialize, AsChangeset)]
 #[primary_key(id)]

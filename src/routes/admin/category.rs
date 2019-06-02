@@ -2,8 +2,8 @@ use super::super::error::Error;
 use crate::{
 	db::Database,
 	models::{
+		category::{Category, NewCategory},
 		user::{self, User},
-		category::{Category, NewCategory}
 	},
 	render,
 };
@@ -21,7 +21,11 @@ pub fn list(
 	let mut ctx = tera::Context::new();
 	let cats = Category::find_all(&db)?;
 	ctx.insert("categories", &cats);
-	Ok(render::render("admin/category/list", global_var, Some(ctx))?)
+	Ok(render::render(
+		"admin/category/list",
+		global_var,
+		Some(ctx),
+	)?)
 }
 
 #[derive(Default, FromForm, Debug)]
@@ -53,18 +57,21 @@ pub fn update(
 			form.name.trim().to_owned()
 		},
 		parent: if form.parent.trim().len() > 0 {
-			let cat:Category = Category::find_by_slug(&db, &form.parent.trim())?;
+			let cat: Category = Category::find_by_slug(&db, &form.parent.trim())?;
 			Some(cat.id)
-		} else { None },
+		} else {
+			None
+		},
 		description: if form.description.trim().len() > 0 {
 			Some(form.description.trim().to_owned())
-		} else { None },
-		order: form.order 
+		} else {
+			None
+		},
+		order: form.order,
 	};
-	
 	match form.target {
 		Some(id) => {
-			let mut cat:Category = Category::find(&db, id)?;
+			let mut cat: Category = Category::find(&db, id)?;
 			cat.slug = new_cat.slug;
 			cat.name = new_cat.name;
 			cat.parent = new_cat.parent;

@@ -9,7 +9,7 @@ pub enum Error {
 	Pool(r2d2::Error),
 	NotFound,
 	UserHasNoPermission,
-	OptionNone
+	OptionNone,
 }
 impl From<bcrypt::BcryptError> for Error {
 	fn from(e: bcrypt::BcryptError) -> Self {
@@ -95,7 +95,9 @@ macro_rules! update {
  * User::last(db);
  */
 macro_rules! last {
-	($table:ident) => { last!($table, id); };
+	($table:ident) => {
+		last!($table, id);
+	};
 	($table:ident, $field:ident) => {
 		pub fn last(db: &crate::db::Database) -> Result<Self> {
 			$table::table
@@ -117,7 +119,9 @@ macro_rules! last {
  * User::find_pk(db,1);
  */
 macro_rules! find_pk {
-	($table:ident) => { find_pk!($table, id as i32); };
+	($table:ident) => {
+		find_pk!($table, id as i32);
+	};
 	($table:ident, $field:ident as $field_type:ty) => {
 		pub fn find(db: &crate::db::Database, pkv: $field_type) -> Result<Self> {
 			$table::table
@@ -146,6 +150,6 @@ macro_rules! find_one_by {
 	};
 }
 
+pub mod category;
 pub mod content;
 pub mod user;
-pub mod category;

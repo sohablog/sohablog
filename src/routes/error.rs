@@ -12,7 +12,7 @@ pub enum Error {
 	ChronoParse(chrono::ParseError),
 	NotFound,
 	NoPermission,
-	BadRequest(&'static str)
+	BadRequest(&'static str),
 }
 
 impl From<models::Error> for Error {

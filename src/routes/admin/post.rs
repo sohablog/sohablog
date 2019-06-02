@@ -88,14 +88,14 @@ pub fn edit_post(
 	};
 	let category = match form.category {
 		Some(cat_id) => {
-			let cat:models::category::Category = models::category::Category::find(&db, cat_id)?;
+			let cat: models::category::Category = models::category::Category::find(&db, cat_id)?;
 			Some(cat.id)
-		},
-		None => None
+		}
+		None => None,
 	};
 	let _post = match form.id {
 		Some(id) => {
-			let mut post:Content = Content::find(&db, id)?;
+			let mut post: Content = Content::find(&db, id)?;
 			if post.status == content::ContentStatus::Deleted
 				|| post.r#type != content::ContentType::Article
 			{
