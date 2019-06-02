@@ -1,4 +1,12 @@
 table! {
+	assoc_tag_content (id) {
+		id -> Integer,
+		tag -> Integer,
+		content -> Integer,
+	}
+}
+
+table! {
     category (id) {
         id -> Integer,
         slug -> Varchar,
@@ -34,6 +42,13 @@ table! {
 }
 
 table! {
+	tag (id) {
+		id -> Integer,
+		name -> Varchar,
+	}
+}
+
+table! {
     user (id) {
         id -> Integer,
         username -> Varchar,
@@ -53,9 +68,13 @@ table! {
 
 joinable!(content -> category (category));
 joinable!(content -> user (user));
+joinable!(assoc_tag_content -> content (content));
+joinable!(assoc_tag_content -> tag (tag));
 
 allow_tables_to_appear_in_same_query!(
     category,
     content,
     user,
+	tag,
+	assoc_tag_content,
 );
