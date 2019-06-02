@@ -44,6 +44,7 @@ fn main() {
 						router::admin::post::edit_get,
 						router::admin::post::edit_post,
 						router::admin::category::list,
+						router::admin::category::update,
 						router::post::post_show,
 						router::root::page_show
 					],

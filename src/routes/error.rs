@@ -12,6 +12,7 @@ pub enum Error {
 	ChronoParse(chrono::ParseError),
 	NotFound,
 	NoPermission,
+	BadRequest(&'static str)
 }
 
 impl From<models::Error> for Error {
@@ -40,6 +41,7 @@ impl<'a> Responder<'a> for Error {
 		match self {
 			Error::NotFound => Err(rocket::http::Status::NotFound),
 			Error::NoPermission => Err(rocket::http::Status::Forbidden),
+			Error::BadRequest(reason) => Err(rocket::http::Status::new(400, reason)),
 			_ => Err(Status::InternalServerError),
 		}
 	}

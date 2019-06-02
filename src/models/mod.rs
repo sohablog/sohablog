@@ -85,6 +85,14 @@ macro_rules! update {
 		}
 	};
 }
+macro_rules! replace {
+	()=>{
+		pub fn replace(&self,db: &crate::db::Database,new: &Self)->Result<()>{
+			diesel::update(self).set(new).execute(&*db.pool().get()?)?;
+			Ok(())
+		}
+	};
+}
 /**
  * Get last row
  *

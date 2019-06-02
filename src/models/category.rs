@@ -3,7 +3,7 @@ use serde_derive::*;
 use super::{Error, Result};
 use crate::schema::*;
 
-#[derive(Identifiable, Debug, Associations, Queryable, Clone, Serialize)]
+#[derive(Identifiable, Debug, Associations, Queryable, Clone, Serialize, Insertable, AsChangeset)]
 #[primary_key(slug)]
 #[table_name = "category"]
 #[belongs_to(Category, foreign_key = "parent")]
@@ -16,8 +16,9 @@ pub struct Category {
 }
 impl Category {
 	find_pk!(category, slug as &str);
-	insert_non_incremental!(category, NewCategory, slug);
+	insert_non_incremental!(category, Category, slug);
 	find_one_by!(category, find_by_name, name as &str);
+	replace!();
 
 	pub fn find_all(db: &crate::db::Database) -> Result<Vec<Self>> {
 		let mut query = category::table.into_boxed();
@@ -29,13 +30,4 @@ impl PartialEq for Category {
 	fn eq(&self, other: &Self) -> bool {
 		self.slug == other.slug
 	}
-}
-
-#[derive(Insertable)]
-#[table_name = "category"]
-pub struct NewCategory {
-	pub slug: String,
-	pub name: String,
-	pub description: Option<String>,
-	pub parent: Option<String>,
 }
