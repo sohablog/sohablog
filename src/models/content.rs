@@ -115,6 +115,7 @@ pub struct NewContent {
 	pub allow_comment: bool,
 	pub allow_feed: bool,
 	pub parent: Option<i32>,
+	pub category: Option<String>,
 }
 
 //integer constants

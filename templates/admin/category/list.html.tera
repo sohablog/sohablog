@@ -1,0 +1,24 @@
+{% extends "admin/base" %}
+
+{% block title %}Category | {{super()}}{% endblock %}
+
+{% block main %}
+	<table>
+		<thead>
+			<tr>
+				<th>Slug</th>
+				<th>Name</th>
+				<th>Order</th>
+				<th>Parent</th>
+			</tr>
+		</thead>
+		<tbody>{% for cat in categories %}
+			<tr>
+				<td>{{cat.slug}}</td>
+				<td>{{cat.name}}</td>
+				<td>{{cat.order}}</td>
+				<td>{% if cat.parent %}{{cat.parent}}{% else %}None{% endif %}</td>
+			</tr>{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

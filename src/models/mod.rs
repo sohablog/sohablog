@@ -9,6 +9,7 @@ pub enum Error {
 	Pool(r2d2::Error),
 	NotFound,
 	UserHasNoPermission,
+	OptionNone
 }
 impl From<bcrypt::BcryptError> for Error {
 	fn from(e: bcrypt::BcryptError) -> Self {
@@ -23,6 +24,11 @@ impl From<diesel::result::Error> for Error {
 impl From<r2d2::Error> for Error {
 	fn from(e: r2d2::Error) -> Self {
 		Error::Pool(e)
+	}
+}
+impl From<std::option::NoneError> for Error {
+	fn from(_: std::option::NoneError) -> Error {
+		Error::OptionNone
 	}
 }
 pub type Result<T> = std::result::Result<T, Error>;
@@ -110,8 +116,8 @@ macro_rules! last {
  * User::find_pk(db,1);
  */
 macro_rules! find_pk {
-	($table:ident) => { find_pk!($table, id, i32); };
-	($table:ident, $field:ident, $field_type:ty) => {
+	($table:ident) => { find_pk!($table, id as i32); };
+	($table:ident, $field:ident as $field_type:ty) => {
 		pub fn find(db: &crate::db::Database, pkv: $field_type) -> Result<Self> {
 			$table::table
 				.filter($table::$field.eq(pkv))

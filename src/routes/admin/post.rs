@@ -2,6 +2,7 @@ use super::super::error::Error;
 use crate::{
 	db::Database,
 	models::{
+		self,
 		content::{self, Content},
 		user::{self, User},
 	},
@@ -44,7 +45,9 @@ pub fn edit_get(
 	{
 		return Err(Error::NotFound);
 	}
+	let categories = models::category::Category::find_all(&db)?;
 	ctx.insert("post", &post);
+	ctx.insert("categories", &categories);
 	Ok(render::render("admin/post/edit", global_var, Some(ctx))?)
 }
 #[derive(Default, FromForm, Debug)]
@@ -54,6 +57,7 @@ pub struct PostForm {
 	pub content: String,
 	pub slug: Option<String>,
 	pub time: String,
+	pub category: Option<String>,
 }
 #[post("/admin/post/_edit", data = "<form>")]
 pub fn edit_post(
@@ -82,9 +86,20 @@ pub fn edit_post(
 		}
 		None => None,
 	};
+	let category = match &form.category {
+		Some(cat_slug) => {
+			if cat_slug.trim().len() == 0 {
+				None
+			} else {
+				let cat:models::category::Category = models::category::Category::find(&db, cat_slug)?;
+				Some(cat.slug.to_owned())
+			}
+		},
+		None => None
+	};
 	let _post = match form.id {
 		Some(id) => {
-			let mut post = Content::find(&db, id)?;
+			let mut post:Content = Content::find(&db, id)?;
 			if post.status == content::ContentStatus::Deleted
 				|| post.r#type != content::ContentType::Article
 			{
@@ -95,6 +110,7 @@ pub fn edit_post(
 			post.content = form.content.to_owned();
 			post.time =
 				chrono::NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?;
+			post.category = category;
 			post.update(&db)?;
 			post
 		}
@@ -116,6 +132,7 @@ pub fn edit_post(
 				allow_feed: true,
 				parent: None,
 				view_password: None,
+				category: category,
 			};
 			Content::insert(&db, content)?
 		}

@@ -3,7 +3,9 @@
 	decl_macro,
 	custom_attribute,
 	never_type,
-	type_alias_enum_variants
+	type_alias_enum_variants,
+	vec_remove_item,
+	try_trait
 )]
 #![allow(proc_macro_derive_resolution_fallback)]
 
@@ -41,6 +43,7 @@ fn main() {
 						router::admin::post::new_get,
 						router::admin::post::edit_get,
 						router::admin::post::edit_post,
+						router::admin::category::list,
 						router::post::post_show,
 						router::root::page_show
 					],

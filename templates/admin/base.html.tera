@@ -9,7 +9,7 @@
 	</head>
 	<body>
 {% block nav %}
-		Admin - {{currentUser.username}} | <a href="/admin/post">Post</a>
+		Admin - {{currentUser.username}} | <a href="/admin/post">Post</a> | <a href="/admin/category">Category</a>
 		<hr>
 {% endblock %}
 {% block main %}{% endblock %}
