@@ -1,9 +1,9 @@
 use rocket::{
 	http::{
 		uri::{FromUriParam, Query},
-		RawStr
+		RawStr,
 	},
-	request::FromFormValue
+	request::FromFormValue,
 };
 use rocket_codegen::*;
 
@@ -19,7 +19,7 @@ impl Page {
 	}
 
 	pub fn total(item_count: i32, limit: i32) -> i32 {
-		let mut t:i32 = item_count / limit;
+		let mut t: i32 = item_count / limit;
 		if item_count % limit != 0 {
 			t += 1;
 		}
@@ -46,7 +46,7 @@ impl<'a> FromFormValue<'a> for Page {
 	fn from_form_value(form_value: &'a RawStr) -> Result<Page, &'a RawStr> {
 		match form_value.parse::<i32>() {
 			Ok(page) => Ok(Page::new(page)),
-			_ => Err(form_value)
+			_ => Err(form_value),
 		}
 	}
 }
@@ -54,6 +54,6 @@ impl<'a> FromFormValue<'a> for Page {
 pub mod error;
 
 pub mod admin;
+pub mod post;
 pub mod root;
 pub mod user;
-pub mod post;

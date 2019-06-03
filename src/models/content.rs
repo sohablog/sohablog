@@ -1,7 +1,12 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{tag::{Tag, AssocTagContent}, category::Category, user::User, Error, Result};
+use super::{
+	category::Category,
+	tag::{AssocTagContent, Tag},
+	user::User,
+	Error, Result,
+};
 use crate::db::Database;
 use crate::schema::*;
 
@@ -42,7 +47,6 @@ impl Content {
 	pub fn get_user(&self, db: &Database) -> Result<User> {
 		User::find(db, self.user)
 	}
-	
 	pub fn count_post(db: &crate::db::Database, with_hidden: bool) -> Result<i64> {
 		let mut status = vec![ContentStatus::Normal];
 		if let true = with_hidden {
@@ -53,7 +57,8 @@ impl Content {
 			.filter(content::type_.eq(ContentType::Article))
 			.filter(content::status.eq_any(status))
 			.count()
-			.get_result(&*db.pool().get()?).map_err(Error::from)
+			.get_result(&*db.pool().get()?)
+			.map_err(Error::from)
 	}
 
 	pub fn find_posts(

@@ -1,7 +1,7 @@
-use diesel::prelude::*;
-use serde_derive::*;
 use super::{Error, Result};
 use crate::schema::*;
+use diesel::prelude::*;
+use serde_derive::*;
 
 #[derive(Identifiable, Debug, Queryable, Clone, Serialize)]
 #[primary_key(id)]
@@ -22,24 +22,32 @@ impl Tag {
 
 	pub fn new(name: String) -> NewTag {
 		NewTag {
-			name: name.to_lowercase()
+			name: name.to_lowercase(),
 		}
 	}
 
 	pub fn find_by_name(db: &crate::db::Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
-		let tags = tags.iter().filter(|&s| s.len() > 0).map(|&s| Self::new(s.to_string())).collect::<Vec<NewTag>>();
+		let tags = tags
+			.iter()
+			.filter(|&s| s.len() > 0)
+			.map(|&s| Self::new(s.to_string()))
+			.collect::<Vec<NewTag>>();
 		diesel::insert_or_ignore_into(tag::table)
 			.values(&tags)
 			.execute(&*db.pool().get()?)?;
-		tag::table.into_boxed()
+		tag::table
+			.into_boxed()
 			.filter(tag::name.eq_any(tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>()))
-			.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+			.load::<Self>(&*db.pool().get()?)
+			.map_err(Error::from)
 	}
 
 	pub fn find_by_id(db: &crate::db::Database, tags: Vec<i32>) -> Result<Vec<Tag>> {
-		tag::table.into_boxed()
+		tag::table
+			.into_boxed()
 			.filter(tag::id.eq_any(tags))
-			.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+			.load::<Self>(&*db.pool().get()?)
+			.map_err(Error::from)
 	}
 }
 
@@ -61,18 +69,20 @@ pub struct NewAssocTagContent {
 }
 impl AssocTagContent {
 	pub fn find_by_content_id(db: &crate::db::Database, content_id: i32) -> Result<Vec<Self>> {
-		assoc_tag_content::table.into_boxed()
+		assoc_tag_content::table
+			.into_boxed()
 			.filter(assoc_tag_content::content.eq(content_id))
-			.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+			.load::<Self>(&*db.pool().get()?)
+			.map_err(Error::from)
 	}
 
 	pub fn update(db: &crate::db::Database, content_id: i32, tags: Vec<Tag>) -> Result<()> {
 		let tag_ids = tags.iter().map(|t| t.id).collect::<Vec<i32>>();
 
 		let exist_assocs = Self::find_by_content_id(db, content_id)?;
-		let exist_assocs:Vec<i32> = exist_assocs.iter().map(|o| o.tag).collect();
-		
-		let mut removing_ids:Vec<i32> = Vec::new();
+		let exist_assocs: Vec<i32> = exist_assocs.iter().map(|o| o.tag).collect();
+
+		let mut removing_ids: Vec<i32> = Vec::new();
 		for exist_tag_id in exist_assocs {
 			if !tag_ids.contains(&exist_tag_id) {
 				removing_ids.push(exist_tag_id);
@@ -84,10 +94,13 @@ impl AssocTagContent {
 			.execute(&*db.pool().get()?)?;
 		diesel::insert_or_ignore_into(assoc_tag_content::table)
 			.values(
-				tag_ids.iter().map(|&id| NewAssocTagContent {
-					tag: id,
-					content: content_id
-				}).collect::<Vec<NewAssocTagContent>>()
+				tag_ids
+					.iter()
+					.map(|&id| NewAssocTagContent {
+						tag: id,
+						content: content_id,
+					})
+					.collect::<Vec<NewAssocTagContent>>(),
 			)
 			.execute(&*db.pool().get()?)?;
 		Ok(())

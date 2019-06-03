@@ -1,4 +1,7 @@
-use super::super::error::Error;
+use super::super::{
+	error::Error,
+	Page
+};
 use crate::{
 	db::Database,
 	models::{
@@ -12,21 +15,36 @@ use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
 use rocket_contrib::templates::Template;
 
-#[get("/admin/post")]
+pub const ITEMS_PER_PAGE:i32=25;
+
+#[get("/admin/post?<page>")]
 pub fn list(
 	db: State<Database>,
+	page: Option<Page>,
 	global_var: render::GlobalVariable,
 	current_user: User,
 ) -> Result<Template, Error> {
 	current_user.check_permission(user::PERM_POST_VIEW)?;
+	let page = page.unwrap_or_default();
+	let posts = content::Content::find_posts(&db, page.range(ITEMS_PER_PAGE), true)?;
+	let page_total = Page::total(
+		content::Content::count_post(&db, false)? as i32,
+		ITEMS_PER_PAGE,
+	);
+
 	let mut ctx = tera::Context::new();
-	let posts = Content::find_posts(&db, (0, 25), true)?;
 	ctx.insert("posts", &posts);
+	ctx.insert("pageTotal", &page_total);
+	ctx.insert("pageCurrent", &page.0);
 	Ok(render::render("admin/post/list", global_var, Some(ctx))?)
 }
 
 #[get("/admin/post/_new")]
-pub fn new_get(db: State<Database>, global_var: render::GlobalVariable, current_user: User) -> Result<Template, Error> {
+pub fn new_get(
+	db: State<Database>,
+	global_var: render::GlobalVariable,
+	current_user: User,
+) -> Result<Template, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
 	let categories = models::category::Category::find_all(&db)?;
 
@@ -65,7 +83,7 @@ pub struct PostForm {
 	pub slug: Option<String>,
 	pub time: String,
 	pub category: Option<i32>,
-	pub tags: Option<String>
+	pub tags: Option<String>,
 }
 #[post("/admin/post/_edit", data = "<form>")]
 pub fn edit_post(
@@ -142,7 +160,7 @@ pub fn edit_post(
 		}
 	};
 	if let Some(tags) = &form.tags {
-		let tags:Vec<&str> = tags.split(",").map(|s| s.trim()).collect();
+		let tags: Vec<&str> = tags.split(",").map(|s| s.trim()).collect();
 		post.set_tags(&db, tags)?;
 	}
 	Ok(Redirect::to("/admin/post"))

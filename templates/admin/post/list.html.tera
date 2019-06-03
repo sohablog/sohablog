@@ -21,4 +21,5 @@
 			</tr>{% endfor %}
 		</tbody>
 	</table>
+	<p>{% if pageCurrent > 1 %}<a href="?page={{pageCurrent - 1}}">上一页</a>&nbsp;{% endif %}{{pageCurrent}}/{{pageTotal}}{% if pageCurrent < pageTotal %}&nbsp;<a href="?page={{pageCurrent + 1}}">下一页</a>{% endif %}</p>
 {% endblock %}
