@@ -1,17 +1,24 @@
 use rocket_codegen::*;
 
-use super::error::Error;
+use super::{
+	error::Error,
+	Page
+};
 use crate::db::Database;
 use crate::models::content;
 use crate::render;
 use rocket::State;
 use rocket_contrib::templates::Template;
 
-#[get("/")]
-pub fn index(db: State<Database>, global_var: render::GlobalVariable) -> Result<Template, Error> {
+#[get("/?<page>")]
+pub fn index(db: State<Database>, page: Option<Page>, global_var: render::GlobalVariable) -> Result<Template, Error> {
+	let page = page.unwrap_or_default();
 	let mut ctx = tera::Context::new();
-	let posts = content::Content::find_posts(&db, (0, 10), false)?;
+	let posts = content::Content::find_posts(&db, page.range(super::post::ITEMS_PER_PAGE), false)?;
+	let page_total = Page::total(content::Content::count_post(&db, false)? as i32, super::post::ITEMS_PER_PAGE);
 	ctx.insert("posts", &posts);
+	ctx.insert("pageTotal", &page_total);
+	ctx.insert("pageCurrent", &page.0);
 	Ok(render::theme_render("list", global_var, Some(ctx))?)
 }
 

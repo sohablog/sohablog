@@ -7,6 +7,8 @@ use crate::render;
 use rocket::State;
 use rocket_contrib::templates::Template;
 
+pub const ITEMS_PER_PAGE : i32 = 15;
+
 #[get("/post/<path>")]
 pub fn post_show(
 	db: State<Database>,
