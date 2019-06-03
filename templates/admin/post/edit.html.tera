@@ -24,7 +24,7 @@
 		<br />
 		<input type="text" placeholder="Time" name="time" value="{% if post %}{{post.time|date(format='%Y-%m-%d %H:%M:%S')}}{% else %}{{now()|date(format='%Y-%m-%d %H:%M:%S')}}{% endif %}" />
 		<br />
-		<input type="text" placeholder="Tags (split with comma)" name="tags" value="{{tags|join(sep=', ')}}" />
+		<input type="text" placeholder="Tags (split with comma)" name="tags" {% if tags %}value="{{tags|join(sep=', ')}}" {% endif %}/>
 		<br />
 		<input type="submit" id="submit" />
 	</form>

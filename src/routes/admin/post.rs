@@ -26,8 +26,12 @@ pub fn list(
 }
 
 #[get("/admin/post/_new")]
-pub fn new_get(global_var: render::GlobalVariable, current_user: User) -> Result<Template, Error> {
+pub fn new_get(db: State<Database>, global_var: render::GlobalVariable, current_user: User) -> Result<Template, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
+	let categories = models::category::Category::find_all(&db)?;
+
+	let mut ctx = tera::Context::new();
+	ctx.insert("categories", &categories);
 	Ok(render::render("admin/post/edit", global_var, None)?)
 }
 #[get("/admin/post/<post_id>")]
