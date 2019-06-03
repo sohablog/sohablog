@@ -1,12 +1,10 @@
 FROM rust:slim-stretch AS stage-build
 
-# http://repo.mysql.com/apt/debian/
 RUN mkdir -p /app/build \
-	&& sed -i -e "s/cdn-fastly.deb.debian.org/mirrors4.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list \
 	&& apt-get update \
 	&& apt-get install -y build-essential \
-	&& echo 'deb http://mirrors4.tuna.tsinghua.edu.cn/mysql/apt/debian/ stretch mysql-8.0' >> /etc/apt/sources.list.d/mysql.list \
-	&& echo 'deb http://mirrors4.tuna.tsinghua.edu.cn/mysql/apt/debian/ stretch mysql-tools' >> /etc/apt/sources.list.d/mysql.list \
+	&& echo 'deb http://repo.mysql.com/apt/debian/ stretch mysql-8.0' >> /etc/apt/sources.list.d/mysql.list \
+	&& echo 'deb http://repo.mysql.com/apt/debian/ stretch mysql-tools' >> /etc/apt/sources.list.d/mysql.list \
 	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8C718D3B5072E1F5 \
 	&& apt-get update \
 	&& apt-get install -y libmysqlclient-dev \
@@ -15,13 +13,13 @@ WORKDIR /app/build
 ADD . .
 RUN cargo build --release
 
+# main
 FROM debian:stretch-slim
 RUN mkdir -p /app/bin \
-	&& sed -i -e "s/cdn-fastly.deb.debian.org/mirrors4.tuna.tsinghua.edu.cn/g" /etc/apt/sources.list \
 	&& apt-get update \
 	&& apt-get install -y dirmngr \
-	&& echo 'deb http://mirrors4.tuna.tsinghua.edu.cn/mysql/apt/debian/ stretch mysql-8.0' >> /etc/apt/sources.list.d/mysql.list \
-	&& echo 'deb http://mirrors4.tuna.tsinghua.edu.cn/mysql/apt/debian/ stretch mysql-tools' >> /etc/apt/sources.list.d/mysql.list \
+	&& echo 'deb http://repo.mysql.com/apt/debian/ stretch mysql-8.0' >> /etc/apt/sources.list.d/mysql.list \
+	&& echo 'deb http://repo.mysql.com/apt/debian/ stretch mysql-tools' >> /etc/apt/sources.list.d/mysql.list \
 	&& apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8C718D3B5072E1F5 \
 	&& apt-get update \
 	&& apt-get install -y libmysqlclient* \
