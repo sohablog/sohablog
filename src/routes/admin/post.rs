@@ -47,7 +47,7 @@ pub fn new_get(
 
 	let mut ctx = tera::Context::new();
 	ctx.insert("categories", &categories);
-	Ok(render::render("admin/post/edit", global_var, None)?)
+	Ok(render::render("admin/post/edit", global_var, Some(ctx))?)
 }
 #[get("/admin/post/<post_id>")]
 pub fn edit_get(
