@@ -42,18 +42,6 @@ CREATE TABLE `tag` (
   FULLTEXT KEY `tag_name_fulltext_idx` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `assoc_tag_content` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tag` int(11) NOT NULL,
-  `content` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `assoc_tag_content_tag_uniq_idx` (`tag`,`content`) USING BTREE,
-  KEY `assoc_tag_content_tag_idx` (`tag`) USING BTREE,
-  KEY `assoc_tag_content_content_idx` (`content`) USING BTREE,
-  CONSTRAINT `assoc_content_fk` FOREIGN KEY (`content`) REFERENCES `content` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `assoc_tag_fk` FOREIGN KEY (`tag`) REFERENCES `tag` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
 CREATE TABLE `content` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user` int(11) NOT NULL DEFAULT '-1',
@@ -84,3 +72,15 @@ CREATE TABLE `content` (
   CONSTRAINT `content_content_fk` FOREIGN KEY (`parent`) REFERENCES `content` (`id`),
   CONSTRAINT `content_user_fk` FOREIGN KEY (`user`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `assoc_tag_content` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tag` int(11) NOT NULL,
+  `content` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `assoc_tag_content_tag_uniq_idx` (`tag`,`content`) USING BTREE,
+  KEY `assoc_tag_content_tag_idx` (`tag`) USING BTREE,
+  KEY `assoc_tag_content_content_idx` (`content`) USING BTREE,
+  CONSTRAINT `assoc_content_fk` FOREIGN KEY (`content`) REFERENCES `content` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `assoc_tag_fk` FOREIGN KEY (`tag`) REFERENCES `tag` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB;
