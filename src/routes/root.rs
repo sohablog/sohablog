@@ -19,7 +19,6 @@ pub fn index(
 		content::Content::count_post(&db, false)? as i32,
 		super::post::ITEMS_PER_PAGE,
 	);
-	
 	let mut ctx = tera::Context::new();
 	ctx.insert("posts", &posts);
 	ctx.insert("pageTotal", &page_total);

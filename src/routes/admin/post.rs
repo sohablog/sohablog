@@ -1,7 +1,4 @@
-use super::super::{
-	error::Error,
-	Page
-};
+use super::super::{error::Error, Page};
 use crate::{
 	db::Database,
 	models::{
@@ -15,7 +12,7 @@ use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
 use rocket_contrib::templates::Template;
 
-pub const ITEMS_PER_PAGE:i32=25;
+pub const ITEMS_PER_PAGE: i32 = 25;
 
 #[get("/admin/post?<page>")]
 pub fn list(
