@@ -22,11 +22,10 @@ pub enum Error {
 
 pub struct RenderResult(pub Vec<u8>);
 impl<'r> response::Responder<'r> for RenderResult {
-    fn respond_to(self, req: &Request) -> response::Result<'r> {
-        response::content::Html(self.0).respond_to(req)
-    }
+	fn respond_to(self, req: &Request) -> response::Result<'r> {
+		response::content::Html(self.0).respond_to(req)
+	}
 }
-
 
 pub struct GlobalContext<'a> {
 	pub db: State<'a, Database>,

@@ -1,11 +1,10 @@
 use super::super::error::Error;
-use crate::{models::user::User, render};
+use crate::{models::user::User, render, templates};
 use rocket_codegen::*;
-use rocket_contrib::templates::Template;
 
 #[get("/admin")]
-pub fn index(global_var: render::GlobalVariable, _user: User) -> Result<Template, Error> {
-	Ok(render::render("admin/index", global_var, None)?)
+pub fn index(gctx: render::GlobalContext, _user: User) -> render::RenderResult {
+	render!(templates::admin::index, &gctx)
 }
 
 #[get("/admin/generatePasswordHash?<p>")]

@@ -1,6 +1,6 @@
 @use crate::render::*;
 
-@(ctx: GlobalContext, title: String, head: Content, meta: Content, content: Content, foot: Content)
+@(ctx: &GlobalContext, title: String, head: Content, meta: Content, content: Content, foot: Content)
 
 <html>
 	<head>
@@ -12,7 +12,7 @@
 @:head()
 	</head>
 	<body>
-		@if let Some(user) = ctx.user {
+		@if let Some(user) = &ctx.user {
 			<p>Admin - @user.username | <a href="/admin/post">Post</a> | <a href="/admin/category">Category</a></p>
 			<hr>
 		}

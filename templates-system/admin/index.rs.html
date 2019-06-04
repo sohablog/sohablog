@@ -1,0 +1,8 @@
+@use super::super::base;
+@use crate::render::*;
+
+@(ctx: &GlobalContext)
+
+@:base(ctx, "Admin Panel".to_string(), {}, {}, {
+	<h1>@format!("Hello, {}!", &ctx.user.as_ref().unwrap().username)</h1>
+}, {})

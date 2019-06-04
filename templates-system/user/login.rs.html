@@ -1,7 +1,7 @@
 @use super::super::base;
 @use crate::render::*;
 
-@(ctx: GlobalContext, message: Option<String>)
+@(ctx: &GlobalContext, message: Option<String>, username: Option<String>)
 
 @:base(ctx, "Login".to_string(), {}, {}, {
 	<h1>Login</h1>
@@ -11,7 +11,7 @@
 		</div>
 	}
 	<form method="POST">
-		<input type="text" placeholder="Username" name="username"/>
+		<input type="text" placeholder="Username" name="username" />
 		<br />
 		<input type="password" placeholder="Password" name="password" />
 		<br />
