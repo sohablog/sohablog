@@ -14,9 +14,12 @@ extern crate diesel;
 
 mod db;
 mod models;
+#[macro_use]
 mod render;
 mod routes;
 mod schema;
+
+include!(concat!(env!("OUT_DIR"), "/templates-system/templates.rs"));
 
 fn main() {
 	use crate::db::Database;

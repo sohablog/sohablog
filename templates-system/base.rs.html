@@ -1,0 +1,22 @@
+@use crate::render::*;
+
+@(ctx: GlobalContext, title: String, head: Content, meta: Content, content: Content, foot: Content)
+
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>@title - SOHABlog</title>
+@:meta()
+@:head()
+	</head>
+	<body>
+		@if let Some(user) = ctx.user {
+			<p>Admin - @user.username | <a href="/admin/post">Post</a> | <a href="/admin/category">Category</a></p>
+			<hr>
+		}
+@:content()
+@:foot()
+	</body>
+</html>

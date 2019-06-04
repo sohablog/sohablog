@@ -1,7 +1,11 @@
 use rocket_codegen::*;
 
-use crate::db::Database;
-use crate::models::user;
+use crate::{
+	db::Database,
+	models::user,
+	render::{self, GlobalContext},
+	templates
+};
 use rocket::{
 	http::{Cookie, Cookies},
 	request::LenientForm,
@@ -11,8 +15,8 @@ use rocket::{
 use rocket_contrib::templates::Template;
 
 #[get("/user/login")]
-pub fn login_get() -> Template {
-	Template::render("admin/user/login", &tera::Context::new())
+pub fn login_get(gctx: GlobalContext) -> render::RenderResult {
+	render!(templates::user::login, gctx, None)
 }
 
 #[derive(Default, FromForm, Debug)]
