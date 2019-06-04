@@ -2,10 +2,10 @@ use crate::{
 	models::user,
 	db::Database
 };
-use comrak::{markdown_to_html, ComrakOptions};
+use comrak::{self, ComrakOptions};
 use rocket::{
 	request::{FromRequest, Outcome},
-	response,
+	response::{self, Responder},
 	Request,
 	State,
 };
@@ -20,8 +20,9 @@ pub enum Error {
 	TemplateRender,
 }
 
+#[derive(Debug)]
 pub struct RenderResult(pub Vec<u8>);
-impl<'r> response::Responder<'r> for RenderResult {
+impl<'r> Responder<'r> for RenderResult {
 	fn respond_to(self, req: &Request) -> response::Result<'r> {
 		response::content::Html(self.0).respond_to(req)
 	}
@@ -115,12 +116,16 @@ const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
 	ext_description_lists: true,
 };
 
+pub fn markdown_to_html(s: &str) -> String {
+	comrak::markdown_to_html(s, &COMRAK_OPTIONS)
+}
+
 #[deprecated]
 pub fn tera_filter_markdown(
 	value: tera::Value,
 	_: HashMap<String, tera::Value>,
 ) -> tera::Result<tera::Value> {
 	let s = try_get_value!("markdown", "value", String, value);
-	let html = markdown_to_html(s.as_str(), &COMRAK_OPTIONS);
+	let html = markdown_to_html(s.as_str());
 	Ok(to_value(html).unwrap())
 }

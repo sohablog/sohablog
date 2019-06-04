@@ -6,7 +6,7 @@ use crate::{
 use rocket::{
 	http::{Cookie, Cookies},
 	request::LenientForm,
-	response::Redirect,
+	response::{Redirect},
 };
 use rocket_codegen::*;
 
@@ -25,7 +25,7 @@ pub fn login_post(
 	gctx: GlobalContext,
 	mut cookies: Cookies,
 	form: LenientForm<LoginForm>,
-) -> Result<Redirect, Vec<u8>> { // FIXME: Should be RenderResult
+) -> Result<Redirect, RenderResult> {
 	if let Ok(user) = user::User::find_by_username(&gctx.db, form.username.as_str()) {
 		if user.verify_password_hash(form.password.as_str()) {
 			cookies.add_private(Cookie::new("user_id", user.id.to_string()));
@@ -37,5 +37,5 @@ pub fn login_post(
 		&gctx,
 		Some(String::from("Wrong username or password")),
 		Some(String::from(&form.username))
-	).0)
+	))
 }
