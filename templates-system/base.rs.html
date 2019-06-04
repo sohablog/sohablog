@@ -1,4 +1,5 @@
 @use crate::render::*;
+@use rocket_codegen::*;
 
 @(ctx: &GlobalContext, title: String, head: Content, meta: Content, content: Content, foot: Content)
 
@@ -13,7 +14,7 @@
 	</head>
 	<body>
 		@if let Some(user) = &ctx.user {
-			<p>Admin - @user.username | <a href="@uri!(crate::routes::admin::list)">Post</a> | <a href="@uri!(crate::routes::category::list)">Category</a></p>
+			<p>Admin - @user.username | <a href="@uri!(crate::routes::admin::post::list: page = None)">Post</a> | <a href="@uri!(crate::routes::admin::category::list)">Category</a></p>
 			<hr>
 		}
 @:content()

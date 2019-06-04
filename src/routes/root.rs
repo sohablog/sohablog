@@ -10,15 +10,15 @@ use rocket_contrib::templates::Template;
 #[get("/?<page>")]
 pub fn index(
 	db: State<Database>,
-	page: Option<Page>,
+	mut page: Page,
 	global_var: render::GlobalVariable,
 ) -> Result<Template, Error> {
-	let page = page.unwrap_or_default();
 	let posts = content::Content::find_posts(&db, page.range(super::post::ITEMS_PER_PAGE), false)?;
 	page.calc_total(
 		content::Content::count_post(&db, false)? as i32,
 		super::post::ITEMS_PER_PAGE,
 	);
+	
 	let mut ctx = tera::Context::new();
 	ctx.insert("posts", &posts);
 	ctx.insert("pageTotal", &page.total);

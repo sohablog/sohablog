@@ -17,12 +17,11 @@ pub const ITEMS_PER_PAGE: i32 = 25;
 #[get("/admin/post?<page>")]
 pub fn list(
 	db: State<Database>,
-	page: Option<Page>,
+	mut page: Page,
 	global_var: render::GlobalVariable,
 	current_user: User,
 ) -> Result<Template, Error> {
 	current_user.check_permission(user::PERM_POST_VIEW)?;
-	let page = page.unwrap_or_default();
 	let posts = content::Content::find_posts(&db, page.range(ITEMS_PER_PAGE), true)?;
 	page.calc_total(
 		content::Content::count_post(&db, false)? as i32,
