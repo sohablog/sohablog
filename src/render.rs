@@ -4,6 +4,7 @@ use crate::{
 };
 use comrak::{self, ComrakOptions};
 use rocket::{
+	http::uri::Origin,
 	request::{FromRequest, Outcome},
 	response::{self, Responder},
 	Request,
@@ -13,6 +14,10 @@ use rocket_contrib::templates::Template;
 use std::collections::HashMap;
 use std::result::Result;
 use tera::*;
+use std::io::{
+	Write,
+	Result as IoResult
+};
 
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -20,6 +25,7 @@ pub enum Error {
 	TemplateRender,
 }
 
+/// `RenderResult` wraps a Vec<u8> which is the HTML render result.
 #[derive(Debug)]
 pub struct RenderResult(pub Vec<u8>);
 impl<'r> Responder<'r> for RenderResult {
@@ -28,6 +34,28 @@ impl<'r> Responder<'r> for RenderResult {
 	}
 }
 
+/// returns `RenderResult`
+#[macro_export]
+macro_rules! render {
+	($path:path, $($param:expr),*) => {{
+		use crate::render::RenderResult;
+
+		let mut buf = vec![];
+		$path(&mut buf,$($param),*).unwrap();
+		RenderResult(buf)
+	}}
+}
+
+trait ToHtml {
+	fn to_html(&self, out: &mut Write) -> IoResult<()>;
+}
+impl ToHtml for Origin<'_> {
+	fn to_html(&self, out: &mut Write) -> IoResult<()> {
+		write!(out, "{}", &self.to_string())
+	}
+}
+
+/// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
 pub struct GlobalContext<'a> {
 	pub db: State<'a, Database>,
 	pub user: Option<user::User>
@@ -42,15 +70,27 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	}
 }
 
-#[macro_export]
-macro_rules! render {
-	($path:path, $($param:expr),*) => {{
-		use crate::render::RenderResult;
-
-		let mut buf = vec![];
-		$path(&mut buf,$($param),*).unwrap();
-		RenderResult(buf)
-	}}
+/// Options for `comrak` which is a Markdown parser
+const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
+	hardbreaks: false,
+	smart: true,
+	github_pre_lang: true,
+	width: 0,
+	default_info_string: None,
+	unsafe_: true,
+	ext_strikethrough: true,
+	ext_tagfilter: true,
+	ext_table: true,
+	ext_autolink: true,
+	ext_tasklist: true,
+	ext_superscript: true,
+	ext_header_ids: None,
+	ext_footnotes: true,
+	ext_description_lists: true,
+};
+/// Parses markdown to HTML
+pub fn markdown_to_html(s: &str) -> String {
+	comrak::markdown_to_html(s, &COMRAK_OPTIONS)
 }
 
 #[deprecated]
@@ -96,28 +136,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalVariable {
 		let user = request.guard::<Option<user::User>>().unwrap();
 		Outcome::Success(GlobalVariable { current_user: user })
 	}
-}
-
-const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
-	hardbreaks: false,
-	smart: true,
-	github_pre_lang: true,
-	width: 0,
-	default_info_string: None,
-	unsafe_: true,
-	ext_strikethrough: true,
-	ext_tagfilter: true,
-	ext_table: true,
-	ext_autolink: true,
-	ext_tasklist: true,
-	ext_superscript: true,
-	ext_header_ids: None,
-	ext_footnotes: true,
-	ext_description_lists: true,
-};
-
-pub fn markdown_to_html(s: &str) -> String {
-	comrak::markdown_to_html(s, &COMRAK_OPTIONS)
 }
 
 #[deprecated]

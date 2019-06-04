@@ -5,27 +5,23 @@ use crate::{
 		category::{Category, NewCategory},
 		user::{self, User},
 	},
-	render,
+	render::{GlobalContext, RenderResult},
+	templates,
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
-use rocket_contrib::templates::Template;
 
 #[get("/admin/category")]
 pub fn list(
-	db: State<Database>,
-	global_var: render::GlobalVariable,
+	gctx: GlobalContext,
 	current_user: User,
-) -> Result<Template, Error> {
+) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_CATEGORY_MANAGE)?;
-	let mut ctx = tera::Context::new();
-	let cats = Category::find_all(&db)?;
-	ctx.insert("categories", &cats);
-	Ok(render::render(
-		"admin/category/list",
-		global_var,
-		Some(ctx),
-	)?)
+	Ok(render!(
+		templates::admin::category::list,
+		&gctx,
+		Category::find_all(&gctx.db)?
+	))
 }
 
 #[derive(Default, FromForm, Debug)]
