@@ -15,14 +15,14 @@ pub fn index(
 ) -> Result<Template, Error> {
 	let page = page.unwrap_or_default();
 	let posts = content::Content::find_posts(&db, page.range(super::post::ITEMS_PER_PAGE), false)?;
-	let page_total = Page::total(
+	page.calc_total(
 		content::Content::count_post(&db, false)? as i32,
 		super::post::ITEMS_PER_PAGE,
 	);
 	let mut ctx = tera::Context::new();
 	ctx.insert("posts", &posts);
-	ctx.insert("pageTotal", &page_total);
-	ctx.insert("pageCurrent", &page.0);
+	ctx.insert("pageTotal", &page.total);
+	ctx.insert("pageCurrent", &page.current);
 	Ok(render::theme_render("list", global_var, Some(ctx))?)
 }
 

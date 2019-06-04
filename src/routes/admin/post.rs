@@ -6,7 +6,7 @@ use crate::{
 		content::{self, Content},
 		user::{self, User},
 	},
-	render,
+	render::{self, GlobalContext, RenderResult},
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
@@ -24,15 +24,15 @@ pub fn list(
 	current_user.check_permission(user::PERM_POST_VIEW)?;
 	let page = page.unwrap_or_default();
 	let posts = content::Content::find_posts(&db, page.range(ITEMS_PER_PAGE), true)?;
-	let page_total = Page::total(
+	page.calc_total(
 		content::Content::count_post(&db, false)? as i32,
 		ITEMS_PER_PAGE,
 	);
 
 	let mut ctx = tera::Context::new();
 	ctx.insert("posts", &posts);
-	ctx.insert("pageTotal", &page_total);
-	ctx.insert("pageCurrent", &page.0);
+	ctx.insert("pageTotal", &page.total);
+	ctx.insert("pageCurrent", &page.current);
 	Ok(render::render("admin/post/list", global_var, Some(ctx))?)
 }
 
