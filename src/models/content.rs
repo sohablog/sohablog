@@ -1,6 +1,6 @@
 use diesel::prelude::*;
-use serde_derive::*;
 use rocket_codegen::uri;
+use serde_derive::*;
 
 use super::{
 	category::Category,
@@ -45,10 +45,6 @@ impl Content {
 	find_one_by!(content, find_by_slug, slug as &str);
 	update!();
 
-	pub fn get_user(&self, db: &Database) -> Result<User> {
-		User::find(db, self.user)
-	}
-	
 	pub fn count_post(db: &crate::db::Database, with_hidden: bool) -> Result<i64> {
 		let mut status = vec![ContentStatus::Normal];
 		if let true = with_hidden {
@@ -130,7 +126,10 @@ impl Content {
 	pub fn get_tags_name(&self, db: &crate::db::Database) -> Result<Vec<String>> {
 		let tags = AssocTagContent::find_by_content_id(db, self.id)?;
 		let tags = Tag::find_by_id(db, tags.iter().map(|t| t.id).collect::<Vec<i32>>())?;
-		let tags = tags.iter().map(|t| t.name.to_owned()).collect::<Vec<String>>();
+		let tags = tags
+			.iter()
+			.map(|t| t.name.to_owned())
+			.collect::<Vec<String>>();
 		Ok(tags)
 	}
 
@@ -161,6 +160,10 @@ impl Content {
 		} else {
 			Ok(None)
 		}
+	}
+
+	pub fn get_user(&self, db: &Database) -> Result<User> {
+		User::find(db, self.user)
 	}
 }
 

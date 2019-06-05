@@ -10,10 +10,7 @@ use crate::{
 pub const ITEMS_PER_PAGE: i32 = 15;
 
 #[get("/post/<path>")]
-pub fn post_show(
-	gctx: GlobalContext,
-	path: String,
-) -> Result<RenderResult, Error> {
+pub fn post_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Error> {
 	let slug = path.replace(".html", ""); // TODO: We just need to remove `.html` at the end
 	let post = match slug.parse::<i32>() {
 		Ok(post_id) => content::Content::find(&gctx.db, post_id)?,
@@ -29,7 +26,11 @@ pub fn post_show(
 	Ok(render!(
 		templates::post_show,
 		&gctx,
-		format!("{}", post.title.as_ref().unwrap_or(&String::from("Untitled"))).as_str(),
+		format!(
+			"{}",
+			post.title.as_ref().unwrap_or(&String::from("Untitled"))
+		)
+		.as_str(),
 		post
 	))
 }

@@ -1,12 +1,12 @@
 use crate::{
 	models::user,
 	render::{GlobalContext, RenderResult},
-	templates
+	templates,
 };
 use rocket::{
 	http::{Cookie, Cookies},
 	request::LenientForm,
-	response::{Redirect},
+	response::Redirect,
 };
 use rocket_codegen::*;
 

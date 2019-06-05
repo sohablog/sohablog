@@ -8,18 +8,14 @@ use rocket::{
 use std::fmt::Result as FmtResult;
 
 #[derive(Debug, Copy, Clone)]
-pub struct Page{
+pub struct Page {
 	pub current: i32,
 	pub total: i32,
 }
 impl Page {
 	pub fn new(current: i32, total: i32) -> Self {
 		Self {
-			current: if current < 1 {
-				1
-			} else {
-				current
-			},
+			current: if current < 1 { 1 } else { current },
 			total: total,
 		}
 	}

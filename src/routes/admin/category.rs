@@ -12,10 +12,7 @@ use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
 
 #[get("/admin/category")]
-pub fn list(
-	gctx: GlobalContext,
-	current_user: User,
-) -> Result<RenderResult, Error> {
+pub fn list(gctx: GlobalContext, current_user: User) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_CATEGORY_MANAGE)?;
 	Ok(render!(
 		templates::admin::category::list,

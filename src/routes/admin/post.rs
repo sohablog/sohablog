@@ -7,7 +7,7 @@ use crate::{
 		user::{self, User},
 	},
 	render::{GlobalContext, RenderResult},
-	templates
+	templates,
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
@@ -27,12 +27,7 @@ pub fn list(
 		ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(
-		templates::admin::post::list,
-		&gctx,
-		page,
-		posts
-	))
+	Ok(render!(templates::admin::post::list, &gctx, page, posts))
 }
 
 #[get("/admin/post/_new")]
@@ -65,7 +60,11 @@ pub fn edit_get(
 	Ok(render!(
 		templates::admin::post::edit,
 		&gctx,
-		format!("Edit {}", post.title.as_ref().unwrap_or(&String::from("Untitled"))).as_str(),
+		format!(
+			"Edit {}",
+			post.title.as_ref().unwrap_or(&String::from("Untitled"))
+		)
+		.as_str(),
 		Some(post),
 		categories
 	))
