@@ -1,5 +1,8 @@
 use super::{Error, Result};
-use crate::schema::*;
+use crate::{
+	schema::*,
+	db::Database
+};
 use diesel::prelude::*;
 use serde_derive::*;
 
@@ -26,7 +29,7 @@ impl Tag {
 		}
 	}
 
-	pub fn find_by_name(db: &crate::db::Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
+	pub fn find_by_name(db: &Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
 		let exist_tags = tag::table
 			.filter(tag::name.eq_any(&tags))
 			.load::<Self>(&*db.pool().get()?)
@@ -48,7 +51,7 @@ impl Tag {
 			.map_err(Error::from)
 	}
 
-	pub fn find_by_id(db: &crate::db::Database, tags: Vec<i32>) -> Result<Vec<Tag>> {
+	pub fn find_by_id(db: &Database, tags: Vec<i32>) -> Result<Vec<Tag>> {
 		tag::table
 			.into_boxed()
 			.filter(tag::id.eq_any(tags))
@@ -74,7 +77,7 @@ pub struct NewAssocTagContent {
 	pub content: i32,
 }
 impl AssocTagContent {
-	pub fn find_by_content_id(db: &crate::db::Database, content_id: i32) -> Result<Vec<Self>> {
+	pub fn find_by_content_id(db: &Database, content_id: i32) -> Result<Vec<Self>> {
 		assoc_tag_content::table
 			.into_boxed()
 			.filter(assoc_tag_content::content.eq(content_id))
@@ -82,27 +85,32 @@ impl AssocTagContent {
 			.map_err(Error::from)
 	}
 
-	pub fn update(db: &crate::db::Database, content_id: i32, tags: Vec<Tag>) -> Result<()> {
+	pub fn update(db: &Database, content_id: i32, tags: Vec<Tag>) -> Result<()> {
 		let tag_ids: Vec<i32> = tags.iter().map(|t| t.id).collect();
-
-		let exist_assocs = Self::find_by_content_id(db, content_id)?;
-		let exist_assocs: Vec<i32> = exist_assocs.iter().map(|o| o.tag).collect();
-
-		let removing_ids: Vec<i32> = exist_assocs.iter().filter(|&id| !tag_ids.contains(id)).map(|&i| i).collect();
+		let exist_assocs: Vec<i32> = Self::find_by_content_id(db, content_id)?
+			.iter()
+			.map(|o| o.tag)
+			.collect();
+		let removing_ids: Vec<i32> = exist_assocs
+			.iter()
+			.cloned()
+			.filter(|id| !tag_ids.contains(&id))
+			.collect();
 		let adding_objects: Vec<NewAssocTagContent> = tag_ids
 			.iter()
 			.filter(|&id| !exist_assocs.contains(id))
 			.map(|&id| NewAssocTagContent {
 				tag: id,
-				content: content_id
+				content: content_id,
 			})
 			.collect();
-		dbg!(&removing_ids);dbg!(&adding_objects);
 
+		// first deletes tags which is not exists in this post
 		diesel::delete(assoc_tag_content::table)
 			.filter(assoc_tag_content::content.eq(content_id))
 			.filter(assoc_tag_content::tag.eq_any(removing_ids))
 			.execute(&*db.pool().get()?)?;
+		// then insert new added tags
 		diesel::insert_into(assoc_tag_content::table)
 			.values(&adding_objects)
 			.execute(&*db.pool().get()?)?;
