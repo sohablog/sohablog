@@ -10,7 +10,7 @@
 	@for post in posts {
 	<div>
 		<h2><a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a></h2>
-		<small><b>@if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized}</b> · @post.time</small>
+		<small><b>@if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized}</b> · @date_format(&post.time, "%Y-%m-%d")</small>
 	</div><hr />}
 	@:paginator(page)
 }, {})

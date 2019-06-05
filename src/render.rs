@@ -82,3 +82,7 @@ pub fn markdown_to_html(out: &mut Write, s: &str) -> IoResult<()> {
 	let s = comrak::markdown_to_html(s, &COMRAK_OPTIONS);
 	write!(out, "{}", s)
 }
+
+pub fn date_format(time: &chrono::NaiveDateTime, fmt: &str) -> String {
+	time.format(fmt).to_string()
+}

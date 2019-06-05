@@ -6,7 +6,7 @@
 
 @:base(ctx, title, {}, {}, {
 	<h1><a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a></h1>
-	<small>by @(post.get_user(&ctx.db).unwrap().name) in @if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized} · @post.time</small>
+	<small>by @(post.get_user(&ctx.db).unwrap().name) in @if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized} · @date_format(&post.time, "%Y-%m-%d")</small>
 	<article>
 		@:markdown_to_html(&post.content.as_str())
 	</article>

@@ -3,6 +3,7 @@
 @use crate::models::category::Category;
 @use crate::render::*;
 @use rocket_codegen::*;
+@use chrono::prelude::Utc;
 
 @(ctx: &GlobalContext, title: &str, post: Option<Content>, categories: Vec<Category>)
 
@@ -26,7 +27,7 @@
 			<input type="radio" name="category" value="@cat.id" @if let Some(p) = &post {@if let Some(cid) = p.category {@if cid == cat.id {checked }}}/>&nbsp;@cat.name <br />}
 		</p>
 		<br />
-		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time}" />
+		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time} else {@date_format(&Utc::now().naive_local(), "%Y-%m-%d %H:%M:%S")}" />
 		<br />
 		<input type="text" placeholder="Tags (split with comma)" name="tags" @if let Some(p) = &post {value="@(p.get_tags_name(&ctx.db).unwrap().join(", "))" }/>
 		<br />
