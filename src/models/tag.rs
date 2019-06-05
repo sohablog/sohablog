@@ -20,24 +20,30 @@ impl Tag {
 	insert!(tag, NewTag);
 	find_pk!(tag);
 
-	pub fn new(name: String) -> NewTag {
+	pub fn new(name: &str) -> NewTag {
 		NewTag {
-			name: name.to_lowercase(),
+			name: name.trim().to_lowercase().to_string(),
 		}
 	}
 
 	pub fn find_by_name(db: &crate::db::Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
-		let tags = tags
-			.iter()
-			.filter(|&s| s.len() > 0)
-			.map(|&s| Self::new(s.to_string()))
-			.collect::<Vec<NewTag>>();
-		diesel::insert_or_ignore_into(tag::table)
-			.values(&tags)
+		let exist_tags = tag::table
+			.filter(tag::name.eq_any(&tags))
+			.load::<Self>(&*db.pool().get()?)
+			.map_err(Error::from)?;
+		let mut new_tags: Vec<NewTag> = Vec::new();
+		for tag in &tags {
+			if !exist_tags.iter().any(|t| t.name.as_str() == *tag) {
+				new_tags.push(Self::new(tag));
+			}
+		}
+		diesel::insert_into(tag::table)
+			.values(&new_tags)
 			.execute(&*db.pool().get()?)?;
+
+		// SB MySQL doesn't support `RETURNING` clause
 		tag::table
-			.into_boxed()
-			.filter(tag::name.eq_any(tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>()))
+			.filter(tag::name.eq_any(&tags))
 			.load::<Self>(&*db.pool().get()?)
 			.map_err(Error::from)
 	}
@@ -77,31 +83,28 @@ impl AssocTagContent {
 	}
 
 	pub fn update(db: &crate::db::Database, content_id: i32, tags: Vec<Tag>) -> Result<()> {
-		let tag_ids = tags.iter().map(|t| t.id).collect::<Vec<i32>>();
+		let tag_ids: Vec<i32> = tags.iter().map(|t| t.id).collect();
 
 		let exist_assocs = Self::find_by_content_id(db, content_id)?;
 		let exist_assocs: Vec<i32> = exist_assocs.iter().map(|o| o.tag).collect();
 
-		let mut removing_ids: Vec<i32> = Vec::new();
-		for exist_tag_id in exist_assocs {
-			if !tag_ids.contains(&exist_tag_id) {
-				removing_ids.push(exist_tag_id);
-			}
-		}
+		let removing_ids: Vec<i32> = exist_assocs.iter().filter(|&id| !tag_ids.contains(id)).map(|&i| i).collect();
+		let adding_objects: Vec<NewAssocTagContent> = tag_ids
+			.iter()
+			.filter(|&id| !exist_assocs.contains(id))
+			.map(|&id| NewAssocTagContent {
+				tag: id,
+				content: content_id
+			})
+			.collect();
+		dbg!(&removing_ids);dbg!(&adding_objects);
+
 		diesel::delete(assoc_tag_content::table)
 			.filter(assoc_tag_content::content.eq(content_id))
 			.filter(assoc_tag_content::tag.eq_any(removing_ids))
 			.execute(&*db.pool().get()?)?;
-		diesel::insert_or_ignore_into(assoc_tag_content::table)
-			.values(
-				tag_ids
-					.iter()
-					.map(|&id| NewAssocTagContent {
-						tag: id,
-						content: content_id,
-					})
-					.collect::<Vec<NewAssocTagContent>>(),
-			)
+		diesel::insert_into(assoc_tag_content::table)
+			.values(&adding_objects)
 			.execute(&*db.pool().get()?)?;
 		Ok(())
 	}
