@@ -1,8 +1,5 @@
 use super::{Error, Result};
-use crate::{
-	schema::*,
-	db::Database
-};
+use crate::{db::Database, schema::*};
 use diesel::prelude::*;
 use serde_derive::*;
 

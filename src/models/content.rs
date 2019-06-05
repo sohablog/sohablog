@@ -8,8 +8,7 @@ use super::{
 	user::User,
 	Error, Result,
 };
-use crate::db::Database;
-use crate::schema::*;
+use crate::{db::Database, schema::*};
 
 #[derive(Debug, Queryable, Associations, Clone, Serialize, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]
@@ -45,7 +44,7 @@ impl Content {
 	find_one_by!(content, find_by_slug, slug as &str);
 	update!();
 
-	pub fn count_post(db: &crate::db::Database, with_hidden: bool) -> Result<i64> {
+	pub fn count_post(db: &Database, with_hidden: bool) -> Result<i64> {
 		let mut status = vec![ContentStatus::Normal];
 		if let true = with_hidden {
 			status.push(ContentStatus::Hidden);
@@ -60,7 +59,7 @@ impl Content {
 	}
 
 	pub fn find_posts(
-		db: &crate::db::Database,
+		db: &Database,
 		(min, max): (i32, i32),
 		with_hidden: bool,
 		sort_by_id: bool,
@@ -88,7 +87,7 @@ impl Content {
 	/// is_prev: true-> prev_post, false-> next_post
 	pub fn find_neighbor_post(
 		&self,
-		db: &crate::db::Database,
+		db: &Database,
 		prev: bool,
 		limit: i64,
 	) -> Result<Option<Self>> {
@@ -118,18 +117,19 @@ impl Content {
 		}
 	}
 
-	pub fn get_tags(&self, db: &crate::db::Database) -> Result<Vec<Tag>> {
+	pub fn get_tags(&self, db: &Database) -> Result<Vec<Tag>> {
 		let assocs = AssocTagContent::find_by_content_id(db, self.id)?;
 		Tag::find_by_id(db, assocs.iter().map(|t| t.tag).collect::<Vec<i32>>())
 	}
 
-	pub fn set_tags(&self, db: &crate::db::Database, tags: Vec<&str>) -> Result<()> {
+	pub fn set_tags(&self, db: &Database, tags: Vec<&str>) -> Result<()> {
 		let tags = Tag::find_by_name(db, tags)?;
 		AssocTagContent::update(db, self.id, tags)
 	}
 
-	pub fn get_tags_name(&self, db: &crate::db::Database) -> Result<Vec<String>> {
-		let tags = self.get_tags(db)?
+	pub fn get_tags_name(&self, db: &Database) -> Result<Vec<String>> {
+		let tags = self
+			.get_tags(db)?
 			.iter()
 			.map(|t| t.name.to_owned())
 			.collect::<Vec<String>>();
@@ -145,7 +145,7 @@ impl Content {
 		uri!(crate::routes::post::post_show: path = format!("{}.html", path)).to_string()
 	}
 
-	pub fn get_category(&self, db: &crate::db::Database) -> Result<Option<Category>> {
+	pub fn get_category(&self, db: &Database) -> Result<Option<Category>> {
 		if let Some(cid) = self.category {
 			match Category::find(db, cid) {
 				Ok(c) => Ok(Some(c)),
@@ -157,7 +157,7 @@ impl Content {
 		}
 	}
 
-	pub fn get_category_name(&self, db: &crate::db::Database) -> Result<Option<String>> {
+	pub fn get_category_name(&self, db: &Database) -> Result<Option<String>> {
 		if let Some(cat) = self.get_category(db)? {
 			Ok(Some(cat.name.to_owned()))
 		} else {

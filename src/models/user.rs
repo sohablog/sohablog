@@ -2,8 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use super::{Error, Result};
-use crate::db::Database;
-use crate::schema::*;
+use crate::{db::Database, schema::*};
 
 use bcrypt;
 

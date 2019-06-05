@@ -1,5 +1,5 @@
 use super::{Error, Result};
-use crate::schema::*;
+use crate::{db::Database, schema::*};
 use diesel::prelude::*;
 use serde_derive::*;
 
@@ -23,7 +23,7 @@ impl Category {
 	find_one_by!(category, find_by_slug, slug as &str);
 	update!();
 
-	pub fn find_all(db: &crate::db::Database) -> Result<Vec<Self>> {
+	pub fn find_all(db: &Database) -> Result<Vec<Self>> {
 		let mut query = category::table.into_boxed();
 		query = query.order(category::order.desc());
 		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
