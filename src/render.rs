@@ -10,10 +10,6 @@ use rocket::{
 	Request,
 	State,
 };
-use rocket_contrib::templates::Template;
-use std::collections::HashMap;
-use std::result::Result;
-use tera::*;
 use std::io::{
 	Write,
 	Result as IoResult
@@ -92,49 +88,4 @@ const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
 pub fn markdown_to_html(out: &mut Write, s: &str) -> IoResult<()> {
 	let s = comrak::markdown_to_html(s, &COMRAK_OPTIONS);
 	write!(out, "{}", s)
-}
-
-#[deprecated]
-fn create_final_context(global_var: GlobalVariable, context: Option<Context>) -> Context {
-	let mut ctx = Context::new();
-	ctx.insert("currentUser", &global_var.current_user);
-	if let Some(context) = context {
-		ctx.extend(context);
-	};
-	ctx
-}
-
-#[deprecated]
-pub fn theme_render(
-	name: &str,
-	global_var: GlobalVariable,
-	context: Option<Context>,
-) -> Result<Template, Error> {
-	let ctx = create_final_context(global_var, context);
-	Ok(Template::render(
-		format!("theme/{}/{}", "basic", name),
-		&ctx,
-	))
-}
-
-#[deprecated]
-pub struct GlobalVariable {
-	pub current_user: Option<user::User>,
-}
-impl<'a, 'r> FromRequest<'a, 'r> for GlobalVariable {
-	type Error = ();
-	fn from_request(request: &'a Request<'r>) -> Outcome<GlobalVariable, ()> {
-		let user = request.guard::<Option<user::User>>().unwrap();
-		Outcome::Success(GlobalVariable { current_user: user })
-	}
-}
-
-#[deprecated]
-pub fn tera_filter_markdown(
-	value: tera::Value,
-	_: HashMap<String, tera::Value>,
-) -> tera::Result<tera::Value> {
-	let s = try_get_value!("markdown", "value", String, value);
-	let html = comrak::markdown_to_html(s.as_str(), &COMRAK_OPTIONS);
-	Ok(to_value(html).unwrap())
 }

@@ -50,11 +50,6 @@ fn main() {
 						router::root::page_show
 					],
 				)
-				.attach(rocket_contrib::templates::Template::custom(|engines| {
-					engines
-						.tera
-						.register_filter("markdown", render::tera_filter_markdown);
-				}))
 				.manage(db)
 				.launch();
 		}
