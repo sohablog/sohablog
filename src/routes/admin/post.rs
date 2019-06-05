@@ -6,71 +6,69 @@ use crate::{
 		content::{self, Content},
 		user::{self, User},
 	},
-	render,
+	render::{GlobalContext, RenderResult},
+	templates
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
-use rocket_contrib::templates::Template;
 
 pub const ITEMS_PER_PAGE: i32 = 25;
 
 #[get("/admin/post?<page>")]
 pub fn list(
-	db: State<Database>,
-	page: Option<Page>,
-	global_var: render::GlobalVariable,
+	gctx: GlobalContext,
+	mut page: Page,
 	current_user: User,
-) -> Result<Template, Error> {
+) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_VIEW)?;
-	let page = page.unwrap_or_default();
-	let posts = content::Content::find_posts(&db, page.range(ITEMS_PER_PAGE), true)?;
-	let page_total = Page::total(
-		content::Content::count_post(&db, false)? as i32,
+	let posts = content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), true)?;
+	page.calc_total(
+		content::Content::count_post(&gctx.db, false)? as i32,
 		ITEMS_PER_PAGE,
 	);
 
-	let mut ctx = tera::Context::new();
-	ctx.insert("posts", &posts);
-	ctx.insert("pageTotal", &page_total);
-	ctx.insert("pageCurrent", &page.0);
-	Ok(render::render("admin/post/list", global_var, Some(ctx))?)
+	Ok(render!(
+		templates::admin::post::list,
+		&gctx,
+		page,
+		posts
+	))
 }
 
 #[get("/admin/post/_new")]
-pub fn new_get(
-	db: State<Database>,
-	global_var: render::GlobalVariable,
-	current_user: User,
-) -> Result<Template, Error> {
+pub fn new_get(gctx: GlobalContext, current_user: User) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
-	let categories = models::category::Category::find_all(&db)?;
+	let categories = models::category::Category::find_all(&gctx.db)?;
 
-	let mut ctx = tera::Context::new();
-	ctx.insert("categories", &categories);
-	Ok(render::render("admin/post/edit", global_var, Some(ctx))?)
+	Ok(render!(
+		templates::admin::post::edit,
+		&gctx,
+		"New Post",
+		None,
+		categories
+	))
 }
 #[get("/admin/post/<post_id>")]
 pub fn edit_get(
+	gctx: GlobalContext,
 	post_id: i32,
-	db: State<Database>,
-	global_var: render::GlobalVariable,
 	current_user: User,
-) -> Result<Template, Error> {
+) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
-	let post: Content = Content::find(&db, post_id)?;
-	let mut ctx = tera::Context::new();
+	let post: Content = Content::find(&gctx.db, post_id)?;
 	if post.status == content::ContentStatus::Deleted
 		|| post.r#type != content::ContentType::Article
 	{
 		return Err(Error::NotFound);
 	}
-	let categories = models::category::Category::find_all(&db)?;
-	let tags = post.get_tags(&db)?;
-	let tags = tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>();
-	ctx.insert("post", &post);
-	ctx.insert("categories", &categories);
-	ctx.insert("tags", &tags);
-	Ok(render::render("admin/post/edit", global_var, Some(ctx))?)
+	let categories = models::category::Category::find_all(&gctx.db)?;
+	Ok(render!(
+		templates::admin::post::edit,
+		&gctx,
+		format!("Edit {}", post.title.as_ref().unwrap_or(&String::from("Untitled"))).as_str(),
+		Some(post),
+		categories
+	))
 }
 #[derive(Default, FromForm, Debug)]
 pub struct PostForm {

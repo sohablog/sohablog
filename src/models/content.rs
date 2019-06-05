@@ -1,5 +1,6 @@
 use diesel::prelude::*;
 use serde_derive::*;
+use rocket_codegen::uri;
 
 use super::{
 	category::Category,
@@ -47,6 +48,7 @@ impl Content {
 	pub fn get_user(&self, db: &Database) -> Result<User> {
 		User::find(db, self.user)
 	}
+	
 	pub fn count_post(db: &crate::db::Database, with_hidden: bool) -> Result<i64> {
 		let mut status = vec![ContentStatus::Normal];
 		if let true = with_hidden {
@@ -84,8 +86,8 @@ impl Content {
 
 	/// is_prev: true-> prev_post, false-> next_post
 	pub fn find_neighbor_post(
+		&self,
 		db: &crate::db::Database,
-		post: &Content,
 		prev: bool,
 		limit: i64,
 	) -> Result<Option<Self>> {
@@ -96,13 +98,13 @@ impl Content {
 			.filter(content::status.eq(ContentStatus::Normal));
 		query = if prev {
 			query
-				.filter(content::id.ne(post.id))
-				.filter(content::time.le(&post.time))
+				.filter(content::id.ne(self.id))
+				.filter(content::time.le(&self.time))
 				.order((content::time.desc(), content::id.desc()))
 		} else {
 			query
-				.filter(content::id.ne(post.id))
-				.filter(content::time.ge(&post.time))
+				.filter(content::id.ne(self.id))
+				.filter(content::time.ge(&self.time))
 				.order((content::time.asc(), content::id.asc()))
 		};
 
@@ -123,6 +125,42 @@ impl Content {
 	pub fn set_tags(&self, db: &crate::db::Database, tags: Vec<&str>) -> Result<()> {
 		AssocTagContent::update(db, self.id, Tag::find_by_name(db, tags)?)?;
 		Ok(())
+	}
+
+	pub fn get_tags_name(&self, db: &crate::db::Database) -> Result<Vec<String>> {
+		let tags = AssocTagContent::find_by_content_id(db, self.id)?;
+		let tags = Tag::find_by_id(db, tags.iter().map(|t| t.id).collect::<Vec<i32>>())?;
+		let tags = tags.iter().map(|t| t.name.to_owned()).collect::<Vec<String>>();
+		Ok(tags)
+	}
+
+	pub fn get_link(&self) -> String {
+		let path = if let Some(slug) = &self.slug {
+			slug.to_owned()
+		} else {
+			self.id.to_string()
+		};
+		uri!(crate::routes::post::post_show: path = format!("{}.html", path)).to_string()
+	}
+
+	pub fn get_category(&self, db: &crate::db::Database) -> Result<Option<Category>> {
+		if let Some(cid) = self.category {
+			match Category::find(db, cid) {
+				Ok(c) => Ok(Some(c)),
+				Err(Error::NotFound) => Ok(None),
+				Err(e) => Err(e),
+			}
+		} else {
+			Ok(None)
+		}
+	}
+
+	pub fn get_category_name(&self, db: &crate::db::Database) -> Result<Option<String>> {
+		if let Some(cat) = self.get_category(db)? {
+			Ok(Some(cat.name.to_owned()))
+		} else {
+			Ok(None)
+		}
 	}
 }
 

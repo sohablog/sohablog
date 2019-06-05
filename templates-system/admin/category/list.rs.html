@@ -1,8 +1,10 @@
-{% extends "admin/base" %}
+@use super::super::super::base;
+@use crate::models::category::Category;
+@use crate::render::*;
 
-{% block title %}Category | {{super()}}{% endblock %}
+@(ctx: &GlobalContext, categories: Vec<Category>)
 
-{% block main %}
+@:base(ctx, "Categories", {}, {}, {
 	<table>
 		<thead>
 			<tr>
@@ -14,18 +16,18 @@
 				<th></th>
 			</tr>
 		</thead>
-		<tbody>{% for cat in categories %}
+		<tbody>@for cat in categories {
 			<tr>
 				<form method="POST" action="/admin/category/update">
-					<input type="hidden" name="target" value="{{cat.id}}" />
-					<td><input type="text" name="slug" value="{{cat.slug}}" /></td>
-					<td><input type="text" name="name" value="{{cat.name}}" /></td>
-					<td><textarea name="description">{{cat.description}}</textarea></td>
-					<td><input type="number" name="order" value="{{cat.order}}" /></td>
-					<td><input type="text" name="parent" value="{{cat.parent}}" /></td>
+					<input type="hidden" name="target" value="@cat.id" />
+					<td><input type="text" name="slug" value="@cat.slug" /></td>
+					<td><input type="text" name="name" value="@cat.name" /></td>
+					<td><textarea name="description">@if let Some(desc) = cat.description {@desc}</textarea></td>
+					<td><input type="number" name="order" value="@cat.order" /></td>
+					<td><input type="text" name="parent" @if let Some(pid) = cat.parent {value="@pid" }/></td>
 					<td><input type="submit" value="Modify"/></td>
 				</form>
-			</tr>{% endfor %}
+			</tr>}
 			<tr>
 				<form method="POST" action="/admin/category/update">
 					<td><input type="text" name="slug" placeholder="Slug" /></td>
@@ -38,4 +40,4 @@
 			</tr>
 		</tbody>
 	</table>
-{% endblock %}
+}, {})

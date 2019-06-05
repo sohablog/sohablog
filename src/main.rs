@@ -14,6 +14,7 @@ extern crate diesel;
 
 mod db;
 mod models;
+#[macro_use]
 mod render;
 mod routes;
 mod schema;
@@ -49,14 +50,17 @@ fn main() {
 						router::root::page_show
 					],
 				)
-				.attach(rocket_contrib::templates::Template::custom(|engines| {
-					engines
-						.tera
-						.register_filter("markdown", render::tera_filter_markdown);
-				}))
 				.manage(db)
 				.launch();
 		}
 		Err(e) => println!("Met an error while initializing database: {}", e),
 	};
+}
+
+// system templates
+include!(concat!(env!("OUT_DIR"), "/templates-system/templates.rs"));
+
+// user theme templates
+mod theme {
+	include!(concat!(env!("OUT_DIR"), "/templates-theme/templates.rs"));
 }

@@ -1,0 +1,20 @@
+@use super::super::base;
+@use crate::render::*;
+
+@(ctx: &GlobalContext, message: Option<String>, username: Option<String>)
+
+@:base(ctx, "Login", {}, {}, {
+	<h1>Login</h1>
+	@if let Some(message) = message {
+		<div style="border: 1px solid red;">
+			<p>@message</p>
+		</div>
+	}
+	<form method="POST">
+		<input type="text" placeholder="Username" name="username" @if let Some(s) = username {value="@s" }/>
+		<br />
+		<input type="password" placeholder="Password" name="password" />
+		<br />
+		<input type="submit" />
+	</form>
+}, {})

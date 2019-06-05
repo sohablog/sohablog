@@ -1,0 +1,5 @@
+@use crate::routes::Page;
+
+@(page: Page)
+
+<p>@if page.current > 1 {<a href="?page=@(page.current - 1)">上一页</a>&nbsp;} @page.current / @page.total @if page.current < page.total {&nbsp;<a href="?page=@(page.current + 1)">下一页</a>}</p>

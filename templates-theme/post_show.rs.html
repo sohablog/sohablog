@@ -1,0 +1,32 @@
+@use super::misc::base;
+@use crate::models::content::Content as PostContent;
+@use crate::render::*;
+
+@(ctx: &GlobalContext, title: &str, post: PostContent)
+
+@:base(ctx, title, {}, {}, {
+	<h1><a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a></h1>
+	<small>by @(post.get_user(&ctx.db).unwrap().name) in @if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized} · @post.time</small>
+	<article>
+		@:markdown_to_html(&post.content.as_str())
+	</article>
+	<hr />
+	<p><small>Tags:</small> @(post.get_tags_name(&ctx.db).unwrap().join(", "))</p>
+	<hr />
+	<p>
+		<b>上一篇: </b>
+		@if let Some(p) = post.find_neighbor_post(&ctx.db, true, 1).unwrap() {
+		<a href="@p.get_link()">@if let Some(t) = &p.title {@t} else {Untitled}</a>
+		} else {
+		<i>没有了</i>
+		}
+	</p>
+	<p>
+		<b>下一篇: </b>
+		@if let Some(p) = post.find_neighbor_post(&ctx.db, false, 1).unwrap() {
+		<a href="@p.get_link()">@if let Some(t) = &p.title {@t} else {Untitled}</a>
+		} else {
+		<i>没有了</i>
+		}
+	</p>
+}, {})

@@ -80,7 +80,7 @@ macro_rules! insert_non_incremental {
  */
 macro_rules! update {
 	()=>{
-		pub fn update(&self,db: &crate::db::Database)->Result<()>{
+		pub fn update(&self,db: &crate::db::Database) -> Result<()>{
 			diesel::update(self).set(self).execute(&*db.pool().get()?)?;
 			Ok(())
 		}
