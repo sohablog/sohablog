@@ -117,16 +117,6 @@ pub fn theme_render(
 }
 
 #[deprecated]
-pub fn render(
-	name: &'static str,
-	global_var: GlobalVariable,
-	context: Option<Context>,
-) -> Result<Template, Error> {
-	let ctx = create_final_context(global_var, context);
-	Ok(Template::render(name, &ctx))
-}
-
-#[deprecated]
 pub struct GlobalVariable {
 	pub current_user: Option<user::User>,
 }
