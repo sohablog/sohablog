@@ -10,7 +10,7 @@ use crate::{
 #[get("/?<page>")]
 pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error> {
 	let posts =
-		content::Content::find_posts(&gctx.db, page.range(super::post::ITEMS_PER_PAGE), false)?;
+		content::Content::find_posts(&gctx.db, page.range(super::post::ITEMS_PER_PAGE), false, false)?;
 	page.calc_total(
 		content::Content::count_post(&gctx.db, false)? as i32,
 		super::post::ITEMS_PER_PAGE,

@@ -21,7 +21,7 @@ pub fn list(
 	current_user: User,
 ) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_VIEW)?;
-	let posts = content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), true)?;
+	let posts = content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), true, true)?;
 	page.calc_total(
 		content::Content::count_post(&gctx.db, false)? as i32,
 		ITEMS_PER_PAGE,

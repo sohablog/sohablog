@@ -63,6 +63,7 @@ impl Content {
 		db: &crate::db::Database,
 		(min, max): (i32, i32),
 		with_hidden: bool,
+		sort_by_id: bool,
 	) -> Result<Vec<Self>> {
 		let mut query = content::table.into_boxed();
 
@@ -75,7 +76,11 @@ impl Content {
 			.filter(content::type_.eq(ContentType::Article))
 			.filter(content::status.eq_any(status));
 
-		query = query.order(content::time.desc());
+		query = if sort_by_id {
+			query.order(content::id.desc())
+		} else {
+			query.order(content::time.desc())
+		};
 		query = query.offset(min.into()).limit((max - min).into());
 		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
 	}
