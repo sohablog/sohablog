@@ -3,6 +3,6 @@
 
 @(ctx: &GlobalContext)
 
-@:base(ctx, "Admin Panel".to_string(), {}, {}, {
+@:base(ctx, "Admin Panel", {}, {}, {
 	<h1>@format!("Hello, {}!", &ctx.user.as_ref().unwrap().username)</h1>
 }, {})

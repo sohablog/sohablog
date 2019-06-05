@@ -1,0 +1,48 @@
+@use super::super::super::base;
+@use crate::models::content::Content;
+@use crate::models::category::Category;
+@use crate::models::tag::Tag;
+@use crate::render::*;
+@use rocket_codegen::*;
+
+@(ctx: &GlobalContext, title: &str, post: Option<Content>, categories: Vec<Category>)
+
+@:base(ctx, title, {}, {
+	<link href="https://unpkg.com/markdown-palettes@@latest/dist/markdown-palettes.css" rel="stylesheet" />
+}, {
+	<form action="@uri!(crate::routes::admin::post::edit_post)" method="POST">
+		@if let Some(p) = &post {<input type="hidden" name="id" value="@p.id" />}
+		<input type="text" placeholder="Title" name="title" @if let Some(p) = &post {@if let Some(t) = &p.title {value="@t" }}/>
+		<br />
+		<input type="text" placeholder="Slug" name="slug" @if let Some(p) = &post {@if let Some(t) = &p.slug {value="@t" }}/>
+		<br />
+		<div style="height: 600px;">
+			<div id="content-mp"></div>
+		</div>
+		<textarea style="display: none;" id="content" name="content">@if let Some(p) = &post {@p.content}</textarea>
+		<br />
+		<p><b>Category</b></p>
+		<p>
+			<input type="radio" name="category" value="" @if let Some(p) = &post {@if let None = p.category {checked }} else {checked }/>&nbsp;Uncategorized <br />@for cat in categories {
+			<input type="radio" name="category" value="@cat.id" @if let Some(p) = &post {@if let Some(cid) = p.category {@if cid == cat.id {checked }}}/>&nbsp;@cat.name <br />}
+		</p>
+		<br />
+		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time}" />
+		<br />
+		<input type="text" placeholder="Tags (split with comma)" name="tags" @if let Some(p) = &post {value="@(p.get_tags_name(&ctx.db).unwrap().join(", "))" }/>
+		<br />
+		<input type="submit" id="submit" />
+	</form>
+}, {
+	<script src="https://unpkg.com/markdown-palettes@@latest/dist/markdown-palettes.min.js"></script>
+	<script>
+		var mpContent=new MarkdownPalettes("#content-mp");
+		document.getElementById('submit').onclick=function ()@{
+			document.getElementById('content').value=mpContent.content;
+			return true;
+		@};
+		document.addEventListener('DOMContentLoaded',function ()@{
+			mpContent.content=document.getElementById('content').value;
+		@},false);
+	</script>
+})

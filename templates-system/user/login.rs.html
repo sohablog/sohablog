@@ -3,7 +3,7 @@
 
 @(ctx: &GlobalContext, message: Option<String>, username: Option<String>)
 
-@:base(ctx, "Login".to_string(), {}, {}, {
+@:base(ctx, "Login", {}, {}, {
 	<h1>Login</h1>
 	@if let Some(message) = message {
 		<div style="border: 1px solid red;">

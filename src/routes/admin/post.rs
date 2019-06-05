@@ -37,40 +37,39 @@ pub fn list(
 }
 
 #[get("/admin/post/_new")]
-pub fn new_get(
-	db: State<Database>,
-	global_var: render::GlobalVariable,
-	current_user: User,
-) -> Result<Template, Error> {
+pub fn new_get(gctx: GlobalContext, current_user: User) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
-	let categories = models::category::Category::find_all(&db)?;
+	let categories = models::category::Category::find_all(&gctx.db)?;
 
-	let mut ctx = tera::Context::new();
-	ctx.insert("categories", &categories);
-	Ok(render::render("admin/post/edit", global_var, Some(ctx))?)
+	Ok(render!(
+		templates::admin::post::edit,
+		&gctx,
+		"New Post",
+		None,
+		categories
+	))
 }
 #[get("/admin/post/<post_id>")]
 pub fn edit_get(
+	gctx: GlobalContext,
 	post_id: i32,
-	db: State<Database>,
-	global_var: render::GlobalVariable,
 	current_user: User,
-) -> Result<Template, Error> {
+) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
-	let post: Content = Content::find(&db, post_id)?;
-	let mut ctx = tera::Context::new();
+	let post: Content = Content::find(&gctx.db, post_id)?;
 	if post.status == content::ContentStatus::Deleted
 		|| post.r#type != content::ContentType::Article
 	{
 		return Err(Error::NotFound);
 	}
-	let categories = models::category::Category::find_all(&db)?;
-	let tags = post.get_tags(&db)?;
-	let tags = tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>();
-	ctx.insert("post", &post);
-	ctx.insert("categories", &categories);
-	ctx.insert("tags", &tags);
-	Ok(render::render("admin/post/edit", global_var, Some(ctx))?)
+	let categories = models::category::Category::find_all(&gctx.db)?;
+	Ok(render!(
+		templates::admin::post::edit,
+		&gctx,
+		format!("Edit {}", post.title.as_ref().unwrap_or(&String::from("Untitled"))).as_str(),
+		Some(post),
+		categories
+	))
 }
 #[derive(Default, FromForm, Debug)]
 pub struct PostForm {

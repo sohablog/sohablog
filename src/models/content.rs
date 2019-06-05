@@ -125,6 +125,13 @@ impl Content {
 		Ok(())
 	}
 
+	pub fn get_tags_name(&self, db: &crate::db::Database) -> Result<Vec<String>> {
+		let tags = AssocTagContent::find_by_content_id(db, self.id)?;
+		let tags = Tag::find_by_id(db, tags.iter().map(|t| t.id).collect::<Vec<i32>>())?;
+		let tags = tags.iter().map(|t| t.name.to_owned()).collect::<Vec<String>>();
+		Ok(tags)
+	}
+
 	pub fn get_category(&self, db: &crate::db::Database) -> Result<Option<Category>> {
 		if let Some(cid) = self.category {
 			match Category::find(db, cid) {
