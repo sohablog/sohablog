@@ -1,29 +1,33 @@
 use rocket_codegen::*;
 
 use super::{error::Error, Page};
-use crate::db::Database;
-use crate::models::content;
-use crate::render;
+use crate::{
+	db::Database,
+	models::content,
+	render::{self, GlobalContext, RenderResult},
+	theme::templates,
+};
 use rocket::State;
 use rocket_contrib::templates::Template;
 
 #[get("/?<page>")]
 pub fn index(
-	db: State<Database>,
+	gctx: GlobalContext,
 	mut page: Page,
-	global_var: render::GlobalVariable,
-) -> Result<Template, Error> {
-	let posts = content::Content::find_posts(&db, page.range(super::post::ITEMS_PER_PAGE), false)?;
+) -> Result<RenderResult, Error> {
+	let posts = content::Content::find_posts(&gctx.db, page.range(super::post::ITEMS_PER_PAGE), false)?;
 	page.calc_total(
-		content::Content::count_post(&db, false)? as i32,
+		content::Content::count_post(&gctx.db, false)? as i32,
 		super::post::ITEMS_PER_PAGE,
 	);
 	
-	let mut ctx = tera::Context::new();
-	ctx.insert("posts", &posts);
-	ctx.insert("pageTotal", &page.total);
-	ctx.insert("pageCurrent", &page.current);
-	Ok(render::theme_render("list", global_var, Some(ctx))?)
+	Ok(render!(
+		templates::post_list,
+		&gctx,
+		"Index",
+		page,
+		posts
+	))
 }
 
 #[get("/<path>")]

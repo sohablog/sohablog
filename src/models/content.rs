@@ -1,5 +1,6 @@
 use diesel::prelude::*;
 use serde_derive::*;
+use rocket_codegen::uri;
 
 use super::{
 	category::Category,
@@ -132,6 +133,15 @@ impl Content {
 		Ok(tags)
 	}
 
+	pub fn get_link(&self) -> String {
+		let path = if let Some(slug) = &self.slug {
+			slug.to_owned()
+		} else {
+			self.id.to_string()
+		};
+		uri!(crate::routes::post::post_show: path = format!("{}.html", path)).to_string()
+	}
+
 	pub fn get_category(&self, db: &crate::db::Database) -> Result<Option<Category>> {
 		if let Some(cid) = self.category {
 			match Category::find(db, cid) {
@@ -139,6 +149,14 @@ impl Content {
 				Err(Error::NotFound) => Ok(None),
 				Err(e) => Err(e),
 			}
+		} else {
+			Ok(None)
+		}
+	}
+
+	pub fn get_category_name(&self, db: &crate::db::Database) -> Result<Option<String>> {
+		if let Some(cat) = self.get_category(db)? {
+			Ok(Some(cat.name.to_owned()))
 		} else {
 			Ok(None)
 		}

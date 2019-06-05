@@ -24,7 +24,7 @@
 			<tr>
 				<td>@post.id</td>
 				<td><a href="@uri!(crate::routes::admin::post::edit_get: post_id = post.id)">@if let Some(t) = &post.title {@t} else {Untitled}</a></td>
-				<td>@if let Some(category) = &post.get_category(&ctx.db).unwrap() {@category.name} else {Uncategorized}</td>
+				<td>@if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized}</td>
 				<td>@post.time</td>
 			</tr>}
 		</tbody>

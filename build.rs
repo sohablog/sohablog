@@ -5,14 +5,24 @@ use std::{
 	path::PathBuf
 };
 
-fn main() -> Result<()> {
-	let system_template_dir = format!("{}/templates-system", env::var("CARGO_MANIFEST_DIR").unwrap());
-	let system_template_out = format!("{}/templates-system", env::var("OUT_DIR").unwrap());
-	fs::create_dir_all(&system_template_dir).unwrap();
-	fs::create_dir_all(&system_template_out).unwrap();
-	let system_template_dir = PathBuf::from(system_template_dir);
-	let system_template_out = PathBuf::from(system_template_out);
+fn compile_templates(src: String, out: String) -> Result<()> {
+	fs::create_dir_all(&src).unwrap();
+	fs::create_dir_all(&out).unwrap();
+	let src = PathBuf::from(src);
+	let out = PathBuf::from(out);
 
-	let mut ructe_compiler = Ructe::new(system_template_out)?;
-	ructe_compiler.compile_templates(&system_template_dir)
+	let mut ructe_compiler = Ructe::new(out)?;
+	ructe_compiler.compile_templates(&src)
+}
+
+fn main() -> Result<()> {
+	compile_templates(
+		format!("{}/templates-system", env::var("CARGO_MANIFEST_DIR").unwrap()),
+		format!("{}/templates-system", env::var("OUT_DIR").unwrap()),
+	)?;
+	compile_templates(
+		format!("{}/templates-theme", env::var("CARGO_MANIFEST_DIR").unwrap()),
+		format!("{}/templates-theme", env::var("OUT_DIR").unwrap()),
+	)?;
+	Ok(())
 }

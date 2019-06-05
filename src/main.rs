@@ -19,8 +19,6 @@ mod render;
 mod routes;
 mod schema;
 
-include!(concat!(env!("OUT_DIR"), "/templates-system/templates.rs"));
-
 fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
@@ -62,4 +60,12 @@ fn main() {
 		}
 		Err(e) => println!("Met an error while initializing database: {}", e),
 	};
+}
+
+// system templates
+include!(concat!(env!("OUT_DIR"), "/templates-system/templates.rs"));
+
+// user theme templates
+mod theme {
+	include!(concat!(env!("OUT_DIR"), "/templates-theme/templates.rs"));
 }
