@@ -7,6 +7,7 @@ use crate::{
 		user::{self, User},
 	},
 	render::{self, GlobalContext, RenderResult},
+	templates
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
@@ -16,23 +17,23 @@ pub const ITEMS_PER_PAGE: i32 = 25;
 
 #[get("/admin/post?<page>")]
 pub fn list(
-	db: State<Database>,
+	gctx: GlobalContext,
 	mut page: Page,
-	global_var: render::GlobalVariable,
 	current_user: User,
-) -> Result<Template, Error> {
+) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_VIEW)?;
-	let posts = content::Content::find_posts(&db, page.range(ITEMS_PER_PAGE), true)?;
+	let posts = content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), true)?;
 	page.calc_total(
-		content::Content::count_post(&db, false)? as i32,
+		content::Content::count_post(&gctx.db, false)? as i32,
 		ITEMS_PER_PAGE,
 	);
 
-	let mut ctx = tera::Context::new();
-	ctx.insert("posts", &posts);
-	ctx.insert("pageTotal", &page.total);
-	ctx.insert("pageCurrent", &page.current);
-	Ok(render::render("admin/post/list", global_var, Some(ctx))?)
+	Ok(render!(
+		templates::admin::post::list,
+		&gctx,
+		page,
+		posts
+	))
 }
 
 #[get("/admin/post/_new")]

@@ -1,0 +1,31 @@
+@use super::super::super::base;
+@use super::super::super::misc::paginator;
+@use crate::models::content::Content;
+@use crate::routes::Page;
+@use crate::render::*;
+@use rocket_codegen::*;
+
+@(ctx: &GlobalContext, page: Page, posts: Vec<Content>)
+
+@:base(ctx, "Post List".to_string(), {}, {}, {
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Category</th>
+				<th>Time</th>
+			</tr>
+		</thead>
+		<tbody>@for post in posts {
+			<tr>
+				<td>@post.id</td>
+				<td><a href="@uri!(crate::routes::admin::post::edit_get: post_id = post.id)">@if let Some(t) = &post.title {@t} else {Untitled}</a></td>
+				<td>@if let Some(category) = &post.get_category(&ctx.db).unwrap() {@category.name} else {Uncategorized}</td>
+				<td>@post.time</td>
+			</tr>}
+		</tbody>
+	</table>
+	<hr />
+	@:paginator(page)
+}, {})

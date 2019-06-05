@@ -124,6 +124,18 @@ impl Content {
 		AssocTagContent::update(db, self.id, Tag::find_by_name(db, tags)?)?;
 		Ok(())
 	}
+
+	pub fn get_category(&self, db: &crate::db::Database) -> Result<Option<Category>> {
+		if let Some(cid) = self.category {
+			match Category::find(db, cid) {
+				Ok(c) => Ok(Some(c)),
+				Err(Error::NotFound) => Ok(None),
+				Err(e) => Err(e),
+			}
+		} else {
+			Ok(None)
+		}
+	}
 }
 
 #[derive(Insertable, Debug)]
