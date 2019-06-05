@@ -89,8 +89,9 @@ const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
 	ext_description_lists: true,
 };
 /// Parses markdown to HTML
-pub fn markdown_to_html(s: &str) -> String {
-	comrak::markdown_to_html(s, &COMRAK_OPTIONS)
+pub fn markdown_to_html(out: &mut Write, s: &str) -> IoResult<()> {
+	let s = comrak::markdown_to_html(s, &COMRAK_OPTIONS);
+	write!(out, "{}", s)
 }
 
 #[deprecated]
@@ -134,6 +135,6 @@ pub fn tera_filter_markdown(
 	_: HashMap<String, tera::Value>,
 ) -> tera::Result<tera::Value> {
 	let s = try_get_value!("markdown", "value", String, value);
-	let html = markdown_to_html(s.as_str());
+	let html = comrak::markdown_to_html(s.as_str(), &COMRAK_OPTIONS);
 	Ok(to_value(html).unwrap())
 }

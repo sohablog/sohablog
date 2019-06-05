@@ -6,12 +6,11 @@ use crate::{
 		content::{self, Content},
 		user::{self, User},
 	},
-	render::{self, GlobalContext, RenderResult},
+	render::{GlobalContext, RenderResult},
 	templates
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
-use rocket_contrib::templates::Template;
 
 pub const ITEMS_PER_PAGE: i32 = 25;
 

@@ -1,24 +1,23 @@
 use rocket_codegen::*;
 
 use super::error::Error;
-use crate::db::Database;
-use crate::models::content;
-use crate::render;
-use rocket::State;
-use rocket_contrib::templates::Template;
+use crate::{
+	models::content,
+	render::{GlobalContext, RenderResult},
+	theme::templates,
+};
 
 pub const ITEMS_PER_PAGE: i32 = 15;
 
 #[get("/post/<path>")]
 pub fn post_show(
-	db: State<Database>,
-	global_var: render::GlobalVariable,
+	gctx: GlobalContext,
 	path: String,
-) -> Result<Template, Error> {
+) -> Result<RenderResult, Error> {
 	let slug = path.replace(".html", ""); // TODO: We just need to remove `.html` at the end
 	let post = match slug.parse::<i32>() {
-		Ok(post_id) => content::Content::find(&db, post_id)?,
-		Err(_) => content::Content::find_by_slug(&db, &slug)?,
+		Ok(post_id) => content::Content::find(&gctx.db, post_id)?,
+		Err(_) => content::Content::find_by_slug(&gctx.db, &slug)?,
 	};
 	if post.status == content::ContentStatus::Deleted
 		|| post.r#type != content::ContentType::Article
@@ -27,17 +26,10 @@ pub fn post_show(
 	}
 	// TODO: Password check when `view_password` exists
 
-	let prev_post = content::Content::find_neighbor_post(&db, &post, true, 1)?;
-	let next_post = content::Content::find_neighbor_post(&db, &post, false, 1)?;
-	let tags = post.get_tags(&db)?;
-	let tags = tags.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>();
-
-	let poster = post.get_user(&db)?;
-	let mut ctx = tera::Context::new();
-	ctx.insert("post", &post);
-	ctx.insert("post_next", &next_post);
-	ctx.insert("post_prev", &prev_post);
-	ctx.insert("poster", &poster);
-	ctx.insert("tags", &tags);
-	Ok(render::theme_render("post", global_var, Some(ctx))?)
+	Ok(render!(
+		templates::post_show,
+		&gctx,
+		format!("{}", post.title.as_ref().unwrap_or(&String::from("Untitled"))).as_str(),
+		post
+	))
 }
