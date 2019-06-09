@@ -13,6 +13,7 @@ pub enum Error {
 	NotFound,
 	NoPermission,
 	BadRequest(&'static str),
+	UploadError(std::io::Error)
 }
 
 impl From<models::Error> for Error {

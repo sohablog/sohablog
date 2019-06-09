@@ -36,6 +36,8 @@ fn main() {
 					"/",
 					routes![
 						router::root::index,
+						router::post::post_show,
+						router::root::page_show,
 						router::user::login_get,
 						router::user::login_post,
 						router::admin::root::generate_password_hash,
@@ -46,8 +48,7 @@ fn main() {
 						router::admin::post::edit_post,
 						router::admin::category::list,
 						router::admin::category::update,
-						router::post::post_show,
-						router::root::page_show
+						router::admin::file::upload_file
 					],
 				)
 				.manage(db)
