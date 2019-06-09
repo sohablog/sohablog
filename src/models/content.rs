@@ -45,6 +45,7 @@ impl Content {
 	find_one_by!(content, find_by_slug, slug as &str);
 	update!();
 
+	// -- general methods --
 	pub fn count_post(db: &Database, status: &Vec<ContentStatus>) -> Result<i64> {
 		content::table
 			.filter(content::type_.eq(ContentType::Article))
@@ -73,39 +74,6 @@ impl Content {
 		};
 		query = query.offset(min.into()).limit((max - min).into());
 		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
-	}
-
-	/// is_prev: true-> prev_post, false-> next_post
-	pub fn find_neighbor_post(
-		&self,
-		db: &Database,
-		prev: bool,
-		limit: i64,
-	) -> Result<Option<Self>> {
-		let mut query = content::table.into_boxed();
-
-		query = query
-			.filter(content::type_.eq(ContentType::Article))
-			.filter(content::status.eq(ContentStatus::Normal));
-		query = if prev {
-			query
-				.filter(content::id.ne(self.id))
-				.filter(content::time.le(&self.time))
-				.order((content::time.desc(), content::id.desc()))
-		} else {
-			query
-				.filter(content::id.ne(self.id))
-				.filter(content::time.ge(&self.time))
-				.order((content::time.asc(), content::id.asc()))
-		};
-
-		query = query.limit(limit);
-
-		match query.get_result::<Self>(&*db.pool().get()?) {
-			Ok(v) => Ok(Some(v)),
-			Err(diesel::result::Error::NotFound) => Ok(None),
-			Err(e) => Err(Error::from(e)),
-		}
 	}
 
 	pub fn get_tags(&self, db: &Database) -> Result<Vec<Tag>> {
@@ -163,7 +131,41 @@ impl Content {
 	pub fn user_has_access(&self, user: Option<&User>) -> bool {
 		match user {
 			Some(_) => self.status.is_visible_to_logged_in(),
-			None => self.status.is_visible_to_public()
+			None => self.status.is_visible_to_public(),
+		}
+	}
+
+	// -- methods for posts --
+	/// is_prev: true-> prev_post, false-> next_post
+	pub fn find_neighbor_post(
+		&self,
+		db: &Database,
+		prev: bool,
+		limit: i64,
+	) -> Result<Option<Self>> {
+		let mut query = content::table.into_boxed();
+
+		query = query
+			.filter(content::type_.eq(ContentType::Article))
+			.filter(content::status.eq(ContentStatus::Normal));
+		query = if prev {
+			query
+				.filter(content::id.ne(self.id))
+				.filter(content::time.le(&self.time))
+				.order((content::time.desc(), content::id.desc()))
+		} else {
+			query
+				.filter(content::id.ne(self.id))
+				.filter(content::time.ge(&self.time))
+				.order((content::time.asc(), content::id.asc()))
+		};
+
+		query = query.limit(limit);
+
+		match query.get_result::<Self>(&*db.pool().get()?) {
+			Ok(v) => Ok(Some(v)),
+			Err(diesel::result::Error::NotFound) => Ok(None),
+			Err(e) => Err(Error::from(e)),
 		}
 	}
 }
@@ -203,16 +205,21 @@ use diesel::{
 #[sql_type = "Integer"]
 #[serde(rename_all = "lowercase")]
 pub enum ContentStatus {
-	Normal = 0, // Shows in list, visible to public
-	Deleted = 1, // deleted
-	Hidden = 2, // Not shown in list, visible to public
-	Unpublished = 3, // only shows in admin panel, not visible everywhere
+	Normal = 0,         // Shows in list, visible to public
+	Deleted = 1,        // deleted
+	Hidden = 2,         // Not shown in list, visible to public
+	Unpublished = 3,    // only shows in admin panel, not visible everywhere
 	WithAccessOnly = 4, // [not implemented] shows in list and visible only if logged in.
 }
 impl ContentStatus {
 	pub const PUBLIC_LIST: [Self; 1] = [Self::Normal];
 	pub const LOGGED_IN_LIST: [Self; 2] = [Self::Normal, Self::WithAccessOnly];
-	pub const ADMIN_LIST: [Self; 4] = [Self::Normal, Self::Hidden, Self::Unpublished, Self::WithAccessOnly];
+	pub const ADMIN_LIST: [Self; 4] = [
+		Self::Normal,
+		Self::Hidden,
+		Self::Unpublished,
+		Self::WithAccessOnly,
+	];
 	pub const PUBLIC_VISIBLE: [Self; 2] = [Self::Normal, Self::Hidden];
 	pub const LOGGED_IN_VISIBLE: [Self; 3] = [Self::Normal, Self::Hidden, Self::WithAccessOnly];
 
@@ -241,7 +248,7 @@ impl FromSql<Integer, Mysql> for ContentStatus {
 		let i = <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)?;
 		match Self::try_from(i) {
 			Ok(s) => Ok(s),
-			Err(_) => Err(format!("Failed convert `{}` to ContentStatus", i).into())
+			Err(_) => Err(format!("Failed convert `{}` to ContentStatus", i).into()),
 		}
 	}
 }

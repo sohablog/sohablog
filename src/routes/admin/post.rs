@@ -22,7 +22,8 @@ pub fn list(
 ) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_VIEW)?;
 	let content_status = content::ContentStatus::ADMIN_LIST.to_vec();
-	let posts = content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), &content_status, true)?;
+	let posts =
+		content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), &content_status, true)?;
 	page.calc_total(
 		content::Content::count_post(&gctx.db, &content_status)? as i32,
 		ITEMS_PER_PAGE,
@@ -127,14 +128,12 @@ pub fn edit_post(
 			post.title = title;
 			post.slug = slug;
 			post.status = content::ContentStatus::try_from(form.status)?;
-
 			if form.save_draft {
 				post.draft_content = Some(form.content.to_owned());
 			} else {
 				post.content = form.content.to_owned();
 				post.draft_content = None;
 			}
-			
 			post.time =
 				chrono::NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?;
 			post.category = category;
@@ -157,7 +156,11 @@ pub fn edit_post(
 				} else {
 					ctxt.to_owned()
 				},
-				draft_content: if form.save_draft { Some(ctxt.to_owned()) } else { None },
+				draft_content: if form.save_draft {
+					Some(ctxt.to_owned())
+				} else {
+					None
+				},
 				order_level: 0,
 				r#type: content::ContentType::Article,
 				status: if form.save_draft {
