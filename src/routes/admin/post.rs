@@ -21,7 +21,7 @@ pub fn list(
 	current_user: User,
 ) -> Result<RenderResult, Error> {
 	current_user.check_permission(user::PERM_POST_VIEW)?;
-	let posts = content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), true, true)?;
+	let posts = content::Content::find_posts(&gctx.db, page.range(ITEMS_PER_PAGE), content::ContentStatus::ADMIN_LIST.to_vec(), true)?;
 	page.calc_total(
 		content::Content::count_post(&gctx.db, false)? as i32,
 		ITEMS_PER_PAGE,
@@ -78,7 +78,8 @@ pub struct PostForm {
 	pub time: String,
 	pub category: Option<i32>,
 	pub tags: Option<String>,
-	pub get_published: bool,
+	pub status: i32,
+	pub save_draft: bool,
 }
 #[post("/admin/post/_edit", data = "<form>")]
 pub fn edit_post(
@@ -124,7 +125,15 @@ pub fn edit_post(
 			}
 			post.title = title;
 			post.slug = slug;
-			post.content = form.content.to_owned();
+			post.status = content::ContentStatus::try_from(form.status)?;
+
+			if form.save_draft {
+				post.draft_content = Some(form.content.to_owned());
+			} else {
+				post.content = form.content.to_owned();
+				post.draft_content = None;
+			}
+			
 			post.time =
 				chrono::NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?;
 			post.category = category;
@@ -132,6 +141,7 @@ pub fn edit_post(
 			post
 		}
 		None => {
+			let ctxt = &form.content;
 			// TODO: set view_password
 			let content = content::NewContent {
 				user: current_user.id,
@@ -141,11 +151,19 @@ pub fn edit_post(
 				)?,
 				title: title,
 				slug: slug,
-				content: form.content.to_owned(),
-				draft_content: Some(form.content.to_owned()),
+				content: if form.save_draft {
+					String::from("This is an draft.")
+				} else {
+					ctxt.to_owned()
+				},
+				draft_content: if form.save_draft { Some(ctxt.to_owned()) } else { None },
 				order_level: 0,
 				r#type: content::ContentType::Article,
-				status: content::ContentStatus::Normal,
+				status: if form.save_draft {
+					content::ContentStatus::Unpublished
+				} else {
+					content::ContentStatus::try_from(form.status)?
+				},
 				allow_comment: true,
 				allow_feed: true,
 				parent: None,

@@ -12,7 +12,7 @@ pub const ITEMS_PER_PAGE: i32 = 15;
 #[get("/post/<path>")]
 pub fn post_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Error> {
 	let slug = path.replace(".html", ""); // TODO: We just need to remove `.html` at the end
-	let post = match slug.parse::<i32>() {
+	let post: content::Content = match slug.parse::<i32>() {
 		Ok(post_id) => content::Content::find(&gctx.db, post_id)?,
 		Err(_) => content::Content::find_by_slug(&gctx.db, &slug)?,
 	};
@@ -20,6 +20,9 @@ pub fn post_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Erro
 		|| post.r#type != content::ContentType::Article
 	{
 		return Err(Error::NotFound);
+	}
+	if !post.user_has_access(gctx.user.as_ref()) {
+		return Err(Error::NoPermission);
 	}
 	// TODO: Password check when `view_password` exists
 

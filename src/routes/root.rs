@@ -12,7 +12,7 @@ pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error>
 	let posts = content::Content::find_posts(
 		&gctx.db,
 		page.range(super::post::ITEMS_PER_PAGE),
-		false,
+		content::ContentStatus::PUBLIC_LIST.to_vec(),
 		false,
 	)?;
 	page.calc_total(
@@ -31,6 +31,9 @@ pub fn page_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Erro
 		|| post.r#type != content::ContentType::SinglePage
 	{
 		return Err(Error::NotFound);
+	}
+	if !post.user_has_access(gctx.user.as_ref()) {
+		return Err(Error::NoPermission);
 	}
 	// TODO: Password check when `view_password` exists
 

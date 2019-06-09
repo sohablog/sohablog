@@ -8,7 +8,7 @@ use super::{
 	user::User,
 	Error, Result,
 };
-use crate::{db::Database, schema::*};
+use crate::{db::Database, schema::*, templates::ToHtml};
 
 #[derive(Debug, Queryable, Associations, Clone, Serialize, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]
@@ -62,15 +62,10 @@ impl Content {
 	pub fn find_posts(
 		db: &Database,
 		(min, max): (i32, i32),
-		with_hidden: bool,
+		status: Vec<ContentStatus>,
 		sort_by_id: bool,
 	) -> Result<Vec<Self>> {
 		let mut query = content::table.into_boxed();
-
-		let mut status = vec![ContentStatus::Normal];
-		if let true = with_hidden {
-			status.push(ContentStatus::Hidden);
-		}
 
 		query = query
 			.filter(content::type_.eq(ContentType::Article))
@@ -169,6 +164,13 @@ impl Content {
 	pub fn get_user(&self, db: &Database) -> Result<User> {
 		User::find(db, self.user)
 	}
+
+	pub fn user_has_access(&self, user: Option<&User>) -> bool {
+		match user {
+			Some(user) => self.status.is_visible_to_logged_in(),
+			None => self.status.is_visible_to_public()
+		}
+	}
 }
 
 #[derive(Insertable, Debug)]
@@ -213,19 +215,37 @@ pub enum ContentStatus {
 	WithAccessOnly = 4, // [not implemented] shows in list and visible only if logged in.
 }
 impl ContentStatus {
-	const PUBLIC_VISIBLE: [Self; 2] = [Self::Normal, Self::Hidden];
+	pub const PUBLIC_LIST: [Self; 1] = [Self::Normal];
+	pub const LOGGED_IN_LIST: [Self; 2] = [Self::Normal, Self::WithAccessOnly];
+	pub const ADMIN_LIST: [Self; 4] = [Self::Normal, Self::Hidden, Self::Unpublished, Self::WithAccessOnly];
+	pub const PUBLIC_VISIBLE: [Self; 2] = [Self::Normal, Self::Hidden];
+	pub const LOGGED_IN_VISIBLE: [Self; 3] = [Self::Normal, Self::Hidden, Self::WithAccessOnly];
+
 	pub fn is_visible_to_public(&self) -> bool {
 		Self::PUBLIC_VISIBLE.contains(self)
 	}
-}
-impl FromSql<Integer, Mysql> for ContentStatus {
-	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		match <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)? {
+
+	pub fn is_visible_to_logged_in(&self) -> bool {
+		Self::LOGGED_IN_VISIBLE.contains(self)
+	}
+
+	// not impl std::convert::TryFrom　for some reasons
+	pub fn try_from(n: i32) -> Result<Self> {
+		match n {
 			0 => Ok(ContentStatus::Normal),
 			1 => Ok(ContentStatus::Deleted),
 			2 => Ok(ContentStatus::Hidden),
 			3 => Ok(ContentStatus::Unpublished),
-			n => Err(format!("Unknown ContentStatus: {}", n).into()),
+			n => Err(Error::NoEnumNumber("ContentStatus".to_string(), n)),
+		}
+	}
+}
+impl FromSql<Integer, Mysql> for ContentStatus {
+	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
+		let i = <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)?;
+		match Self::try_from(i) {
+			Ok(s) => Ok(s),
+			Err(_) => Err(format!("Failed convert `{}` to ContentStatus", i).into())
 		}
 	}
 }
@@ -235,6 +255,11 @@ impl ToSql<Integer, Mysql> for ContentStatus {
 		out: &mut serialize::Output<W, Mysql>,
 	) -> serialize::Result {
 		ToSql::<Integer, Mysql>::to_sql(&(*self as i32), out)
+	}
+}
+impl ToHtml for ContentStatus {
+	fn to_html(&self, out: &mut std::io::Write) -> std::io::Result<()> {
+		write!(out, "{}", *self as i32)
 	}
 }
 

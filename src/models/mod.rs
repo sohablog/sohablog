@@ -10,6 +10,7 @@ pub enum Error {
 	NotFound,
 	UserHasNoPermission,
 	OptionNone,
+	NoEnumNumber(String, i32),
 }
 impl From<bcrypt::BcryptError> for Error {
 	fn from(e: bcrypt::BcryptError) -> Self {
@@ -27,7 +28,7 @@ impl From<r2d2::Error> for Error {
 	}
 }
 impl From<std::option::NoneError> for Error {
-	fn from(_: std::option::NoneError) -> Error {
+	fn from(_: std::option::NoneError) -> Self {
 		Error::OptionNone
 	}
 }

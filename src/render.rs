@@ -35,7 +35,7 @@ macro_rules! render {
 	}}
 }
 
-trait ToHtml {
+pub trait ToHtml {
 	fn to_html(&self, out: &mut Write) -> IoResult<()>;
 }
 impl ToHtml for Origin<'_> {
