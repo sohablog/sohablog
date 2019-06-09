@@ -45,12 +45,7 @@ impl Content {
 	find_one_by!(content, find_by_slug, slug as &str);
 	update!();
 
-	pub fn count_post(db: &Database, with_hidden: bool) -> Result<i64> {
-		let mut status = vec![ContentStatus::Normal];
-		if let true = with_hidden {
-			status.push(ContentStatus::Hidden);
-		}
-
+	pub fn count_post(db: &Database, status: &Vec<ContentStatus>) -> Result<i64> {
 		content::table
 			.filter(content::type_.eq(ContentType::Article))
 			.filter(content::status.eq_any(status))
@@ -62,7 +57,7 @@ impl Content {
 	pub fn find_posts(
 		db: &Database,
 		(min, max): (i32, i32),
-		status: Vec<ContentStatus>,
+		status: &Vec<ContentStatus>,
 		sort_by_id: bool,
 	) -> Result<Vec<Self>> {
 		let mut query = content::table.into_boxed();

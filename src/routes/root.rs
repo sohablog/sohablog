@@ -9,18 +9,19 @@ use crate::{
 
 #[get("/?<page>")]
 pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error> {
+	let post_status = if let None = gctx.user {
+		content::ContentStatus::PUBLIC_LIST.to_vec()
+	} else {
+		content::ContentStatus::LOGGED_IN_LIST.to_vec()
+	};
 	let posts = content::Content::find_posts(
 		&gctx.db,
 		page.range(super::post::ITEMS_PER_PAGE),
-		if let None = gctx.user {
-			content::ContentStatus::PUBLIC_LIST.to_vec()
-		} else {
-			content::ContentStatus::LOGGED_IN_LIST.to_vec()
-		},
+		&post_status,
 		false,
 	)?;
 	page.calc_total(
-		content::Content::count_post(&gctx.db, false)? as i32,
+		content::Content::count_post(&gctx.db, &post_status)? as i32,
 		super::post::ITEMS_PER_PAGE,
 	);
 
