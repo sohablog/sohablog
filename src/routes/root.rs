@@ -12,7 +12,11 @@ pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error>
 	let posts = content::Content::find_posts(
 		&gctx.db,
 		page.range(super::post::ITEMS_PER_PAGE),
-		content::ContentStatus::PUBLIC_LIST.to_vec(),
+		if let None = gctx.user {
+			content::ContentStatus::PUBLIC_LIST.to_vec()
+		} else {
+			content::ContentStatus::LOGGED_IN_LIST.to_vec()
+		},
 		false,
 	)?;
 	page.calc_total(

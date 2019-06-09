@@ -36,7 +36,7 @@
 			<option value="@ContentStatus::Unpublished"@if let Some(p) = &post {@if p.status == ContentStatus::Unpublished { selected}}>Unpublished</option>
 			<option value="@ContentStatus::Normal"@if let Some(p) = &post {@if p.status == ContentStatus::Normal { selected}} else { selected}>Normal</option>
 			<option value="@ContentStatus::Hidden"@if let Some(p) = &post {@if p.status == ContentStatus::Hidden { selected}}>Hidden</option>
-			<!-- <option value="4">With Access Only</option> -->
+			<option value="@ContentStatus::WithAccessOnly"@if let Some(p) = &post {@if p.status == ContentStatus::WithAccessOnly { selected}}>Only with Access</option>
 		</select>
 		<br />
 		<input type="hidden" id="save_draft" name="save_draft" value="true" />

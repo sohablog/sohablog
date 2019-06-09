@@ -167,7 +167,7 @@ impl Content {
 
 	pub fn user_has_access(&self, user: Option<&User>) -> bool {
 		match user {
-			Some(user) => self.status.is_visible_to_logged_in(),
+			Some(_) => self.status.is_visible_to_logged_in(),
 			None => self.status.is_visible_to_public()
 		}
 	}
@@ -236,6 +236,7 @@ impl ContentStatus {
 			1 => Ok(ContentStatus::Deleted),
 			2 => Ok(ContentStatus::Hidden),
 			3 => Ok(ContentStatus::Unpublished),
+			4 => Ok(ContentStatus::WithAccessOnly),
 			n => Err(Error::NoEnumNumber("ContentStatus".to_string(), n)),
 		}
 	}
