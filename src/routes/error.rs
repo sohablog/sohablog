@@ -13,26 +13,31 @@ pub enum Error {
 	NotFound,
 	NoPermission,
 	BadRequest(&'static str),
-	UploadError(std::io::Error)
+	UploadError(std::io::Error),
+	OptionNone
 }
-
+impl From<std::option::NoneError> for Error {
+	fn from(_: std::option::NoneError) -> Self {
+		Self::OptionNone
+	}
+}
 impl From<models::Error> for Error {
-	fn from(err: models::Error) -> Error {
+	fn from(err: models::Error) -> Self {
 		match err {
-			models::Error::NotFound => Error::NotFound,
-			models::Error::UserHasNoPermission => Error::NoPermission,
-			_ => Error::Model(err),
+			models::Error::NotFound => Self::NotFound,
+			models::Error::UserHasNoPermission => Self::NoPermission,
+			_ => Self::Model(err),
 		}
 	}
 }
 impl From<render::Error> for Error {
-	fn from(err: render::Error) -> Error {
-		Error::Render(err)
+	fn from(err: render::Error) -> Self {
+		Self::Render(err)
 	}
 }
 impl From<chrono::ParseError> for Error {
-	fn from(err: chrono::ParseError) -> Error {
-		Error::ChronoParse(err)
+	fn from(err: chrono::ParseError) -> Self {
+		Self::ChronoParse(err)
 	}
 }
 
@@ -40,9 +45,9 @@ impl<'a> Responder<'a> for Error {
 	fn respond_to(self, _req: &Request) -> response::Result<'a> {
 		println!("{:?}", &self);
 		match self {
-			Error::NotFound => Err(rocket::http::Status::NotFound),
-			Error::NoPermission => Err(rocket::http::Status::Forbidden),
-			Error::BadRequest(reason) => Err(rocket::http::Status::new(400, reason)),
+			Self::NotFound => Err(rocket::http::Status::NotFound),
+			Self::NoPermission => Err(rocket::http::Status::Forbidden),
+			Self::BadRequest(reason) => Err(rocket::http::Status::new(400, reason)),
 			_ => Err(Status::InternalServerError),
 		}
 	}

@@ -16,10 +16,10 @@ use multipart::server::{
 	Multipart,
 	save::{
 		SaveResult,
-		SavedData,
-		Entries
+		SavedData
 	}
 };
+use std::fs;
 use uuid::Uuid;
 
 #[post("/admin/file/upload", data = "<data>")]
@@ -44,10 +44,18 @@ pub fn upload_file(data: Data, content_type: &ContentType, db: State<Database>, 
 							Some(e.to_lowercase())
 						})
 				}).unwrap_or_default();
-			let save_path = format!("static/upload/{}.{}", Uuid::new_v4(), extension);
-			Ok(Status::NoContent)
+			let save_path = format!("usr/upload/{}.{}", Uuid::new_v4(), extension);
+			match entries.fields.get("file")?[0].data {
+				SavedData::Bytes(ref b) => { fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?; },
+				SavedData::File(ref path, _) => { fs::copy(path, &save_path).map_err(|e| Error::UploadError(e))?; },
+				_ => return Err(Error::BadRequest("SavedData is not accepted"))
+			}
+
+			// save some informations into db
+
+			Ok(Status::NoContent) // 204 No Content
 		},
-		SaveResult::Partial(_, _) => Ok(Status::Accepted),
+		SaveResult::Partial(_, _) => Ok(Status::Accepted), // 202 Accepted
 		SaveResult::Error(e) => Err(Error::UploadError(e))
 	}
 }
