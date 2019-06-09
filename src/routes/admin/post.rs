@@ -78,6 +78,7 @@ pub struct PostForm {
 	pub time: String,
 	pub category: Option<i32>,
 	pub tags: Option<String>,
+	pub get_published: bool,
 }
 #[post("/admin/post/_edit", data = "<form>")]
 pub fn edit_post(
@@ -141,6 +142,7 @@ pub fn edit_post(
 				title: title,
 				slug: slug,
 				content: form.content.to_owned(),
+				draft_content: Some(form.content.to_owned()),
 				order_level: 0,
 				r#type: content::ContentType::Article,
 				status: content::ContentStatus::Normal,

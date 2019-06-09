@@ -29,6 +29,7 @@ table! {
         slug -> Nullable<Varchar>,
 		#[sql_name = "content"]
         content_ -> Longtext,
+		draft_content -> Nullable<Longtext>,
         order_level -> Integer,
         #[sql_name = "type"]
         type_ -> Integer,

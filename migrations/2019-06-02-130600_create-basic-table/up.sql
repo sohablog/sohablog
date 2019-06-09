@@ -50,6 +50,7 @@ CREATE TABLE `content` (
   `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `title` varchar(233) DEFAULT NULL,
   `content` longtext NOT NULL,
+  `draft_content` longtext DEFAULT NULL,
   `order_level` int(11) NOT NULL DEFAULT '0',
   `type` int(11) NOT NULL,
   `status` int(11) NOT NULL DEFAULT '0',
