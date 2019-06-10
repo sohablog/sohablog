@@ -46,7 +46,9 @@ table! {
     file (id) {
         id -> Integer,
         key -> Varchar,
+        user -> Integer,
         content -> Nullable<Integer>,
+        time -> Datetime,
     }
 }
 
@@ -80,6 +82,7 @@ joinable!(assoc_tag_content -> tag (tag));
 joinable!(content -> category (category));
 joinable!(content -> user (user));
 joinable!(file -> content (content));
+joinable!(file -> user (user));
 
 allow_tables_to_appear_in_same_query!(
     assoc_tag_content,

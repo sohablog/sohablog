@@ -150,8 +150,24 @@ macro_rules! find_one_by {
 		}
 	};
 }
+/**
+ * Find by ...
+ *
+ * impl File{
+ *     find_by!(file,find_by_content_id,content as i32);
+ * }
+ * File::find_by_content_id(db,1);
+ */
+macro_rules! find_by {
+	($table:ident, $fn:ident, $($col:ident as $type:ty),+)=>{
+		pub fn $fn(db: &crate::db::Database,$($col: $type),+)->Result<Vec<Self>>{
+			$table::table$(.filter($table::$col.eq($col)))+.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+		}
+	};
+}
 
 pub mod category;
 pub mod content;
 pub mod tag;
 pub mod user;
+pub mod file;
