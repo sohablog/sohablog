@@ -44,6 +44,16 @@
 		<input type="submit" id="submit_draft" value="Draft" />
 		<input type="submit" id="submit" value="Save" />
 	</form>
+	<hr />
+	<h3>Attachments</h3>
+	@if let Some(p) = &post {<form id="attachment-upload" action="@uri!(crate::routes::admin::file::upload)" method="POST">
+		<input type="file" name="file" />
+		<input type="hidden" name="related_content_id" value="@p.id" />
+		<input type="submit" value="Upload" />
+	</form>
+	<div id="attachments-container" data-url="@uri!(crate::routes::admin::file::find_by_content: content_id=p.id)" data-upload-route="@(ctx.system_config.upload_route)">
+		<div id="list">Fetching...</div>
+	</div>} else {<p><i>You should draft or post first in order to upload attachments.</i></p>}
 }, {
 	<script src="/static/system/@statics::jquery_3_4_1_min_js.name"></script>
 	<script src="/static/system/@statics::markdown_palettes_0_4_11_min_js.name"></script>

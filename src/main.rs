@@ -21,6 +21,7 @@ mod schema;
 
 pub struct SystemConfig {
 	pub upload_dir: String,
+	pub upload_route: String,
 }
 
 fn main() {
@@ -35,6 +36,7 @@ fn main() {
 	let mut db = Database::new(&db_url);
 	let system_config = SystemConfig {
 		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/")),
+		upload_route: env::var("SOHABLOG_UPLOAD_ROUTE").unwrap_or(String::from("/static/upload")),
 	};
 	std::fs::create_dir_all(system_config.upload_dir.as_str()).unwrap();
 
@@ -57,11 +59,12 @@ fn main() {
 						router::admin::post::edit_post,
 						router::admin::category::list,
 						router::admin::category::update,
-						router::admin::file::upload_file
+						router::admin::file::upload,
+						router::admin::file::find_by_content
 					],
 				)
 				.mount(
-					"/static/upload",
+					system_config.upload_route.as_str(),
 					StaticFiles::from(system_config.upload_dir.as_str()),
 				)
 				.mount(

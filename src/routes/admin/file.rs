@@ -1,7 +1,7 @@
 use super::super::error::Error;
 use crate::{
 	db::Database,
-	models::{file::File, user::User},
+	models::{file::File, user::User, content::{self, Content}},
 	SystemConfig,
 };
 use multipart::server::{
@@ -18,8 +18,20 @@ use rocket_contrib::json::Json;
 use std::fs;
 use uuid::Uuid;
 
+#[get("/admin/file/by-content/<content_id>")]
+pub fn find_by_content(content_id: i32, db: State<Database>, _user: User) -> Result<Json<Vec<File>>, Error> {
+	let content: Content = Content::find(&db, content_id)?;
+	if content.status == content::ContentStatus::Deleted
+		|| content.r#type != content::ContentType::Article
+	{
+		return Err(Error::NotFound);
+	}
+	let list = File::find_by_content_id(&db, content_id)?;
+	Ok(Json(list))
+}
+
 #[post("/admin/file/upload", data = "<data>")]
-pub fn upload_file(
+pub fn upload(
 	data: Data,
 	content_type: &ContentType,
 	system_config: State<SystemConfig>,
@@ -36,7 +48,7 @@ pub fn upload_file(
 
 	match Multipart::with_body(data.open(), boundary).save().temp() {
 		SaveResult::Full(entries) => {
-			let content_id = entries.fields.get("content").and_then(|o| {
+			let content_id = entries.fields.get("related_content_id").and_then(|o| {
 				if let SavedData::Text(s) = &o[0].data {
 					s.parse::<i32>().ok()
 				} else {

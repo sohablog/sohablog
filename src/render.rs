@@ -1,4 +1,4 @@
-use crate::{db::Database, models::user};
+use crate::{db::Database, models::user, SystemConfig};
 use comrak::{self, ComrakOptions};
 use rocket::{
 	http::uri::Origin,
@@ -48,6 +48,7 @@ impl ToHtml for Origin<'_> {
 pub struct GlobalContext<'a> {
 	pub db: State<'a, Database>,
 	pub user: Option<user::User>,
+	pub system_config: State<'a, SystemConfig>,
 }
 impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	type Error = ();
@@ -55,6 +56,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 		Outcome::Success(Self {
 			db: request.guard::<State<Database>>()?,
 			user: request.guard::<Option<user::User>>().unwrap(),
+			system_config: request.guard::<State<SystemConfig>>()?
 		})
 	}
 }
