@@ -41,7 +41,7 @@ var fetchAllAttachments = function () {
 				var e=$('<div><h4></h4><p><button id="delete-file">Delete</button>&nbsp;<small></small></p><p><code></code></p><hr /></div>');
 				$('h4', e).text(v.filename);
 				$('#delete-file', e).on('click', function () {
-					if(prompt("Are you sure to delete `"+v.filename+"`?")){
+					if(confirm("Are you sure to delete `"+v.filename+"`?")){
 						deleteFile(v.id);
 					}
 				});
