@@ -20,6 +20,7 @@ pub fn upload_file(
 	content_type: &ContentType,
 	system_config: State<SystemConfig>,
 	db: State<Database>,
+	current_user: User,
 ) -> Result<Json<File>, Error> {
 	if !content_type.is_form_data() {
 		return Err(Error::BadRequest("Wrong `Content-Type`"));
@@ -31,6 +32,13 @@ pub fn upload_file(
 
 	match Multipart::with_body(data.open(), boundary).save().temp() {
 		SaveResult::Full(entries) => {
+			let content_id = entries.fields.get("content")
+				.and_then(|o| if let SavedData::Text(s) = &o[0].data {
+					s.parse::<i32>().ok()
+				} else {
+					None
+				});
+				
 			let filename = entries
 				.fields
 				.get("file")
@@ -70,7 +78,7 @@ pub fn upload_file(
 				}
 			}
 
-			let file = File::create(&db, file_key, original_filename, 1, None)?;
+			let file = File::create(&db, file_key, original_filename, current_user.id, content_id)?;
 
 			Ok(Json(file))
 		}
