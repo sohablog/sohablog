@@ -26,7 +26,7 @@ fn main() {
 	use std::env;
 
 	dotenv::dotenv().ok();
-	let db_url = env::var("DATABASE_URL").unwrap();
+	let db_url = env::var("SOHABLOG_DATABASE_URL").unwrap();
 	let mut db = Database::new(&db_url);
 
 	match db.init() {
