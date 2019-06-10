@@ -1,63 +1,78 @@
 use super::super::error::Error;
-use crate::{
-	models::user::User,
-	db::Database,
-	SystemConfig
+use crate::{db::Database, models::user::User, SystemConfig};
+use multipart::server::{
+	save::{SaveResult, SavedData},
+	Multipart,
+};
+use rocket::{
+	http::{ContentType, Status},
+	request::State,
+	Data,
 };
 use rocket_codegen::*;
-use rocket::{
-	http::{
-		Status,
-		ContentType
-	},
-	request::State,
-	Data
-};
-use multipart::server::{
-	Multipart,
-	save::{
-		SaveResult,
-		SavedData
-	}
-};
 use std::fs;
 use uuid::Uuid;
 
 #[post("/admin/file/upload", data = "<data>")]
-pub fn upload_file(data: Data, content_type: &ContentType, system_config: State<SystemConfig>, db: State<Database>) -> Result<Status, Error> {
+pub fn upload_file(
+	data: Data,
+	content_type: &ContentType,
+	system_config: State<SystemConfig>,
+	db: State<Database>,
+) -> Result<Status, Error> {
 	if !content_type.is_form_data() {
 		return Err(Error::BadRequest("Wrong `Content-Type`"));
 	}
-	let (_, boundary) = content_type.params().find(|&(k, _)| k == "boundary").ok_or_else(|| Error::BadRequest("No `boundary`"))?;
+	let (_, boundary) = content_type
+		.params()
+		.find(|&(k, _)| k == "boundary")
+		.ok_or_else(|| Error::BadRequest("No `boundary`"))?;
 
 	match Multipart::with_body(data.open(), boundary).save().temp() {
 		SaveResult::Full(entries) => {
-			let filename = entries.fields.get("file")
+			let filename = entries
+				.fields
+				.get("file")
 				.and_then(|o| o.iter().next())
 				.ok_or_else(|| Error::BadRequest("File not found in body"))?
-				.headers.filename.clone();
+				.headers
+				.filename
+				.clone();
 			let extension = filename
 				.and_then(|s| {
-					s.rsplit('.').next()
-						.and_then(|e| if e.chars().any(|c| !c.is_alphanumeric()) {
+					s.rsplit('.').next().and_then(|e| {
+						if e.chars().any(|c| !c.is_alphanumeric()) {
 							None
 						} else {
 							Some(format!(".{}", e.to_lowercase()))
-						})
-				}).unwrap_or_default();
-			let file_key = format!("{}{}", Uuid::new_v4(), extension);
-			let save_path = format!("{}/{}", &system_config.upload_dir, &file_key);
+						}
+					})
+				})
+				.unwrap_or_default();
+
+			let year_month = chrono::Utc::now().format("%Y%m");
+			let file_key = format!("{}/{}{}", &year_month, Uuid::new_v4(), &extension); // file key like `201906/mori.love`, this will be saved to db
+
+			fs::create_dir_all(format!("{}/{}", &system_config.upload_dir, &year_month))
+				.map_err(|e| Error::UploadError(e))?; // create folder like `upload_dir/201906`
+			let save_path = format!("{}/{}", &system_config.upload_dir, &file_key); // file full path for writing contents, like `upload_dir/201906/mori.love`
 			match entries.fields.get("file")?[0].data {
-				SavedData::Bytes(ref b) => { fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?; },
-				SavedData::Text(ref s) => { fs::write(&save_path, s).map_err(|e| Error::UploadError(e))?; },
-				SavedData::File(ref path, _) => { fs::copy(path, &save_path).map_err(|e| Error::UploadError(e))?; },
+				SavedData::Bytes(ref b) => {
+					fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?;
+				}
+				SavedData::Text(ref s) => {
+					fs::write(&save_path, s).map_err(|e| Error::UploadError(e))?;
+				}
+				SavedData::File(ref path, _) => {
+					fs::copy(path, &save_path).map_err(|e| Error::UploadError(e))?;
+				}
 			}
 
 			// save some informations into db
 
 			Ok(Status::NoContent) // 204 No Content
-		},
+		}
 		SaveResult::Partial(_, _) => Ok(Status::Accepted), // 202 Accepted
-		SaveResult::Error(e) => Err(Error::UploadError(e))
+		SaveResult::Error(e) => Err(Error::UploadError(e)),
 	}
 }
