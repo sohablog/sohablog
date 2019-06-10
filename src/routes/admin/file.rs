@@ -23,7 +23,7 @@ use std::fs;
 use uuid::Uuid;
 
 #[post("/admin/file/upload", data = "<data>")]
-pub fn upload_file(data: Data, content_type: &ContentType, db: State<Database>, _user: User) -> Result<Status, Error> {
+pub fn upload_file(data: Data, content_type: &ContentType) -> Result<Status, Error> {
 	if !content_type.is_form_data() {
 		return Err(Error::BadRequest("Wrong `Content-Type`"));
 	}
@@ -41,10 +41,11 @@ pub fn upload_file(data: Data, content_type: &ContentType, db: State<Database>, 
 						.and_then(|e| if e.chars().any(|c| !c.is_alphanumeric()) {
 							None
 						} else {
-							Some(e.to_lowercase())
+							Some(format!(".{}", e.to_lowercase()))
 						})
 				}).unwrap_or_default();
-			let save_path = format!("usr/upload/{}.{}", Uuid::new_v4(), extension);
+			// {UPLOAD_DIR}/yyyymm/
+			let save_path = format!("usr/upload/{}{}", Uuid::new_v4(), extension);
 			match entries.fields.get("file")?[0].data {
 				SavedData::Bytes(ref b) => { fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?; },
 				SavedData::File(ref path, _) => { fs::copy(path, &save_path).map_err(|e| Error::UploadError(e))?; },
