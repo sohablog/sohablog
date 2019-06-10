@@ -64,6 +64,13 @@ fn main() {
 					"/static/upload",
 					StaticFiles::from(system_config.upload_dir.as_str()),
 				)
+				.mount(
+					"/static/",
+					routes!(
+						router::static_file::system,
+						router::static_file::theme
+					)
+				)
 				.manage(db)
 				.manage(system_config)
 				.launch();

@@ -63,3 +63,4 @@ pub mod admin;
 pub mod post;
 pub mod root;
 pub mod user;
+pub mod static_file;

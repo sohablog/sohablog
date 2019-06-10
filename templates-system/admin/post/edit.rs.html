@@ -1,3 +1,4 @@
+@use super::super::super::statics;
 @use super::super::super::base;
 @use crate::models::content::Content;
 @use crate::models::content::ContentStatus;
@@ -9,7 +10,7 @@
 @(ctx: &GlobalContext, title: &str, post: Option<Content>, categories: Vec<Category>)
 
 @:base(ctx, title, {}, {
-	<link href="https://unpkg.com/markdown-palettes@@latest/dist/markdown-palettes.css" rel="stylesheet" />
+	<link href="/static/system/@statics::markdown_palettes_0_4_11_css.name" rel="stylesheet" />
 }, {
 	<form action="@uri!(crate::routes::admin::post::edit_post)" method="POST">
 		@if let Some(p) = &post {<input type="hidden" name="id" value="@p.id" />}
@@ -44,21 +45,7 @@
 		<input type="submit" id="submit" value="Save" />
 	</form>
 }, {
-	<script src="https://unpkg.com/markdown-palettes@@latest/dist/markdown-palettes.min.js"></script>
-	<script>
-		var mpContent=new MarkdownPalettes("#content-mp");
-		document.getElementById('submit').onclick=function ()@{
-			document.getElementById('content').value=mpContent.content;
-			document.getElementById('save_draft').value='false';
-			return true;
-		@};
-		document.getElementById('submit_draft').onclick=function ()@{
-			document.getElementById('content').value=mpContent.content;
-			document.getElementById('save_draft').value='true';
-			return true;
-		@};
-		document.addEventListener('DOMContentLoaded',function ()@{
-			mpContent.content=document.getElementById('content').value;
-		@},false);
-	</script>
+	<script src="/static/system/@statics::jquery_3_4_1_min_js.name"></script>
+	<script src="/static/system/@statics::markdown_palettes_0_4_11_min_js.name"></script>
+	<script src="/static/system/@statics::admin_post_edit_js.name"></script>
 })
