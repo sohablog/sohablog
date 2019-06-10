@@ -28,6 +28,7 @@ fn main() {
 	use crate::routes as router;
 	use rocket::routes;
 	use std::env;
+	use rocket_contrib::serve::StaticFiles;
 
 	dotenv::dotenv().ok();
 	let db_url = env::var("SOHABLOG_DATABASE_URL").unwrap();
@@ -59,6 +60,7 @@ fn main() {
 						router::admin::file::upload_file
 					],
 				)
+				.mount("/static/upload", StaticFiles::from(system_config.upload_dir.as_str()))
 				.manage(db)
 				.manage(system_config)
 				.launch();
