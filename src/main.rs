@@ -20,21 +20,21 @@ mod routes;
 mod schema;
 
 pub struct SystemConfig {
-	pub upload_dir: String
+	pub upload_dir: String,
 }
 
 fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
 	use rocket::routes;
-	use std::env;
 	use rocket_contrib::serve::StaticFiles;
+	use std::env;
 
 	dotenv::dotenv().ok();
 	let db_url = env::var("DATABASE_URL").unwrap();
 	let mut db = Database::new(&db_url);
 	let system_config = SystemConfig {
-		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/"))
+		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/")),
 	};
 	std::fs::create_dir_all(system_config.upload_dir.as_str()).unwrap();
 
@@ -60,7 +60,10 @@ fn main() {
 						router::admin::file::upload_file
 					],
 				)
-				.mount("/static/upload", StaticFiles::from(system_config.upload_dir.as_str()))
+				.mount(
+					"/static/upload",
+					StaticFiles::from(system_config.upload_dir.as_str()),
+				)
 				.manage(db)
 				.manage(system_config)
 				.launch();

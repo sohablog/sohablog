@@ -1,5 +1,9 @@
 use super::super::error::Error;
-use crate::{db::Database, models::{user::User, file::File}, SystemConfig};
+use crate::{
+	db::Database,
+	models::{file::File, user::User},
+	SystemConfig,
+};
 use multipart::server::{
 	save::{SaveResult, SavedData},
 	Multipart,
@@ -32,13 +36,13 @@ pub fn upload_file(
 
 	match Multipart::with_body(data.open(), boundary).save().temp() {
 		SaveResult::Full(entries) => {
-			let content_id = entries.fields.get("content")
-				.and_then(|o| if let SavedData::Text(s) = &o[0].data {
+			let content_id = entries.fields.get("content").and_then(|o| {
+				if let SavedData::Text(s) = &o[0].data {
 					s.parse::<i32>().ok()
 				} else {
 					None
-				});
-				
+				}
+			});
 			let filename = entries
 				.fields
 				.get("file")
@@ -61,7 +65,12 @@ pub fn upload_file(
 				.unwrap_or_default();
 
 			let year_month = chrono::Utc::now().format("%Y%m");
-			let file_key = format!("{{upload_dir}}/{}/{}{}", &year_month, Uuid::new_v4(), &extension); // file key like `{upload_dir}/201906/mori.love`, this will be saved to db
+			let file_key = format!(
+				"{{upload_dir}}/{}/{}{}",
+				&year_month,
+				Uuid::new_v4(),
+				&extension
+			); // file key like `{upload_dir}/201906/mori.love`, this will be saved to db
 			fs::create_dir_all(format!("{}/{}", &system_config.upload_dir, &year_month))
 				.map_err(|e| Error::UploadError(e))?; // create folder like `{upload_dir}/201906`
 
@@ -78,7 +87,13 @@ pub fn upload_file(
 				}
 			}
 
-			let file = File::create(&db, file_key, original_filename, current_user.id, content_id)?;
+			let file = File::create(
+				&db,
+				file_key,
+				original_filename,
+				current_user.id,
+				content_id,
+			)?;
 
 			Ok(Json(file))
 		}

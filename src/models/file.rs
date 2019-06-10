@@ -20,7 +20,7 @@ pub struct NewFile {
 	pub key: String,
 	pub filename: String,
 	pub user: i32,
-	pub content: Option<i32>
+	pub content: Option<i32>,
 }
 impl File {
 	last!(file);
@@ -38,7 +38,13 @@ impl File {
 		}
 	}
 
-	pub fn create(db: &Database, key: String, filename: String, user_id: i32, content_id: Option<i32>) -> Result<Self> {
+	pub fn create(
+		db: &Database,
+		key: String,
+		filename: String,
+		user_id: i32,
+		content_id: Option<i32>,
+	) -> Result<Self> {
 		Self::insert(db, Self::new(key, filename, user_id, content_id))
 	}
 }
