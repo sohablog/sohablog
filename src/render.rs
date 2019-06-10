@@ -36,10 +36,10 @@ macro_rules! render {
 }
 
 pub trait ToHtml {
-	fn to_html(&self, out: &mut Write) -> IoResult<()>;
+	fn to_html(&self, out: &mut dyn Write) -> IoResult<()>;
 }
 impl ToHtml for Origin<'_> {
-	fn to_html(&self, out: &mut Write) -> IoResult<()> {
+	fn to_html(&self, out: &mut dyn Write) -> IoResult<()> {
 		write!(out, "{}", &self.to_string())
 	}
 }
@@ -78,7 +78,7 @@ const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
 	ext_description_lists: true,
 };
 /// Parses markdown to HTML
-pub fn markdown_to_html(out: &mut Write, s: &str) -> IoResult<()> {
+pub fn markdown_to_html(out: &mut dyn Write, s: &str) -> IoResult<()> {
 	let s = comrak::markdown_to_html(s, &COMRAK_OPTIONS);
 	write!(out, "{}", s)
 }

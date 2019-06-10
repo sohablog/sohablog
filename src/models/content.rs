@@ -261,7 +261,7 @@ impl ToSql<Integer, Mysql> for ContentStatus {
 	}
 }
 impl ToHtml for ContentStatus {
-	fn to_html(&self, out: &mut std::io::Write) -> std::io::Result<()> {
+	fn to_html(&self, out: &mut dyn std::io::Write) -> std::io::Result<()> {
 		write!(out, "{}", *self as i32)
 	}
 }

@@ -18,7 +18,7 @@ impl fmt::Display for Error {
 	}
 }
 impl error::Error for Error {
-	fn cause(&self) -> Option<&error::Error> {
+	fn cause(&self) -> Option<&dyn error::Error> {
 		match *self {
 			Error::Database(ref e) => Some(e),
 			Error::Pool(ref e) => Some(e),
