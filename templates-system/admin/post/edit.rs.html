@@ -51,7 +51,7 @@
 		<input type="hidden" name="related_content_id" value="@p.id" />
 		<input type="submit" value="Upload" />
 	</form>
-	<div id="attachments-container" data-url="@uri!(crate::routes::admin::file::find_by_content: content_id=p.id)" data-upload-route="@(ctx.system_config.upload_route)">
+	<div id="attachments-container" data-url="@uri!(crate::routes::admin::file::find_by_content: content_id=p.id)" data-delete-route="@uri!(crate::routes::admin::file::delete_by_id: id=-20001003)" data-upload-route="@(ctx.system_config.upload_route)">
 		<div id="list">Fetching...</div>
 	</div>} else {<p><i>You should draft or post first in order to upload attachments.</i></p>}
 }, {

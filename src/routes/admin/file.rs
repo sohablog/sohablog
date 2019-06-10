@@ -30,6 +30,20 @@ pub fn find_by_content(content_id: i32, db: State<Database>, _user: User) -> Res
 	Ok(Json(list))
 }
 
+#[delete("/admin/file/<id>")]
+pub fn delete_by_id(id: i32, db: State<Database>, system_config: State<SystemConfig>, _user: User) -> Result<Status, Error> {
+	let file: File = File::find(&db, id)?;
+	match fs::remove_file(&file.key.replace("{upload_dir}", &system_config.upload_dir)) {
+		Err(e) => match e.kind() {
+			std::io::ErrorKind::NotFound => (),
+			_ => return Err(Error::Io(e)),
+		},
+		_ => (),
+	}
+	file.delete(&db)?;
+	Ok(Status::NoContent)
+}
+
 #[post("/admin/file/upload", data = "<data>")]
 pub fn upload(
 	data: Data,
@@ -83,20 +97,13 @@ pub fn upload(
 				Uuid::new_v4(),
 				&extension
 			); // file key like `{upload_dir}/201906/mori.love`, this will be saved to db
-			fs::create_dir_all(format!("{}/{}", &system_config.upload_dir, &year_month))
-				.map_err(|e| Error::UploadError(e))?; // create folder like `{upload_dir}/201906`
+			fs::create_dir_all(format!("{}/{}", &system_config.upload_dir, &year_month))?; // create folder like `{upload_dir}/201906`
 
 			let save_path = file_key.replace("{upload_dir}", &system_config.upload_dir); // file full path for writing contents, like `/path/to/upload/201906/mori.love`
 			match entries.fields.get("file")?[0].data {
-				SavedData::Bytes(ref b) => {
-					fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?;
-				}
-				SavedData::Text(ref s) => {
-					fs::write(&save_path, s).map_err(|e| Error::UploadError(e))?;
-				}
-				SavedData::File(ref path, _) => {
-					fs::copy(path, &save_path).map_err(|e| Error::UploadError(e))?;
-				}
+				SavedData::Bytes(ref b) => { fs::write(&save_path, b)?; },
+				SavedData::Text(ref s) => { fs::write(&save_path, s)?; },
+				SavedData::File(ref path, _) => { fs::copy(path, &save_path)?; },
 			}
 
 			let file = File::create(
@@ -110,6 +117,6 @@ pub fn upload(
 			Ok(Json(file))
 		}
 		SaveResult::Partial(_, _) => Err(Error::HttpStatus(Status::NoContent)), // 204 No Content
-		SaveResult::Error(e) => Err(Error::UploadError(e)),
+		SaveResult::Error(e) => Err(Error::Io(e)),
 	}
 }

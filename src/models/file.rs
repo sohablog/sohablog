@@ -26,6 +26,7 @@ impl File {
 	last!(file);
 	insert!(file, NewFile);
 	find_pk!(file);
+	delete!();
 	find_by!(file, find_by_content_id, content as i32);
 	find_by!(file, find_by_user_id, user as i32);
 

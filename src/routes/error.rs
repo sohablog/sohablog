@@ -13,7 +13,7 @@ pub enum Error {
 	NotFound,
 	NoPermission,
 	BadRequest(&'static str),
-	UploadError(std::io::Error),
+	Io(std::io::Error),
 	OptionNone,
 	HttpStatus(Status),
 }
@@ -39,6 +39,11 @@ impl From<render::Error> for Error {
 impl From<chrono::ParseError> for Error {
 	fn from(err: chrono::ParseError) -> Self {
 		Self::ChronoParse(err)
+	}
+}
+impl From<std::io::Error> for Error {
+	fn from(err: std::io::Error) -> Self {
+		Self::Io(err)
 	}
 }
 

@@ -60,7 +60,8 @@ fn main() {
 						router::admin::category::list,
 						router::admin::category::update,
 						router::admin::file::upload,
-						router::admin::file::find_by_content
+						router::admin::file::find_by_content,
+						router::admin::file::delete_by_id
 					],
 				)
 				.mount(

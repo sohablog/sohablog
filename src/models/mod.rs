@@ -88,6 +88,18 @@ macro_rules! update {
 	};
 }
 /**
+ * Delete row
+ */
+macro_rules! delete {
+	() => {
+		pub fn delete(&self,db: &crate::db::Database) -> Result<()> {
+			diesel::delete(self)
+				.execute(&*db.pool().get()?)?;
+			Ok(())
+		}
+	};
+}
+/**
  * Get last row
  *
  * impl User{

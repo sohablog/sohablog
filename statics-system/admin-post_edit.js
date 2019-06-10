@@ -13,6 +13,21 @@ document.addEventListener('DOMContentLoaded',function (){
 	mpContent.content=document.getElementById('content').value;
 },false);
 
+var deleteFile = function (id) {
+	$.ajax({
+		url: $('#attachments-container').data('delete-route').replace('-20001003', id),
+	//   magic number, seems no better idea when using `url!` generator ^ 
+		type: 'DELETE',
+		success: function (){
+			fetchAllAttachments();
+		},
+		error: function (e){
+			console.error(e);
+			alert('Delete failed');
+		}
+	});
+};
+
 var fetchAllAttachments = function () {
 	var ctn = $('#attachments-container');
 	var uploadDir = ctn.data('upload-route');
@@ -23,8 +38,13 @@ var fetchAllAttachments = function () {
 		success: function (data){
 			var root=$('<div id="list"></div>');
 			data.forEach(function (v) {
-				var e=$('<div><h4></h4><p><small></small></p><p><code></code></p><hr /></div>');
+				var e=$('<div><h4></h4><p><button id="delete-file">Delete</button>&nbsp;<small></small></p><p><code></code></p><hr /></div>');
 				$('h4', e).text(v.filename);
+				$('#delete-file', e).on('click', function () {
+					if(prompt("Are you sure to delete `"+v.filename+"`?")){
+						deleteFile(v.id);
+					}
+				});
 				$('small', e).text(v.time);
 				var ext="";
 				if(v.filename){
