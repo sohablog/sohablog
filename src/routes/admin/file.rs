@@ -2,6 +2,7 @@ use super::super::error::Error;
 use crate::{
 	models::user::User,
 	db::Database,
+	SystemConfig
 };
 use rocket_codegen::*;
 use rocket::{
@@ -23,7 +24,7 @@ use std::fs;
 use uuid::Uuid;
 
 #[post("/admin/file/upload", data = "<data>")]
-pub fn upload_file(data: Data, content_type: &ContentType) -> Result<Status, Error> {
+pub fn upload_file(data: Data, content_type: &ContentType, system_config: State<SystemConfig>) -> Result<Status, Error> {
 	if !content_type.is_form_data() {
 		return Err(Error::BadRequest("Wrong `Content-Type`"));
 	}
@@ -45,7 +46,7 @@ pub fn upload_file(data: Data, content_type: &ContentType) -> Result<Status, Err
 						})
 				}).unwrap_or_default();
 			// {UPLOAD_DIR}/yyyymm/
-			let save_path = format!("usr/upload/{}{}", Uuid::new_v4(), extension);
+			let save_path = format!("{}/{}{}", &system_config.upload_dir, Uuid::new_v4(), extension);
 			match entries.fields.get("file")?[0].data {
 				SavedData::Bytes(ref b) => { fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?; },
 				SavedData::File(ref path, _) => { fs::copy(path, &save_path).map_err(|e| Error::UploadError(e))?; },
