@@ -24,7 +24,7 @@ use std::fs;
 use uuid::Uuid;
 
 #[post("/admin/file/upload", data = "<data>")]
-pub fn upload_file(data: Data, content_type: &ContentType, system_config: State<SystemConfig>) -> Result<Status, Error> {
+pub fn upload_file(data: Data, content_type: &ContentType, system_config: State<SystemConfig>, db: State<Database>) -> Result<Status, Error> {
 	if !content_type.is_form_data() {
 		return Err(Error::BadRequest("Wrong `Content-Type`"));
 	}
@@ -45,12 +45,12 @@ pub fn upload_file(data: Data, content_type: &ContentType, system_config: State<
 							Some(format!(".{}", e.to_lowercase()))
 						})
 				}).unwrap_or_default();
-			// {UPLOAD_DIR}/yyyymm/
-			let save_path = format!("{}/{}{}", &system_config.upload_dir, Uuid::new_v4(), extension);
+			let file_key = format!("{}{}", Uuid::new_v4(), extension);
+			let save_path = format!("{}/{}", &system_config.upload_dir, &file_key);
 			match entries.fields.get("file")?[0].data {
 				SavedData::Bytes(ref b) => { fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?; },
+				SavedData::Text(ref s) => { fs::write(&save_path, s).map_err(|e| Error::UploadError(e))?; },
 				SavedData::File(ref path, _) => { fs::copy(path, &save_path).map_err(|e| Error::UploadError(e))?; },
-				_ => return Err(Error::BadRequest("SavedData is not accepted"))
 			}
 
 			// save some informations into db
