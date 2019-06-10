@@ -85,3 +85,13 @@ CREATE TABLE `assoc_tag_content` (
   CONSTRAINT `assoc_content_fk` FOREIGN KEY (`content`) REFERENCES `content` (`id`) ON DELETE CASCADE,
   CONSTRAINT `assoc_tag_fk` FOREIGN KEY (`tag`) REFERENCES `tag` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE `file` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(500) NOT NULL COMMENT 'File Key, can be URL or something like `{upload_dir}/file.key`',
+  `content` int(11) DEFAULT NULL COMMENT 'Linked content ID',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `file_key_uniq` (`key`),
+  KEY `file_content_idx` (`content`) USING BTREE,
+  CONSTRAINT `file_content_fk` FOREIGN KEY (`content`) REFERENCES `content` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
