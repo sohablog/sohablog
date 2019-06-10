@@ -1,7 +1,7 @@
 use crate::{models, render};
 use rocket::{
 	http::Status,
-	response::{self, Responder},
+	response::{self, Responder, Response},
 	Request,
 };
 
@@ -14,7 +14,8 @@ pub enum Error {
 	NoPermission,
 	BadRequest(&'static str),
 	UploadError(std::io::Error),
-	OptionNone
+	OptionNone,
+	HttpStatus(Status),
 }
 impl From<std::option::NoneError> for Error {
 	fn from(_: std::option::NoneError) -> Self {
@@ -45,9 +46,14 @@ impl<'a> Responder<'a> for Error {
 	fn respond_to(self, _req: &Request) -> response::Result<'a> {
 		println!("{:?}", &self);
 		match self {
-			Self::NotFound => Err(rocket::http::Status::NotFound),
-			Self::NoPermission => Err(rocket::http::Status::Forbidden),
-			Self::BadRequest(reason) => Err(rocket::http::Status::new(400, reason)),
+			Self::HttpStatus(status) => {
+				let mut resp = Response::new();
+				resp.set_status(status);
+				Ok(resp)
+			},
+			Self::NotFound => Err(Status::NotFound),
+			Self::NoPermission => Err(Status::Forbidden),
+			Self::BadRequest(reason) => Err(Status::new(400, reason)),
 			_ => Err(Status::InternalServerError),
 		}
 	}

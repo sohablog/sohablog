@@ -46,6 +46,7 @@ table! {
     file (id) {
         id -> Integer,
         key -> Varchar,
+        filename -> Text,
         user -> Integer,
         content -> Nullable<Integer>,
         time -> Datetime,

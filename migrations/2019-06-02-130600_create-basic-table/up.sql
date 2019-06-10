@@ -89,6 +89,7 @@ CREATE TABLE `assoc_tag_content` (
 CREATE TABLE `file` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `key` varchar(500) NOT NULL COMMENT 'File Key, can be URL or something like `{upload_dir}/file.key`',
+  `filename` text NOT NULL COMMENT 'Original file name',
   `user` int(11) NOT NULL,
   `content` int(11) DEFAULT NULL COMMENT 'Linked content ID',
   `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -96,6 +97,7 @@ CREATE TABLE `file` (
   UNIQUE KEY `file_key_uniq` (`key`),
   KEY `file_content_idx` (`content`) USING BTREE,
   KEY `file_user_idx` (`user`) USING BTREE,
+  FULLTEXT KEY `file_filename_fulltext_idx` (`filename`),
   CONSTRAINT `file_content_fk` FOREIGN KEY (`content`) REFERENCES `content` (`id`) ON DELETE CASCADE,
   CONSTRAINT `file_user_fk` FOREIGN KEY (`user`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

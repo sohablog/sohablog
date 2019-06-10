@@ -1,5 +1,5 @@
 use super::super::error::Error;
-use crate::{db::Database, models::user::User, SystemConfig};
+use crate::{db::Database, models::{user::User, file::File}, SystemConfig};
 use multipart::server::{
 	save::{SaveResult, SavedData},
 	Multipart,
@@ -10,6 +10,7 @@ use rocket::{
 	Data,
 };
 use rocket_codegen::*;
+use rocket_contrib::json::Json;
 use std::fs;
 use uuid::Uuid;
 
@@ -19,7 +20,7 @@ pub fn upload_file(
 	content_type: &ContentType,
 	system_config: State<SystemConfig>,
 	db: State<Database>,
-) -> Result<Status, Error> {
+) -> Result<Json<File>, Error> {
 	if !content_type.is_form_data() {
 		return Err(Error::BadRequest("Wrong `Content-Type`"));
 	}
@@ -38,6 +39,7 @@ pub fn upload_file(
 				.headers
 				.filename
 				.clone();
+			let original_filename = filename.as_ref()?.to_owned();
 			let extension = filename
 				.and_then(|s| {
 					s.rsplit('.').next().and_then(|e| {
@@ -51,11 +53,11 @@ pub fn upload_file(
 				.unwrap_or_default();
 
 			let year_month = chrono::Utc::now().format("%Y%m");
-			let file_key = format!("{}/{}{}", &year_month, Uuid::new_v4(), &extension); // file key like `201906/mori.love`, this will be saved to db
-
+			let file_key = format!("{{upload_dir}}/{}/{}{}", &year_month, Uuid::new_v4(), &extension); // file key like `{upload_dir}/201906/mori.love`, this will be saved to db
 			fs::create_dir_all(format!("{}/{}", &system_config.upload_dir, &year_month))
-				.map_err(|e| Error::UploadError(e))?; // create folder like `upload_dir/201906`
-			let save_path = format!("{}/{}", &system_config.upload_dir, &file_key); // file full path for writing contents, like `upload_dir/201906/mori.love`
+				.map_err(|e| Error::UploadError(e))?; // create folder like `{upload_dir}/201906`
+
+			let save_path = file_key.replace("{upload_dir}", &system_config.upload_dir); // file full path for writing contents, like `/path/to/upload/201906/mori.love`
 			match entries.fields.get("file")?[0].data {
 				SavedData::Bytes(ref b) => {
 					fs::write(&save_path, b).map_err(|e| Error::UploadError(e))?;
@@ -68,11 +70,11 @@ pub fn upload_file(
 				}
 			}
 
-			// save some informations into db
+			let file = File::create(&db, file_key, original_filename, 1, None)?;
 
-			Ok(Status::NoContent) // 204 No Content
+			Ok(Json(file))
 		}
-		SaveResult::Partial(_, _) => Ok(Status::Accepted), // 202 Accepted
+		SaveResult::Partial(_, _) => Err(Error::HttpStatus(Status::NoContent)), // 204 No Content
 		SaveResult::Error(e) => Err(Error::UploadError(e)),
 	}
 }
