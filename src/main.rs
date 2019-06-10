@@ -31,7 +31,7 @@ fn main() {
 	use rocket_contrib::serve::StaticFiles;
 
 	dotenv::dotenv().ok();
-	let db_url = env::var("SOHABLOG_DATABASE_URL").unwrap();
+	let db_url = env::var("DATABASE_URL").unwrap();
 	let mut db = Database::new(&db_url);
 	let system_config = SystemConfig {
 		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/"))
