@@ -40,8 +40,9 @@ var fetchAllAttachments = function () {
 			data.forEach(function (v) {
 				var e=$('<div><h4></h4><p><button id="delete-file">Delete</button>&nbsp;<small></small></p><p><code></code></p><hr /></div>');
 				$('h4', e).text(v.filename);
-				$('#delete-file', e).on('click', function () {
+				$('#delete-file', e).on('click', function (e) {
 					if(confirm("Are you sure to delete `"+v.filename+"`?")){
+						$(e.currentTarget).attr('disabled', true);
 						deleteFile(v.id);
 					}
 				});
