@@ -90,32 +90,13 @@ pub fn edit_post(
 	current_user: User,
 ) -> Result<Redirect, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
-	let title = match &form.title {
-		Some(title) => {
-			if title.trim().len() == 0 {
-				None
-			} else {
-				Some(title.to_owned())
-			}
-		}
-		None => None,
-	};
-	let slug = match &form.slug {
-		Some(slug) => {
-			if slug.trim().len() == 0 {
-				None
-			} else {
-				Some(slug.to_owned())
-			}
-		}
-		None => None,
-	};
-	let category = match form.category {
-		Some(cat_id) => {
-			let cat: models::category::Category = models::category::Category::find(&db, cat_id)?;
-			Some(cat.id)
-		}
-		None => None,
+	let title = form.title.as_ref().and_then(|t| if t.trim().len() == 0 { None } else { Some(t.trim().to_string()) });
+	let slug = form.slug.as_ref().and_then(|t| if t.trim().len() == 0 { None } else { Some(t.trim().to_string()) });
+	let category = if let Some(id) = form.category {
+		let cat: models::category::Category = models::category::Category::find(&db, id)?;
+		Some(cat.id)
+	} else {
+		None
 	};
 	let post = match form.id {
 		Some(id) => {
