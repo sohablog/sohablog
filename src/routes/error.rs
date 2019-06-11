@@ -61,7 +61,7 @@ impl<'a> Responder<'a> for Error {
 			Self::BadRequest(reason) => Status::new(400, reason),
 			_ => Status::InternalServerError,
 		};
-		if req.content_type().and_then(|o| Some(o.is_json())).unwrap_or(false) {
+		if req.accept().and_then(|o| o.first()).and_then(|o| Some(o.is_json())).unwrap_or(false) {
 			Json(ApiResult {
 				status: status.code.into(),
 				r#return: if global_context.system_config.is_prod {
