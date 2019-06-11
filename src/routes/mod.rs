@@ -19,6 +19,15 @@ pub struct ApiResult<T> {
 	pub r#return: String,
 	pub data: T,
 }
+impl<T> ApiResult<T> {
+	pub fn new(data: T, status: Option<i32>, rtn: Option<String>) -> Self {
+		Self {
+			status: status.unwrap_or(200),
+			r#return: rtn.unwrap_or("OK".to_string()),
+			data: data
+		}
+	}
+}
 
 pub struct JsonOrNormal<J, N>(J, N);
 impl<'r, J: serde::Serialize, N: Responder<'r>> Responder<'r> for JsonOrNormal<J, N> {

@@ -70,16 +70,12 @@ pub fn new_content_comment(
 		reply_to,
 		parent,
 		content_id,
-		CommentStatus::Normal,
+		CommentStatus::Normal, // TODO: Default comment status setting
 	);
 	let new_comment = Comment::insert(&db, new_comment)?;
 
 	Ok(JsonOrNormal(
-		ApiResult {
-			status: 200,
-			r#return: "OK".to_string(),
-			data: new_comment,
-		},
+		ApiResult::new(new_comment, None, None),
 		Redirect::to("/"),
 	))
 }
