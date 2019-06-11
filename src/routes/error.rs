@@ -1,9 +1,11 @@
-use crate::{models, render};
+use crate::{models, render::{self, GlobalContext}};
 use rocket::{
-	http::Status,
-	response::{self, Responder, Response},
+	http::{Status},
+	response::{self, Responder},
 	Request,
 };
+use rocket_contrib::json::Json;
+use super::ApiResult;
 
 #[derive(Debug)]
 pub enum Error {
@@ -48,18 +50,29 @@ impl From<std::io::Error> for Error {
 }
 
 impl<'a> Responder<'a> for Error {
-	fn respond_to(self, _req: &Request) -> response::Result<'a> {
+	fn respond_to(self, req: &Request) -> response::Result<'a> {
+		let global_context = req.guard::<GlobalContext>().unwrap();
+
 		println!("{:?}", &self);
-		match self {
-			Self::HttpStatus(status) => {
-				let mut resp = Response::new();
-				resp.set_status(status);
-				Ok(resp)
-			},
-			Self::NotFound => Err(Status::NotFound),
-			Self::NoPermission => Err(Status::Forbidden),
-			Self::BadRequest(reason) => Err(Status::new(400, reason)),
-			_ => Err(Status::InternalServerError),
+		let status = match self {
+			Self::HttpStatus(status) => status,
+			Self::NotFound => Status::NotFound,
+			Self::NoPermission => Status::Forbidden,
+			Self::BadRequest(reason) => Status::new(400, reason),
+			_ => Status::InternalServerError,
+		};
+		if req.content_type().and_then(|o| Some(o.is_json())).unwrap_or(false) {
+			Json(ApiResult {
+				status: status.code.into(),
+				r#return: if global_context.system_config.is_prod {
+					status.reason.to_string()
+				} else {
+					format!("{:?}", &self)
+				},
+				data: ()
+			}).respond_to(req)
+		} else {
+			Err(status)
 		}
 	}
 }

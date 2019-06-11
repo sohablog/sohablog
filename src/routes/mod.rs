@@ -6,6 +6,14 @@ use rocket::{
 	request::FromFormValue,
 };
 use std::fmt::Result as FmtResult;
+use serde_derive::*;
+
+#[derive(Debug, Serialize)]
+pub struct ApiResult<T> {
+	pub status: i32,
+	pub r#return: String,
+	pub data: T,
+}
 
 #[derive(Debug, Copy, Clone)]
 pub struct Page {

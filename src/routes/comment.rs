@@ -34,6 +34,7 @@ pub fn new_content_comment_xhr(content_id: i32, data: LenientForm<NewCommentForm
 				// TODO: Check if mail is required field
 				return Err(Error::BadRequest("Field `mail` is required"));
 			};
+			// TODO: Check if link is required field
 			comment::Author::new(name, mail, link)
 		}
 	};
