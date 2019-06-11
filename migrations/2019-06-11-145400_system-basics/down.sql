@@ -1,3 +1,4 @@
+DROP TABLE `comment`;
 DROP TABLE `file`;
 DROP TABLE `category`;
 DROP TABLE `user`;

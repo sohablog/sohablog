@@ -18,7 +18,24 @@ table! {
 }
 
 table! {
-	use diesel::sql_types::*;
+    comment (id) {
+        id -> Integer,
+        user -> Nullable<Integer>,
+        author_name -> Varchar,
+        author_mail -> Nullable<Varchar>,
+        author_link -> Nullable<Varchar>,
+        ip -> Nullable<Varchar>,
+        user_agent -> Nullable<Varchar>,
+        text -> Longtext,
+        time -> Datetime,
+        status -> Integer,
+        parent -> Nullable<Integer>,
+        content -> Integer,
+        reply_to -> Nullable<Integer>,
+    }
+}
+
+table! {
     content (id) {
         id -> Integer,
         user -> Integer,
@@ -80,6 +97,8 @@ table! {
 
 joinable!(assoc_tag_content -> content (content));
 joinable!(assoc_tag_content -> tag (tag));
+joinable!(comment -> content (content));
+joinable!(comment -> user (user));
 joinable!(content -> category (category));
 joinable!(content -> user (user));
 joinable!(file -> content (content));
@@ -88,6 +107,7 @@ joinable!(file -> user (user));
 allow_tables_to_appear_in_same_query!(
     assoc_tag_content,
     category,
+    comment,
     content,
     file,
     tag,

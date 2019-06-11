@@ -101,3 +101,29 @@ CREATE TABLE `file` (
   CONSTRAINT `file_content_fk` FOREIGN KEY (`content`) REFERENCES `content` (`id`) ON DELETE CASCADE,
   CONSTRAINT `file_user_fk` FOREIGN KEY (`user`) REFERENCES `user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `comment` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user` int(11) DEFAULT NULL,
+  `author_name` varchar(200) NOT NULL,
+  `author_mail` varchar(200) DEFAULT NULL,
+  `author_link` varchar(200) DEFAULT NULL,
+  `ip` varchar(80) DEFAULT NULL,
+  `user_agent` varchar(250) DEFAULT NULL,
+  `text` longtext NOT NULL,
+  `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` int(11) NOT NULL DEFAULT '0',
+  `reply_to` int(11) DEFAULT NULL COMMENT 'This indicates which comment is this replys to.',
+  `parent` int(11) DEFAULT NULL COMMENT 'Only ONE or NO parent-child relation is allowed.',
+  `content` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `comment_content_fk` (`content`),
+  KEY `comment_parent_fk` (`parent`),
+  KEY `comment_reply_fk` (`reply_to`),
+  KEY `comment_user_fk` (`user`),
+  KEY `comment_status_idx` (`status`) USING BTREE,
+  CONSTRAINT `comment_content_fk` FOREIGN KEY (`content`) REFERENCES `content` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `comment_parent_fk` FOREIGN KEY (`parent`) REFERENCES `comment` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `comment_reply_fk` FOREIGN KEY (`reply_to`) REFERENCES `comment` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `comment_user_fk` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
