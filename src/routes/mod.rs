@@ -3,8 +3,13 @@ use rocket::{
 		uri::{self, FromUriParam, Query, UriDisplay},
 		RawStr,
 	},
-	request::FromFormValue,
+	response::{self, Responder},
+	request::{
+		FromFormValue,
+		Request
+	},
 };
+use rocket_contrib::json::Json;
 use std::fmt::Result as FmtResult;
 use serde_derive::*;
 
@@ -13,6 +18,17 @@ pub struct ApiResult<T> {
 	pub status: i32,
 	pub r#return: String,
 	pub data: T,
+}
+
+pub struct JsonOrNormal<J, N>(J, N);
+impl<'r, J: serde::Serialize, N: Responder<'r>> Responder<'r> for JsonOrNormal<J, N> {
+	fn respond_to(self, req: &Request) -> response::Result<'r> {
+		if req.accept().and_then(|o| o.first()).and_then(|o| Some(o.is_json())).unwrap_or(false) {
+			Json(self.0).respond_to(req)
+		} else {
+			self.1.respond_to(req)
+		}
+	}
 }
 
 #[derive(Debug, Copy, Clone)]
