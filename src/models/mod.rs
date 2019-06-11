@@ -183,3 +183,4 @@ pub mod content;
 pub mod tag;
 pub mod user;
 pub mod file;
+pub mod comment;

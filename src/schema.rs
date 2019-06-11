@@ -29,9 +29,9 @@ table! {
         text -> Longtext,
         time -> Datetime,
         status -> Integer,
+        reply_to -> Nullable<Integer>,
         parent -> Nullable<Integer>,
         content -> Integer,
-        reply_to -> Nullable<Integer>,
     }
 }
 
