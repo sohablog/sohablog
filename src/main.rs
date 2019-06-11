@@ -51,6 +51,7 @@ fn main() {
 						router::root::page_show,
 						router::user::login_get,
 						router::user::login_post,
+						router::comment::new_content_comment_xhr,
 						router::admin::root::generate_password_hash,
 						router::admin::root::index,
 						router::admin::post::list,

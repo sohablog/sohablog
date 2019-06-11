@@ -31,13 +31,6 @@ pub struct Comment {
 	pub parent: Option<i32>,
 	pub content: i32,
 }
-impl Comment {
-	last!(comment);
-	insert!(comment, NewComment);
-	find_pk!(comment);
-	update!();
-}
-
 #[derive(Insertable, Debug)]
 #[table_name = "comment"]
 pub struct NewComment {
@@ -52,6 +45,55 @@ pub struct NewComment {
 	pub reply_to: Option<i32>,
 	pub parent: Option<i32>,
 	pub content: i32,
+}
+impl Comment {
+	last!(comment);
+	insert!(comment, NewComment);
+	find_pk!(comment);
+	update!();
+
+	pub fn new(author: Author, ip: Option<String>, ua: Option<String>, text: String, reply_to: Option<i32>, parent: Option<i32>, content_id: i32, status: CommentStatus) -> NewComment {
+		NewComment {
+			user: author.local_user,
+			author_name: author.name.to_owned(),
+			author_mail: author.mail.to_owned(),
+			author_link: author.link.to_owned(),
+			ip: ip,
+			user_agent: ua,
+			text: text,
+			status: status,
+			reply_to: reply_to,
+			parent: parent,
+			content: content_id
+		}
+	}
+}
+
+#[derive(Debug)]
+pub struct Author {
+	pub name: String,
+	pub mail: Option<String>,
+	pub link: Option<String>,
+	pub local_user: Option<i32>
+}
+impl Author {
+	pub fn from_user(user: &User) -> Self {
+		Self {
+			name: user.name.to_owned(),
+			mail: Some(user.email.to_owned()),
+			link: user.website.to_owned(),
+			local_user: Some(user.id)
+		}
+	}
+
+	pub fn new(name: String, mail: Option<String>, link: Option<String>) -> Self {
+		Self {
+			name: name,
+			mail: mail,
+			link: link,
+			local_user: None
+		}
+	}
 }
 
 //integer constants
