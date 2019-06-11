@@ -6,6 +6,7 @@ CREATE TABLE `user` (
   `email` varchar(100) NOT NULL,
   `username_lower` varchar(64) NOT NULL,
   `email_lower` varchar(100) NOT NULL,
+  `website` varchar(200) DEFAULT NULL,
   `avatar_url` text,
   `permission` int(10) unsigned NOT NULL DEFAULT '0',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -28,6 +28,7 @@ pub struct User {
 	pub email: String,
 	pub username_lower: String,
 	pub email_lower: String,
+	pub website: Option<String>,
 	pub avatar_url: Option<String>,
 	pub permission: u32,
 	pub created_at: chrono::NaiveDateTime,

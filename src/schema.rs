@@ -86,6 +86,7 @@ table! {
         email -> Varchar,
         username_lower -> Varchar,
         email_lower -> Varchar,
+        website -> Nullable<Varchar>,
         avatar_url -> Nullable<Text>,
         permission -> Unsigned<Integer>,
         created_at -> Datetime,
