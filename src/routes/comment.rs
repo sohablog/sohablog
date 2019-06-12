@@ -7,7 +7,7 @@ use crate::{
 		comment::{self, Comment, CommentStatus},
 		content,
 	},
-	render::GlobalContext,
+	util::*,
 };
 use rocket::{
 	request::LenientForm,

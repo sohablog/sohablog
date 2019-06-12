@@ -13,23 +13,19 @@
 extern crate diesel;
 
 mod db;
+mod util;
 mod models;
 #[macro_use]
 mod render;
 mod routes;
 mod schema;
 
-#[derive(Debug)]
-pub struct SystemConfig {
-	pub upload_dir: String,
-	pub upload_route: String,
-	pub real_ip_header: Option<String>,
-	pub is_prod: bool,
-}
+mod error;
 
 fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
+	use crate::util::SystemConfig;
 	use rocket::{routes, config::Config as RocketConfig};
 	use rocket_contrib::serve::StaticFiles;
 	use std::env;

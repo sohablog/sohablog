@@ -3,7 +3,8 @@ use rocket_codegen::*;
 use super::error::Error;
 use crate::{
 	models::content,
-	render::{GlobalContext, RenderResult},
+	render::RenderResult,
+	util::*,
 	theme::templates,
 };
 

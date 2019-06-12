@@ -1,8 +1,23 @@
-use diesel::mysql::MysqlConnection;
-use diesel::r2d2::ConnectionManager;
+use diesel::{
+	mysql::MysqlConnection,
+	r2d2::ConnectionManager,
+};
 use r2d2::Pool;
 use std::error;
 use std::fmt;
+
+use crate::error::{Error as MyError, Kind as ErrorKind};
+
+impl MyError for diesel::result::Error {
+	fn kind(&self) -> ErrorKind {
+		ErrorKind::Database
+	}
+}
+impl MyError for r2d2::Error {
+	fn kind(&self) -> ErrorKind {
+		ErrorKind::DatabasePool
+	}
+}
 
 #[derive(Debug)]
 pub enum Error {

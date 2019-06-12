@@ -5,7 +5,8 @@ use crate::{
 		category::{Category, NewCategory},
 		user::{self, User},
 	},
-	render::{GlobalContext, RenderResult},
+	util::*,
+	render::RenderResult,
 	templates,
 };
 use rocket::{request::LenientForm, response::Redirect, State};

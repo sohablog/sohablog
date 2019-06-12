@@ -6,7 +6,8 @@ use crate::{
 		content::{self, Content},
 		user::{self, User},
 	},
-	render::{GlobalContext, RenderResult},
+	render::RenderResult,
+	util::*,
 	templates,
 };
 use rocket::{request::LenientForm, response::Redirect, State};

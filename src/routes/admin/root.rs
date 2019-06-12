@@ -1,9 +1,9 @@
 use super::super::error::Error;
-use crate::{models::user::User, render, templates};
+use crate::{models::user::User, render, templates, util::*};
 use rocket_codegen::*;
 
 #[get("/admin")]
-pub fn index(gctx: render::GlobalContext, _user: User) -> render::RenderResult {
+pub fn index(gctx: GlobalContext, _user: User) -> render::RenderResult {
 	render!(templates::admin::index, &gctx)
 }
 

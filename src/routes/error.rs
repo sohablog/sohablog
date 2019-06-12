@@ -1,4 +1,4 @@
-use crate::{models, render::{self, GlobalContext}};
+use crate::{models, render, util::*};
 use rocket::{
 	http::{Status},
 	response::{self, Responder},

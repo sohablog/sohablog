@@ -1,6 +1,7 @@
 use crate::{
 	models::user,
-	render::{GlobalContext, RenderResult},
+	render::RenderResult,
+	util::*,
 	templates,
 };
 use rocket::{

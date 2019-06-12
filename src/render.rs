@@ -1,15 +1,9 @@
-use crate::{
-	db::Database,
-	models::user,
-	routes::VisitorIP,
-	SystemConfig
-};
+pub use crate::util::GlobalContext;
 use comrak::{self, ComrakOptions};
 use rocket::{
 	http::uri::Origin,
-	request::{FromRequest, Outcome},
 	response::{self, Responder},
-	Request, State,
+	Request,
 };
 use std::io::{Result as IoResult, Write};
 
@@ -46,27 +40,6 @@ pub trait ToHtml {
 impl ToHtml for Origin<'_> {
 	fn to_html(&self, out: &mut dyn Write) -> IoResult<()> {
 		write!(out, "{}", &self.to_string())
-	}
-}
-
-/// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
-pub struct GlobalContext<'a> {
-	pub ip: VisitorIP,
-	pub db: State<'a, Database>,
-	pub user: Option<user::User>,
-	pub system_config: State<'a, SystemConfig>,
-	pub user_agent: Option<String>,
-}
-impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
-	type Error = ();
-	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
-		Outcome::Success(Self {
-			ip: request.guard::<VisitorIP>().unwrap(), // FIXME: Needs to process errors properly
-			db: request.guard::<State<Database>>()?,
-			user: request.guard::<Option<user::User>>().unwrap(),
-			system_config: request.guard::<State<SystemConfig>>()?,
-			user_agent: request.headers().get_one("User-Agent").and_then(|s| Some(s.to_string()))
-		})
 	}
 }
 
