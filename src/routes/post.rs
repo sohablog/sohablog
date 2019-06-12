@@ -23,7 +23,7 @@ pub fn post_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Erro
 		return Err(Error::NotFound);
 	}
 	if !post.user_has_access(gctx.user.as_ref()) {
-		return Err(Error::NoPermission);
+		return Err(Error::PermissionDenied);
 	}
 	// TODO: Password check when `view_password` exists
 

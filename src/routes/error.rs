@@ -13,7 +13,7 @@ pub enum Error {
 	Render(render::Error),
 	ChronoParse(chrono::ParseError),
 	NotFound,
-	NoPermission,
+	PermissionDenied,
 	BadRequest(&'static str),
 	Io(std::io::Error),
 	OptionNone,
@@ -28,7 +28,7 @@ impl From<models::Error> for Error {
 	fn from(err: models::Error) -> Self {
 		match err {
 			models::Error::NotFound => Self::NotFound,
-			models::Error::UserHasNoPermission => Self::NoPermission,
+			models::Error::UserHasNoPermission => Self::PermissionDenied,
 			_ => Self::Model(err),
 		}
 	}
@@ -57,7 +57,7 @@ impl<'a> Responder<'a> for Error {
 		let status = match self {
 			Self::HttpStatus(status) => status,
 			Self::NotFound => Status::NotFound,
-			Self::NoPermission => Status::Forbidden,
+			Self::PermissionDenied => Status::Forbidden,
 			Self::BadRequest(reason) => Status::new(400, reason),
 			_ => Status::InternalServerError,
 		};

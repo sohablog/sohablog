@@ -20,8 +20,6 @@ mod render;
 mod routes;
 mod schema;
 
-mod error;
-
 fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
