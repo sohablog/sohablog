@@ -1,16 +1,12 @@
 @use super::misc::base;
+@use super::statics;
 @use crate::models::content::Content as PostContent;
 @use crate::render::*;
 
 @(ctx: &GlobalContext, title: &str, post: PostContent)
 
 @:base(ctx, title, {}, {
-	<style>
-		.comment .comment @{
-			padding-left: 2em;
-			border-left: 1px solid #ccc;
-		@}
-	</style>
+	<link href="/static/theme/@statics::comment_css.name" rel="stylesheet" />
 }, {
 	<h1><a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a></h1>
 	<small>by @(post.get_user(&ctx.db).unwrap().name) in @if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized} · @date_format(&post.time, "%Y-%m-%d")</small>
@@ -39,23 +35,28 @@
 	<hr />
 	<div>@if let Ok(comments) = &post.get_parent_comments(&ctx.db) {
 		<h1>Comments</h1>
-		<form action="@post.get_comment_url()" method="POST">
-			@if let Some(u) = &ctx.user {<i>You are logged in as @u.name</i>} else {
-				<p><input type="text" name="name" placeholder="Your name" /></p>
-				<p><input type="text" name="mail" placeholder="Your e-mail" /></p>
-				<p><input type="text" name="link" placeholder="Your website" /></p>
-			}<br />
-			<textarea name="text"></textarea>
-			<input type="submit" value="Send!" />
-		</form> 
+		<div id="comment-form-wrapper">
+			<form id="comment-form" action="@post.get_comment_url()" method="POST">
+				@if let Some(u) = &ctx.user {<i>You are logged in as @u.name</i>} else {
+					<p><input type="text" name="name" placeholder="Your name" /></p>
+					<p><input type="text" name="mail" placeholder="Your e-mail" /></p>
+					<p><input type="text" name="link" placeholder="Your website" /></p>
+				}<br />
+				<textarea name="text"></textarea>
+				<input type="submit" value="Send!" /><button id="cancel-reply" style="display: none;">Cancel Reply</button>
+			</form>
+		</div>
 		@for comment in comments {<div class="comment">
 			<p>@comment.text</p>
-			<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small>
+			<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id">Reply</button>
 			@if let Ok(comments) = &comment.get_children(&ctx.db) {
 				@for comment in comments {<div class="comment">
 					<p>@comment.text</p>
-					<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small>
+					<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id">Reply</button>
 				</div>}
 		}</div>}
 	}</div>
-}, {})
+}, {
+	<script src="/static/theme/@statics::jquery_3_4_1_min_js.name"></script>
+	<script src="/static/theme/@statics::comment_js.name"></script>
+})
