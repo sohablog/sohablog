@@ -3,15 +3,14 @@ use rocket_codegen::*;
 use super::error::Error;
 use super::{ApiResult, JsonOrNormal};
 use crate::{
-	db::Database,
 	models::{
 		comment::{self, Comment, CommentStatus},
 		content,
-		user::User,
 	},
+	render::GlobalContext,
 };
 use rocket::{
-	request::{LenientForm, State},
+	request::LenientForm,
 	response::Redirect,
 };
 
@@ -28,15 +27,14 @@ pub struct NewCommentForm {
 pub fn new_content_comment(
 	content_id: i32,
 	data: LenientForm<NewCommentForm>,
-	db: State<Database>,
-	current_user: Option<User>,
+	gctx: GlobalContext,
 ) -> Result<JsonOrNormal<ApiResult<Comment>, Redirect>, Error> {
-	let content = content::Content::find(&db, content_id)?;
-	if !content.user_has_access(current_user.as_ref()) {
+	let content = content::Content::find(&gctx.db, content_id)?;
+	if !content.user_has_access(gctx.user.as_ref()) {
 		return Err(Error::NotFound);
 	}
 
-	let author = match current_user {
+	let author = match &gctx.user {
 		Some(u) => comment::Author::from_user(&u),
 		None => {
 			let name = data
@@ -56,7 +54,7 @@ pub fn new_content_comment(
 	};
 	let mut parent: Option<i32> = None;
 	let reply_to = if let Some(id) = data.reply_to {
-		let reply_to_comment: Comment = Comment::find(&db, id)?;
+		let reply_to_comment: Comment = Comment::find(&gctx.db, id)?;
 		parent = Some(reply_to_comment.parent.unwrap_or(reply_to_comment.id));
 		Some(reply_to_comment.id)
 	} else {
@@ -64,15 +62,15 @@ pub fn new_content_comment(
 	};
 	let new_comment = Comment::new(
 		author,
-		Some("45.9.11.1".to_string()),
-		Some("SohaBlog/2333.666".to_string()),
+		Some(gctx.ip.to_string()),
+		gctx.user_agent.to_owned(),
 		data.text.to_owned(),
 		reply_to,
 		parent,
 		content_id,
 		CommentStatus::Normal, // TODO: Default comment status setting
 	);
-	let new_comment = Comment::insert(&db, new_comment)?;
+	let new_comment = Comment::insert(&gctx.db, new_comment)?;
 
 	Ok(JsonOrNormal(
 		ApiResult::new(new_comment, None, None),

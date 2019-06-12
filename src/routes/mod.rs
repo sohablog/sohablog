@@ -17,7 +17,8 @@ use rocket::{
 use rocket_contrib::json::Json;
 use std::{
 	fmt::Result as FmtResult,
-	str::FromStr
+	str::FromStr,
+	string::ToString,
 };
 use serde_derive::*;
 
@@ -26,6 +27,11 @@ use error::Error;
 
 #[derive(Debug)]
 pub struct VisitorIP(std::net::IpAddr);
+impl ToString for VisitorIP {
+	fn to_string(&self) -> String {
+		self.0.to_string()
+	}
+}
 impl<'a, 'r> FromRequest<'a, 'r> for VisitorIP {
 	type Error = Error;
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, Error> {

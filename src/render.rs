@@ -55,6 +55,7 @@ pub struct GlobalContext<'a> {
 	pub db: State<'a, Database>,
 	pub user: Option<user::User>,
 	pub system_config: State<'a, SystemConfig>,
+	pub user_agent: Option<String>,
 }
 impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	type Error = ();
@@ -63,7 +64,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 			ip: request.guard::<VisitorIP>().unwrap(), // FIXME: Needs to process errors properly
 			db: request.guard::<State<Database>>()?,
 			user: request.guard::<Option<user::User>>().unwrap(),
-			system_config: request.guard::<State<SystemConfig>>()?
+			system_config: request.guard::<State<SystemConfig>>()?,
+			user_agent: request.headers().get_one("User-Agent").and_then(|s| Some(s.to_string()))
 		})
 	}
 }
