@@ -4,7 +4,7 @@ use super::error::Error;
 use super::{ApiResult, JsonOrNormal};
 use crate::{
 	models::{
-		comment::{self, Comment, CommentStatus},
+		comment::{self, Comment, CommentStatus, CommentSerializedNormal},
 		content,
 	},
 	util::*,
@@ -29,7 +29,7 @@ pub fn new_content_comment(
 	content_id: i32,
 	data: LenientForm<NewCommentForm>,
 	gctx: GlobalContext,
-) -> Result<JsonOrNormal<ApiResult<Comment>, Redirect>, Error> {
+) -> Result<JsonOrNormal<ApiResult<CommentSerializedNormal>, Redirect>, Error> {
 	let content = content::Content::find(&gctx.db, content_id)?;
 	if !content.user_has_access(gctx.user.as_ref()) {
 		return Err(Error::NotFound);
@@ -79,6 +79,9 @@ pub fn new_content_comment(
 	let mut parent: Option<i32> = None;
 	let reply_to = if let Some(id) = data.reply_to {
 		let reply_to_comment: Comment = Comment::find(&gctx.db, id)?;
+		if reply_to_comment.content != content_id {
+			return Err(Error::BadRequest("Invalid `reply_to`"));
+		}
 		parent = Some(reply_to_comment.parent.unwrap_or(reply_to_comment.id));
 		Some(reply_to_comment.id)
 	} else {
@@ -97,7 +100,7 @@ pub fn new_content_comment(
 	let new_comment = Comment::insert(&gctx.db, new_comment)?;
 
 	Ok(JsonOrNormal(
-		ApiResult::new(new_comment, None, None),
+		ApiResult::new(new_comment.serialize_normal(), None, None),
 		Redirect::to(content.get_link()),
 	))
 }

@@ -7,8 +7,9 @@ use super::{
 	Error, Result,
 };
 use crate::{db::Database, schema::*, templates::ToHtml};
+use chrono::{DateTime, NaiveDateTime, Utc};
 
-#[derive(Debug, Queryable, Associations, Clone, Serialize, Identifiable, AsChangeset)]
+#[derive(Debug, Queryable, Associations, Clone, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]
 #[table_name = "comment"]
 #[primary_key(id)]
@@ -25,7 +26,7 @@ pub struct Comment {
 	pub ip: Option<String>,
 	pub user_agent: Option<String>,
 	pub text: String,
-	pub time: chrono::NaiveDateTime,
+	pub time: NaiveDateTime,
 	pub status: CommentStatus,
 	pub reply_to: Option<i32>,
 	pub parent: Option<i32>,
@@ -46,6 +47,16 @@ pub struct NewComment {
 	pub parent: Option<i32>,
 	pub content: i32,
 }
+#[derive(Serialize)]
+pub struct CommentSerializedNormal {
+	pub id: i32,
+	pub name: String,
+	pub mail: Option<String>,
+	pub link: Option<String>,
+	pub text: String,
+	pub time: DateTime<Utc>,
+	pub reply_to: Option<i32>,
+}
 impl Comment {
 	last!(comment);
 	insert!(comment, NewComment);
@@ -56,6 +67,18 @@ impl Comment {
 
 	pub fn get_children(&self, db: &Database) -> Result<Vec<Self>> {
 		Self::find_by_parent(db, self.id)
+	}
+
+	pub fn serialize_normal(&self) -> CommentSerializedNormal {
+		CommentSerializedNormal {
+			id: self.id,
+			name: self.author_name.to_owned(),
+			mail: self.author_mail.to_owned(),
+			link: self.author_link.to_owned(),
+			text: self.text.to_owned(),
+			time: DateTime::<Utc>::from_utc(self.time.to_owned(), Utc),
+			reply_to: self.reply_to,
+		}
 	}
 
 	pub fn find_parents_by_content_id(db: &Database, content_id: i32) -> Result<Vec<Self>> {

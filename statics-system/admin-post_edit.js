@@ -30,6 +30,7 @@ var deleteFile = function (id) {
 
 var fetchAllAttachments = function () {
 	var ctn = $('#attachments-container');
+	if(ctn.length < 1) return;
 	var uploadDir = ctn.data('upload-route');
 	$.ajax({
 		url: ctn.data('url'),
