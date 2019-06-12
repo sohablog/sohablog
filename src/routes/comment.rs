@@ -13,6 +13,7 @@ use rocket::{
 	request::LenientForm,
 	response::Redirect,
 };
+use validator;
 
 #[derive(Default, FromForm, Debug)]
 pub struct NewCommentForm {
@@ -34,16 +35,39 @@ pub fn new_content_comment(
 		return Err(Error::NotFound);
 	}
 
+	if data.text.len() < 2 {
+		return Err(Error::BadRequest("Reply content too short"));
+	}
+
 	let author = match &gctx.user {
 		Some(u) => comment::Author::from_user(&u),
 		None => {
 			let name = data
 				.name
 				.as_ref()
+				.and_then(|o| if o.trim().len() == 0 {
+					None
+				} else {
+					Some(o.trim().to_string())
+				})
 				.ok_or(Error::BadRequest("Field `name` is required"))?
 				.to_owned();
-			let mail = data.mail.as_ref().and_then(|o| Some(o.to_owned()));
-			let link = data.link.as_ref().and_then(|o| Some(o.to_owned()));
+			let mail = data.mail.as_ref().and_then(|o| {
+				let s = o.trim();
+				if s.len() == 0 || !validator::validate_email(s) {
+					None
+				} else {
+					Some(s.to_string())
+				}
+			});
+			let link = data.link.as_ref().and_then(|o| {
+				let s = o.trim();
+				if s.len() == 0 || !validator::validate_url(s) {
+					None
+				} else {
+					Some(s.to_string())
+				}
+			});
 			if let None = mail {
 				// TODO: Check if mail is required field
 				return Err(Error::BadRequest("Field `mail` is required"));
@@ -74,6 +98,6 @@ pub fn new_content_comment(
 
 	Ok(JsonOrNormal(
 		ApiResult::new(new_comment, None, None),
-		Redirect::to("/"),
+		Redirect::to(content.get_link()),
 	))
 }

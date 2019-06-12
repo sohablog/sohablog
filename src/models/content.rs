@@ -4,6 +4,7 @@ use serde_derive::*;
 
 use super::{
 	category::Category,
+	comment::Comment,
 	tag::{AssocTagContent, Tag},
 	user::User,
 	Error, Result,
@@ -104,6 +105,10 @@ impl Content {
 		uri!(crate::routes::post::post_show: path = format!("{}.html", path)).to_string()
 	}
 
+	pub fn get_comment_url(&self) -> String {
+		uri!(crate::routes::comment::new_content_comment: content_id = self.id).to_string()
+	}
+
 	pub fn get_category(&self, db: &Database) -> Result<Option<Category>> {
 		if let Some(cid) = self.category {
 			match Category::find(db, cid) {
@@ -126,6 +131,10 @@ impl Content {
 
 	pub fn get_user(&self, db: &Database) -> Result<User> {
 		User::find(db, self.user)
+	}
+
+	pub fn get_parent_comments(&self, db: &Database) -> Result<Vec<Comment>> {
+		Comment::find_parents_by_content_id(db, self.id)
 	}
 
 	pub fn user_has_access(&self, user: Option<&User>) -> bool {

@@ -50,7 +50,21 @@ impl Comment {
 	last!(comment);
 	insert!(comment, NewComment);
 	find_pk!(comment);
+	find_by!(comment, find_by_content_id, content as i32);
+	find_by!(comment, find_by_parent, parent as i32);
 	update!();
+
+	pub fn get_children(&self, db: &Database) -> Result<Vec<Self>> {
+		Self::find_by_parent(db, self.id)
+	}
+
+	pub fn find_parents_by_content_id(db: &Database, content_id: i32) -> Result<Vec<Self>> {
+		comment::table
+			.filter(comment::parent.is_null())
+			.filter(comment::content.eq(content_id))
+			.load::<Self>(&*db.pool().get()?)
+			.map_err(Error::from)
+	}
 
 	pub fn new(author: Author, ip: Option<String>, ua: Option<String>, text: String, reply_to: Option<i32>, parent: Option<i32>, content_id: i32, status: CommentStatus) -> NewComment {
 		NewComment {
