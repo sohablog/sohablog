@@ -24,4 +24,5 @@ dotenv = "0.14.1"
 multipart = "0.16.1"
 mime = "0.3.13"
 validator = "0.8.0"
+time = "0.1.42"
 uuid = { version = "0.7.4", default-features = false, features = [ "v4" ] }

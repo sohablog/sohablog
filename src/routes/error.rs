@@ -12,6 +12,7 @@ pub enum Error {
 	Model(models::Error),
 	Render(render::Error),
 	ChronoParse(chrono::ParseError),
+	SerdeJson(serde_json::Error),
 	NotFound,
 	PermissionDenied,
 	BadRequest(&'static str),
@@ -41,6 +42,11 @@ impl From<render::Error> for Error {
 impl From<chrono::ParseError> for Error {
 	fn from(err: chrono::ParseError) -> Self {
 		Self::ChronoParse(err)
+	}
+}
+impl From<serde_json::Error> for Error {
+	fn from(err: serde_json::Error) -> Self {
+		Self::SerdeJson(err)
 	}
 }
 impl From<std::io::Error> for Error {

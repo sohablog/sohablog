@@ -106,7 +106,7 @@ impl Comment {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Author {
 	pub name: String,
 	pub mail: Option<String>,

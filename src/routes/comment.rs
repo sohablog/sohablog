@@ -10,6 +10,7 @@ use crate::{
 	util::*,
 };
 use rocket::{
+	http::{Cookie, Cookies},
 	request::LenientForm,
 	response::Redirect,
 };
@@ -29,6 +30,7 @@ pub fn new_content_comment(
 	content_id: i32,
 	data: LenientForm<NewCommentForm>,
 	gctx: GlobalContext,
+	mut cookies: Cookies,
 ) -> Result<JsonOrNormal<ApiResult<CommentSerializedNormal>, Redirect>, Error> {
 	let content = content::Content::find(&gctx.db, content_id)?;
 	if !content.user_has_access(gctx.user.as_ref()) {
@@ -54,7 +56,7 @@ pub fn new_content_comment(
 				.to_owned();
 			let mail = data.mail.as_ref().and_then(|o| {
 				let s = o.trim();
-				if s.len() == 0 || !validator::validate_email(s) {
+				if s.len() == 0 {
 					None
 				} else {
 					Some(s.to_string())
@@ -68,11 +70,22 @@ pub fn new_content_comment(
 					Some(s.to_string())
 				}
 			});
-			if let None = mail {
+			if let Some(s) = &mail {
+				if !validator::validate_email(s) {
+					return Err(Error::BadRequest("Field `mail` is not valid"))
+				}
+			} else {
 				// TODO: Check if mail is required field
 				return Err(Error::BadRequest("Field `mail` is required"));
-			};
-			// TODO: Check if link is required field
+			}
+			if let Some(s) = &link {
+				if !validator::validate_url(s) {
+					return Err(Error::BadRequest("Field `link` is not valid"))
+				}
+			} else {
+				// TODO: Check if link is required field
+				return Err(Error::BadRequest("Field `link` is required"));
+			}
 			comment::Author::new(name, mail, link)
 		}
 	};
@@ -87,6 +100,8 @@ pub fn new_content_comment(
 	} else {
 		None
 	};
+
+	cookies.add(Cookie::build("comment_author", serde_json::to_string(&author)?).path("/").permanent().finish());
 	let new_comment = Comment::new(
 		author,
 		Some(gctx.ip.to_string()),

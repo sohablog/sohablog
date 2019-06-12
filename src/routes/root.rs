@@ -1,8 +1,8 @@
 use rocket_codegen::*;
-
+use rocket::http::Cookies;
 use super::{error::Error, Page};
 use crate::{
-	models::content,
+	models::{content, comment::Author},
 	render::RenderResult,
 	util::*,
 	theme::templates,
@@ -30,7 +30,7 @@ pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error>
 }
 
 #[get("/<path>")]
-pub fn page_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Error> {
+pub fn page_show(gctx: GlobalContext, cookies: Cookies, path: String) -> Result<RenderResult, Error> {
 	let slug = path.replace(".html", ""); // TODO: We just need to remove `.html` at the end
 	let post: content::Content = content::Content::find_by_slug(&gctx.db, &slug)?;
 	if post.status == content::ContentStatus::Deleted
@@ -43,6 +43,7 @@ pub fn page_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Erro
 	}
 	// TODO: Password check when `view_password` exists
 
+	let previous_author = cookies.get("comment_author").and_then(|c| serde_json::from_str::<Author>(c.value()).ok());
 	Ok(render!(
 		templates::post_show,
 		&gctx,
@@ -51,6 +52,7 @@ pub fn page_show(gctx: GlobalContext, path: String) -> Result<RenderResult, Erro
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))
 		)
 		.as_str(),
-		post
+		post,
+		previous_author
 	))
 }
