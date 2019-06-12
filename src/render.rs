@@ -1,4 +1,9 @@
-use crate::{db::Database, models::user, SystemConfig};
+use crate::{
+	db::Database,
+	models::user,
+	routes::VisitorIP,
+	SystemConfig
+};
 use comrak::{self, ComrakOptions};
 use rocket::{
 	http::uri::Origin,
@@ -46,6 +51,7 @@ impl ToHtml for Origin<'_> {
 
 /// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
 pub struct GlobalContext<'a> {
+	pub ip: VisitorIP,
 	pub db: State<'a, Database>,
 	pub user: Option<user::User>,
 	pub system_config: State<'a, SystemConfig>,
@@ -54,6 +60,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	type Error = ();
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
 		Outcome::Success(Self {
+			ip: request.guard::<VisitorIP>().unwrap(), // FIXME: Needs to process errors properly
 			db: request.guard::<State<Database>>()?,
 			user: request.guard::<Option<user::User>>().unwrap(),
 			system_config: request.guard::<State<SystemConfig>>()?

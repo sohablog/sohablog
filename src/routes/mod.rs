@@ -1,17 +1,48 @@
+use crate::SystemConfig;
 use rocket::{
 	http::{
 		uri::{self, FromUriParam, Query, UriDisplay},
 		RawStr,
+		Status
 	},
 	response::{self, Responder},
 	request::{
 		FromFormValue,
-		Request
+		FromRequest,
+		Request,
+		Outcome,
+		State
 	},
 };
 use rocket_contrib::json::Json;
-use std::fmt::Result as FmtResult;
+use std::{
+	fmt::Result as FmtResult,
+	str::FromStr
+};
 use serde_derive::*;
+
+pub mod error;
+use error::Error;
+
+#[derive(Debug)]
+pub struct VisitorIP(std::net::IpAddr);
+impl<'a, 'r> FromRequest<'a, 'r> for VisitorIP {
+	type Error = Error;
+	fn from_request(request: &'a Request<'r>) -> Outcome<Self, Error> {
+		let system_config = request.guard::<State<SystemConfig>>().unwrap();
+		let remote = request.remote().and_then(|o| Some(o.ip()));
+		let real_ip = system_config.real_ip_header.as_ref().and_then(|o| request.headers().get_one(o.as_str()));
+		let ip_addr = if let Some(ip_str) = real_ip {
+			std::net::IpAddr::from_str(ip_str).ok()
+		} else {
+			remote
+		};
+		match ip_addr {
+			Some(ip) => Outcome::Success(Self(ip)),
+			None => Outcome::Failure((Status::BadRequest, Error::BadRequest("Invalid remote IP")))
+		}
+	}
+}
 
 #[derive(Debug, Serialize)]
 pub struct ApiResult<T> {
@@ -89,8 +120,6 @@ impl<'a> FromFormValue<'a> for Page {
 		}
 	}
 }
-
-pub mod error;
 
 pub mod admin;
 pub mod post;

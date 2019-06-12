@@ -19,9 +19,11 @@ mod render;
 mod routes;
 mod schema;
 
+#[derive(Debug)]
 pub struct SystemConfig {
 	pub upload_dir: String,
 	pub upload_route: String,
+	pub real_ip_header: Option<String>,
 	pub is_prod: bool,
 }
 
@@ -40,6 +42,7 @@ fn main() {
 	let system_config = SystemConfig {
 		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/")),
 		upload_route: env::var("SOHABLOG_UPLOAD_ROUTE").unwrap_or(String::from("/static/upload")),
+		real_ip_header: env::var("SOHABLOG_REAL_IP_HEADER").ok(),
 		is_prod: rocket_config.environment.is_prod(),
 	};
 	std::fs::create_dir_all(system_config.upload_dir.as_str()).unwrap();
