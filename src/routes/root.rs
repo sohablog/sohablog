@@ -30,7 +30,7 @@ pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error>
 }
 
 #[get("/<path>")]
-pub fn page_show(gctx: GlobalContext, cookies: Cookies, path: String) -> Result<RenderResult, Error> {
+pub fn page_show(gctx: GlobalContext, mut cookies: Cookies, path: String) -> Result<RenderResult, Error> {
 	let slug = path.replace(".html", ""); // TODO: We just need to remove `.html` at the end
 	let post: content::Content = content::Content::find_by_slug(&gctx.db, &slug)?;
 	if post.status == content::ContentStatus::Deleted
@@ -43,7 +43,7 @@ pub fn page_show(gctx: GlobalContext, cookies: Cookies, path: String) -> Result<
 	}
 	// TODO: Password check when `view_password` exists
 
-	let previous_author = cookies.get("comment_author").and_then(|c| serde_json::from_str::<Author>(c.value()).ok());
+	let previous_author = cookies.get_private("comment_author").and_then(|c| serde_json::from_str::<Author>(c.value()).ok());
 	Ok(render!(
 		templates::post_show,
 		&gctx,

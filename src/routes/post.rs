@@ -11,7 +11,7 @@ use crate::{
 pub const ITEMS_PER_PAGE: i32 = 15;
 
 #[get("/post/<path>")]
-pub fn post_show(gctx: GlobalContext, cookies: Cookies, path: String) -> Result<RenderResult, Error> {
+pub fn post_show(gctx: GlobalContext, mut cookies: Cookies, path: String) -> Result<RenderResult, Error> {
 	let slug = path.replace(".html", ""); // TODO: We just need to remove `.html` at the end
 	let post: content::Content = match slug.parse::<i32>() {
 		Ok(post_id) => content::Content::find(&gctx.db, post_id)?,
@@ -27,7 +27,7 @@ pub fn post_show(gctx: GlobalContext, cookies: Cookies, path: String) -> Result<
 	}
 	// TODO: Password check when `view_password` exists
 
-	let previous_author = cookies.get("comment_author").and_then(|c| serde_json::from_str::<Author>(c.value()).ok());
+	let previous_author = cookies.get_private("comment_author").and_then(|c| serde_json::from_str::<Author>(c.value()).ok());
 
 	Ok(render!(
 		templates::post_show,

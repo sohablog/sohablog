@@ -101,7 +101,7 @@ pub fn new_content_comment(
 		None
 	};
 
-	cookies.add(Cookie::build("comment_author", serde_json::to_string(&author)?).path("/").permanent().finish());
+	cookies.add_private(Cookie::build("comment_author", serde_json::to_string(&author)?).path("/").permanent().finish());
 	let new_comment = Comment::new(
 		author,
 		Some(gctx.ip.to_string()),
