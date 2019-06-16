@@ -23,8 +23,8 @@ mod schema;
 fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
-	use crate::util::SystemConfig;
-	use rocket::{routes, config::Config as RocketConfig};
+	use crate::util::*;
+	use rocket::{routes, config::Config as RocketConfig, fairing::AdHoc};
 	use rocket_contrib::serve::StaticFiles;
 	use std::env;
 
@@ -36,7 +36,9 @@ fn main() {
 	let system_config = SystemConfig {
 		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/")),
 		upload_route: env::var("SOHABLOG_UPLOAD_ROUTE").unwrap_or(String::from("/static/upload")),
+		session_name: env::var("SOHABLOG_SESSION_NAME").unwrap_or(String::from("SOHABLOG_SESSION")),
 		real_ip_header: env::var("SOHABLOG_REAL_IP_HEADER").ok(),
+		csrf_cookie_name: env::var("SOHABLOG_CSRF_COOKIE_NAME").ok(),
 		is_prod: rocket_config.environment.is_prod(),
 	};
 	std::fs::create_dir_all(system_config.upload_dir.as_str()).unwrap();
@@ -77,6 +79,9 @@ fn main() {
 						router::static_file::theme
 					)
 				)
+				.attach(AdHoc::on_response("General Info Header", |_, res| {
+					res.set_raw_header("X-Powered-By", concat!("SOHABlog/", env!("CARGO_PKG_VERSION")));
+				}))
 				.manage(db)
 				.manage(system_config)
 				.launch();

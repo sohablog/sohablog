@@ -68,6 +68,13 @@ impl User {
 			false => Err(Error::UserHasNoPermission),
 		}
 	}
+
+	pub fn to_session_info(&self) -> UserSessionInfo {
+		UserSessionInfo {
+			id: self.id,
+			password_hash: self.password_hash.to_owned()
+		}
+	}
 }
 
 #[derive(Insertable)]
@@ -95,6 +102,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
 			.and_then(|id| User::find(&db, id).ok())
 			.or_forward(())
 	}
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UserSessionInfo {
+	pub id: i32,
+	pub password_hash: String,
 }
 
 // integer constants
