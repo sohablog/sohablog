@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use super::{Error, Result};
-use crate::{db::Database, schema::*};
+use crate::{db::Database, schema::*, util::SessionInfo};
 
 use bcrypt;
 
@@ -95,11 +95,16 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
 	type Error = ();
 	fn from_request(request: &'a rocket::request::Request<'r>) -> Outcome<User, ()> {
 		let db = request.guard::<rocket::State<Database>>()?;
-		request
-			.cookies()
-			.get_private("user_id")
-			.and_then(|cookie| cookie.value().parse().ok())
-			.and_then(|id| User::find(&db, id).ok())
+		let session: SessionInfo = request.guard::<SessionInfo>()?;
+		session.user.as_ref()
+			.and_then(|session| {
+				User::find(&db, session.id).ok()
+					.and_then(|u| if u.password_hash == session.password_hash {
+						Some(u)
+					} else {
+						None
+					})
+			})
 			.or_forward(())
 	}
 }

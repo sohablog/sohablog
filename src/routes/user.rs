@@ -5,7 +5,7 @@ use crate::{
 	templates,
 };
 use rocket::{
-	http::{Cookie, Cookies},
+	http::Cookies,
 	request::LenientForm,
 	response::Redirect,
 };
@@ -23,13 +23,14 @@ pub struct LoginForm {
 }
 #[post("/user/login", data = "<form>")]
 pub fn login_post(
-	gctx: GlobalContext,
+	mut gctx: GlobalContext,
 	mut cookies: Cookies,
 	form: LenientForm<LoginForm>,
 ) -> Result<Redirect, RenderResult> {
 	if let Ok(user) = user::User::find_by_username(&gctx.db, form.username.as_str()) {
 		if user.verify_password_hash(form.password.as_str()) {
-			cookies.add_private(Cookie::new("user_id", user.id.to_string()));
+			gctx.session_info.user = Some(user.to_session_info());
+			gctx.session_info.persist(&mut cookies, &gctx.system_config);
 			return Ok(Redirect::to("/admin"));
 		}
 	}

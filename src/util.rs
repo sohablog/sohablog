@@ -28,7 +28,7 @@ pub struct SessionInfo {
 	pub csrf_token: CSRFToken,
 }
 impl SessionInfo {
-	fn persist(&self, cookies: &mut Cookies, system_config: &SystemConfig) {
+	pub fn persist(&self, cookies: &mut Cookies, system_config: &SystemConfig) {
 		cookies.add_private(
 			Cookie::build(system_config.session_name.to_owned(), serde_json::to_string(self).unwrap_or("".into()))
 				.path("/")
