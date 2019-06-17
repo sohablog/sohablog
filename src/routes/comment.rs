@@ -4,7 +4,7 @@ use super::error::Error;
 use super::{ApiResult, JsonOrNormal};
 use crate::{
 	models::{
-		comment::{self, Comment, CommentStatus, CommentSerializedNormal},
+		comment::{self, Comment, CommentSerializedNormal, CommentStatus},
 		content,
 	},
 	util::*,
@@ -48,32 +48,23 @@ pub fn new_content_comment(
 			let name = data
 				.name
 				.as_ref()
-				.and_then(|o| if o.trim().len() == 0 {
-					None
-				} else {
-					Some(o.trim().to_string())
-				})
+				.filter(|o| o.trim().len() > 0)
+				.map(|o| o.trim().to_string())
 				.ok_or(Error::BadRequest("Field `name` is required"))?
 				.to_owned();
-			let mail = data.mail.as_ref().and_then(|o| {
-				let s = o.trim();
-				if s.len() == 0 {
-					None
-				} else {
-					Some(s.to_string())
-				}
-			});
-			let link = data.link.as_ref().and_then(|o| {
-				let s = o.trim();
-				if s.len() == 0 || !validator::validate_url(s) {
-					None
-				} else {
-					Some(s.to_string())
-				}
-			});
+			let mail = data
+				.mail
+				.as_ref()
+				.filter(|o| o.trim().len() > 0)
+				.map(|s| s.to_string());
+			let link = data
+				.link
+				.as_ref()
+				.filter(|o| o.trim().len() > 0)
+				.map(|s| s.to_string());
 			if let Some(s) = &mail {
 				if !validator::validate_email(s) {
-					return Err(Error::BadRequest("Field `mail` is not valid"))
+					return Err(Error::BadRequest("Field `mail` is not valid"));
 				}
 			} else {
 				// TODO: Check if mail is required field
@@ -81,7 +72,7 @@ pub fn new_content_comment(
 			}
 			if let Some(s) = &link {
 				if !validator::validate_url(s) {
-					return Err(Error::BadRequest("Field `link` is not valid"))
+					return Err(Error::BadRequest("Field `link` is not valid"));
 				}
 			} else {
 				// TODO: Check if link is required field
@@ -102,7 +93,12 @@ pub fn new_content_comment(
 		None
 	};
 
-	cookies.add_private(Cookie::build("comment_author", serde_json::to_string(&author)?).path("/").permanent().finish());
+	cookies.add_private(
+		Cookie::build("comment_author", serde_json::to_string(&author)?)
+			.path("/")
+			.permanent()
+			.finish(),
+	);
 	let new_comment = Comment::new(
 		author,
 		Some(gctx.ip.to_string()),

@@ -7,8 +7,8 @@ use crate::{
 		user::{self, User},
 	},
 	render::RenderResult,
-	util::*,
 	templates,
+	util::*,
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
@@ -92,8 +92,16 @@ pub fn edit_post(
 	_csrf: CSRFTokenValidation,
 ) -> Result<Redirect, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
-	let title = form.title.as_ref().and_then(|t| if t.trim().len() == 0 { None } else { Some(t.trim().to_string()) });
-	let slug = form.slug.as_ref().and_then(|t| if t.trim().len() == 0 { None } else { Some(t.trim().to_string()) });
+	let title = form
+		.title
+		.as_ref()
+		.filter(|t| t.trim().len() > 0)
+		.map(|t| t.trim().to_string());
+	let slug = form
+		.slug
+		.as_ref()
+		.filter(|t| t.trim().len() > 0)
+		.map(|t| t.trim().to_string());
 	let category = if let Some(id) = form.category {
 		let cat: models::category::Category = models::category::Category::find(&db, id)?;
 		Some(cat.id)

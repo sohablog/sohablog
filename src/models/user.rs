@@ -72,7 +72,7 @@ impl User {
 	pub fn to_session_info(&self) -> UserSessionInfo {
 		UserSessionInfo {
 			id: self.id,
-			password_hash: self.password_hash.to_owned()
+			password_hash: self.password_hash.to_owned(),
 		}
 	}
 }
@@ -96,14 +96,17 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
 	fn from_request(request: &'a rocket::request::Request<'r>) -> Outcome<User, ()> {
 		let db = request.guard::<rocket::State<Database>>()?;
 		let session: SessionInfo = request.guard::<SessionInfo>()?;
-		session.user.as_ref()
+		session
+			.user
+			.as_ref()
 			.and_then(|session| {
-				User::find(&db, session.id).ok()
-					.and_then(|u| if u.password_hash == session.password_hash {
+				User::find(&db, session.id).ok().and_then(|u| {
+					if u.password_hash == session.password_hash {
 						Some(u)
 					} else {
 						None
-					})
+					}
+				})
 			})
 			.or_forward(())
 	}

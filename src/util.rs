@@ -1,16 +1,13 @@
-use crate::{
-	db::Database,
-	models::user,
-};
+use crate::{db::Database, models::user};
 use rocket::{
-	fairing::{Fairing, Kind as FairingKind, Info as FairingInfo},
-	http::{Status, Cookies, Cookie, Method},
-	request::{State, FromRequest, Outcome, Request},
+	fairing::{Fairing, Info as FairingInfo, Kind as FairingKind},
+	http::{Cookie, Cookies, Method, Status},
+	request::{FromRequest, Outcome, Request, State},
 	Data,
 };
-use uuid::Uuid;
 use serde_derive::*;
-use std::{str::FromStr, default::Default};
+use std::{default::Default, str::FromStr};
+use uuid::Uuid;
 
 use crate::routes::error::Error; // temp solution
 
@@ -33,13 +30,21 @@ pub struct SessionInfo {
 impl SessionInfo {
 	pub fn persist(&self, cookies: &mut Cookies, system_config: &SystemConfig) {
 		if let Some(cookie_name) = &system_config.csrf_cookie_name {
-			cookies.add(Cookie::build(cookie_name.to_owned(), self.csrf_token.to_string()).max_age(time::Duration::days(3)).path("/").finish());
+			cookies.add(
+				Cookie::build(cookie_name.to_owned(), self.csrf_token.to_string())
+					.max_age(time::Duration::days(3))
+					.path("/")
+					.finish(),
+			);
 		}
 
 		cookies.add_private(
-			Cookie::build(system_config.session_name.to_owned(), serde_json::to_string(self).unwrap_or("".into()))
-				.path("/")
-				.finish()
+			Cookie::build(
+				system_config.session_name.to_owned(),
+				serde_json::to_string(self).unwrap_or("".into()),
+			)
+			.path("/")
+			.finish(),
 		);
 	}
 }
@@ -47,7 +52,7 @@ impl Default for SessionInfo {
 	fn default() -> Self {
 		Self {
 			user: None,
-			csrf_token: Uuid::new_v4().into()
+			csrf_token: Uuid::new_v4().into(),
 		}
 	}
 }
@@ -82,8 +87,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 			db: request.guard::<State<Database>>()?,
 			user: request.guard::<Option<user::User>>().unwrap(),
 			system_config: request.guard::<State<SystemConfig>>()?,
-			user_agent: request.headers().get_one("User-Agent").and_then(|s| Some(s.to_string())),
-			session_info: request.guard::<SessionInfo>()?
+			user_agent: request
+				.headers()
+				.get_one("User-Agent")
+				.and_then(|s| Some(s.to_string())),
+			session_info: request.guard::<SessionInfo>()?,
 		})
 	}
 }
@@ -100,7 +108,10 @@ impl<'a, 'r> FromRequest<'a, 'r> for VisitorIP {
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, Error> {
 		let system_config = request.guard::<'a, State<SystemConfig>>().unwrap();
 		let remote = request.remote().and_then(|o| Some(o.ip()));
-		let real_ip = system_config.real_ip_header.as_ref().and_then(|o| request.headers().get_one(o.as_str()));
+		let real_ip = system_config
+			.real_ip_header
+			.as_ref()
+			.and_then(|o| request.headers().get_one(o.as_str()));
 		let ip_addr = if let Some(ip_str) = real_ip {
 			std::net::IpAddr::from_str(ip_str).ok()
 		} else {
@@ -108,7 +119,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for VisitorIP {
 		};
 		match ip_addr {
 			Some(ip) => Outcome::Success(Self(ip)),
-			None => Outcome::Failure((Status::BadRequest, Error::BadRequest("Invalid remote IP")))
+			None => Outcome::Failure((Status::BadRequest, Error::BadRequest("Invalid remote IP"))),
 		}
 	}
 }
@@ -150,40 +161,57 @@ impl Fairing for CSRFTokenValidation {
 	fn info(&self) -> FairingInfo {
 		FairingInfo {
 			name: "CSRF Validation Finder",
-			kind: FairingKind::Request
+			kind: FairingKind::Request,
 		}
 	}
-	
 	fn on_request(&self, request: &mut Request, data: &Data) {
 		let system_config = request.guard::<State<SystemConfig>>().unwrap();
 
-		if request.method() == Method::Post || request.method() == Method::Put || request.method() == Method::Delete {
-			let token = if request.content_type().map(|c| c.media_type()).filter(|m| m.top() == "multipart" && m.sub() == "form-data").is_some() {
-				let field_disposition_str: String = format!("Content-Disposition: form-data; name=\"{}\"", &system_config.csrf_field_name);
+		if request.method() == Method::Post
+			|| request.method() == Method::Put
+			|| request.method() == Method::Delete
+		{
+			let token = if request
+				.content_type()
+				.map(|c| c.media_type())
+				.filter(|m| m.top() == "multipart" && m.sub() == "form-data")
+				.is_some()
+			{
+				let field_disposition_str: String = format!(
+					"Content-Disposition: form-data; name=\"{}\"",
+					&system_config.csrf_field_name
+				);
 				let field_disposition = field_disposition_str.as_bytes();
 				data.peek()
-					.split(|&c| c==0x0a || c==0x0d)
+					.split(|&c| c == 0x0a || c == 0x0d)
 					.filter(|d| !d.is_empty())
-					.skip_while(|&d| d != field_disposition && d != &field_disposition[..field_disposition.len() - 2])
+					.skip_while(|&d| {
+						d != field_disposition
+							&& d != &field_disposition[..field_disposition.len() - 2]
+					})
 					.skip(1)
-					.map(|s| s.split(|&c| c==0x0a || c==0x0d).next())
+					.map(|s| s.split(|&c| c == 0x0a || c == 0x0d).next())
 					.next()
 					.unwrap_or(None)
 					.and_then(|b| std::str::from_utf8(b).ok())
 			} else {
-				std::str::from_utf8(data.peek()).unwrap_or("")
+				std::str::from_utf8(data.peek())
+					.unwrap_or("")
 					.split('&')
-					.filter_map(|s| s.find('=').and_then(|l| {
-						let (key, value) = s.split_at(l + 1);
-						let key = &key[0..l];
-						if key == system_config.csrf_field_name.as_str() {
-							Some(value)
-						} else {
-							None
-						}
-					}))
+					.filter_map(|s| {
+						s.find('=').and_then(|l| {
+							let (key, value) = s.split_at(l + 1);
+							let key = &key[0..l];
+							if key == system_config.csrf_field_name.as_str() {
+								Some(value)
+							} else {
+								None
+							}
+						})
+					})
 					.next()
-			}.and_then(|s| Some(String::from(s)));
+			}
+			.and_then(|s| Some(String::from(s)));
 			request.local_cache(|| CSRFTokenValidation(token));
 		}
 	}

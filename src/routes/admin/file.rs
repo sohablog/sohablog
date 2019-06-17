@@ -1,7 +1,11 @@
 use super::super::error::Error;
 use crate::{
 	db::Database,
-	models::{file::File, user::User, content::{self, Content}},
+	models::{
+		content::{self, Content},
+		file::File,
+		user::User,
+	},
 	util::*,
 };
 use multipart::server::{
@@ -19,7 +23,11 @@ use std::fs;
 use uuid::Uuid;
 
 #[get("/admin/file/by-content/<content_id>")]
-pub fn find_by_content(content_id: i32, db: State<Database>, _user: User) -> Result<Json<Vec<File>>, Error> {
+pub fn find_by_content(
+	content_id: i32,
+	db: State<Database>,
+	_user: User,
+) -> Result<Json<Vec<File>>, Error> {
 	let content: Content = Content::find(&db, content_id)?;
 	if content.status == content::ContentStatus::Deleted
 		|| content.r#type != content::ContentType::Article
@@ -32,7 +40,12 @@ pub fn find_by_content(content_id: i32, db: State<Database>, _user: User) -> Res
 
 // is CSRFTokenValidation needed?
 #[delete("/admin/file/<id>")]
-pub fn delete_by_id(id: i32, db: State<Database>, system_config: State<SystemConfig>, _user: User) -> Result<Status, Error> {
+pub fn delete_by_id(
+	id: i32,
+	db: State<Database>,
+	system_config: State<SystemConfig>,
+	_user: User,
+) -> Result<Status, Error> {
 	let file: File = File::find(&db, id)?;
 	match fs::remove_file(&file.key.replace("{upload_dir}", &system_config.upload_dir)) {
 		Err(e) => match e.kind() {
@@ -103,9 +116,15 @@ pub fn upload(
 
 			let save_path = file_key.replace("{upload_dir}", &system_config.upload_dir); // file full path for writing contents, like `/path/to/upload/201906/mori.love`
 			match entries.fields.get("file")?[0].data {
-				SavedData::Bytes(ref b) => { fs::write(&save_path, b)?; },
-				SavedData::Text(ref s) => { fs::write(&save_path, s)?; },
-				SavedData::File(ref path, _) => { fs::copy(path, &save_path)?; },
+				SavedData::Bytes(ref b) => {
+					fs::write(&save_path, b)?;
+				}
+				SavedData::Text(ref s) => {
+					fs::write(&save_path, s)?;
+				}
+				SavedData::File(ref path, _) => {
+					fs::copy(path, &save_path)?;
+				}
 			}
 
 			let file = File::create(

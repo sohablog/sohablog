@@ -13,8 +13,8 @@
 extern crate diesel;
 
 mod db;
-mod util;
 mod models;
+mod util;
 #[macro_use]
 mod render;
 mod routes;
@@ -24,7 +24,7 @@ fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
 	use crate::util::*;
-	use rocket::{routes, config::Config as RocketConfig, fairing::AdHoc};
+	use rocket::{config::Config as RocketConfig, fairing::AdHoc, routes};
 	use rocket_contrib::serve::StaticFiles;
 	use std::env;
 
@@ -75,13 +75,13 @@ fn main() {
 				)
 				.mount(
 					"/static/",
-					routes!(
-						router::static_file::system,
-						router::static_file::theme
-					)
+					routes!(router::static_file::system, router::static_file::theme),
 				)
 				.attach(AdHoc::on_response("General Info Header", |_, res| {
-					res.set_raw_header("X-Powered-By", concat!("SOHABlog/", env!("CARGO_PKG_VERSION")));
+					res.set_raw_header(
+						"X-Powered-By",
+						concat!("SOHABlog/", env!("CARGO_PKG_VERSION")),
+					);
 				}))
 				.attach(CSRFTokenValidation(None))
 				.manage(db)

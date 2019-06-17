@@ -1,14 +1,5 @@
-use crate::{
-	models::user,
-	render::RenderResult,
-	util::*,
-	templates,
-};
-use rocket::{
-	http::Cookies,
-	request::LenientForm,
-	response::Redirect,
-};
+use crate::{models::user, render::RenderResult, templates, util::*};
+use rocket::{http::Cookies, request::LenientForm, response::Redirect};
 use rocket_codegen::*;
 
 #[get("/user/login")]

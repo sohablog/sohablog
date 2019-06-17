@@ -1,11 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{
-	content::Content,
-	user::User,
-	Error, Result,
-};
+use super::{content::Content, user::User, Error, Result};
 use crate::{db::Database, schema::*, templates::ToHtml};
 use chrono::{DateTime, NaiveDateTime, Utc};
 
@@ -89,7 +85,16 @@ impl Comment {
 			.map_err(Error::from)
 	}
 
-	pub fn new(author: Author, ip: Option<String>, ua: Option<String>, text: String, reply_to: Option<i32>, parent: Option<i32>, content_id: i32, status: CommentStatus) -> NewComment {
+	pub fn new(
+		author: Author,
+		ip: Option<String>,
+		ua: Option<String>,
+		text: String,
+		reply_to: Option<i32>,
+		parent: Option<i32>,
+		content_id: i32,
+		status: CommentStatus,
+	) -> NewComment {
 		NewComment {
 			user: author.local_user,
 			author_name: author.name.to_owned(),
@@ -101,7 +106,7 @@ impl Comment {
 			status: status,
 			reply_to: reply_to,
 			parent: parent,
-			content: content_id
+			content: content_id,
 		}
 	}
 }
@@ -111,7 +116,7 @@ pub struct Author {
 	pub name: String,
 	pub mail: Option<String>,
 	pub link: Option<String>,
-	pub local_user: Option<i32>
+	pub local_user: Option<i32>,
 }
 impl Author {
 	pub fn from_user(user: &User) -> Self {
@@ -119,7 +124,7 @@ impl Author {
 			name: user.name.to_owned(),
 			mail: Some(user.email.to_owned()),
 			link: user.website.to_owned(),
-			local_user: Some(user.id)
+			local_user: Some(user.id),
 		}
 	}
 
@@ -128,7 +133,7 @@ impl Author {
 			name: name,
 			mail: mail,
 			link: link,
-			local_user: None
+			local_user: None,
 		}
 	}
 }

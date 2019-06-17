@@ -3,18 +3,12 @@ use rocket::{
 		uri::{self, FromUriParam, Query, UriDisplay},
 		RawStr,
 	},
+	request::{FromFormValue, Request},
 	response::{self, Responder},
-	request::{
-		FromFormValue,
-		Request,
-	},
 };
 use rocket_contrib::json::Json;
-use std::{
-	fmt::Result as FmtResult,
-	string::ToString,
-};
 use serde_derive::*;
+use std::{fmt::Result as FmtResult, string::ToString};
 
 pub mod error;
 
@@ -29,7 +23,7 @@ impl<T> ApiResult<T> {
 		Self {
 			status: status.unwrap_or(200),
 			r#return: rtn.unwrap_or("OK".to_string()),
-			data: data
+			data: data,
 		}
 	}
 }
@@ -37,7 +31,12 @@ impl<T> ApiResult<T> {
 pub struct JsonOrNormal<J, N>(J, N);
 impl<'r, J: serde::Serialize, N: Responder<'r>> Responder<'r> for JsonOrNormal<J, N> {
 	fn respond_to(self, req: &Request) -> response::Result<'r> {
-		if req.accept().and_then(|o| o.first()).and_then(|o| Some(o.is_json())).unwrap_or(false) {
+		if req
+			.accept()
+			.and_then(|o| o.first())
+			.and_then(|o| Some(o.is_json()))
+			.unwrap_or(false)
+		{
 			Json(self.0).respond_to(req)
 		} else {
 			self.1.respond_to(req)
@@ -96,8 +95,8 @@ impl<'a> FromFormValue<'a> for Page {
 }
 
 pub mod admin;
+pub mod comment;
 pub mod post;
 pub mod root;
-pub mod user;
 pub mod static_file;
-pub mod comment;
+pub mod user;

@@ -1,11 +1,11 @@
+use super::ApiResult;
 use crate::{models, render, util::*};
 use rocket::{
-	http::{Status},
+	http::Status,
 	response::{self, Responder},
 	Request,
 };
 use rocket_contrib::json::Json;
-use super::ApiResult;
 
 #[derive(Debug)]
 pub enum Error {
@@ -68,7 +68,12 @@ impl<'a> Responder<'a> for Error {
 			Self::BadRequest(reason) => Status::new(400, reason),
 			_ => Status::InternalServerError,
 		};
-		if req.accept().and_then(|o| o.first()).and_then(|o| Some(o.is_json())).unwrap_or(false) {
+		if req
+			.accept()
+			.and_then(|o| o.first())
+			.and_then(|o| Some(o.is_json()))
+			.unwrap_or(false)
+		{
 			Json(ApiResult {
 				status: status.code.into(),
 				r#return: if global_context.system_config.is_prod {
@@ -76,8 +81,9 @@ impl<'a> Responder<'a> for Error {
 				} else {
 					format!("{:?}", &self)
 				},
-				data: ()
-			}).respond_to(req)
+				data: (),
+			})
+			.respond_to(req)
 		} else {
 			Err(status)
 		}

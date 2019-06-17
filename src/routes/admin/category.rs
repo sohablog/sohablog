@@ -5,9 +5,9 @@ use crate::{
 		category::{Category, NewCategory},
 		user::{self, User},
 	},
-	util::*,
 	render::RenderResult,
 	templates,
+	util::*,
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;

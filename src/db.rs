@@ -1,7 +1,4 @@
-use diesel::{
-	mysql::MysqlConnection,
-	r2d2::ConnectionManager,
-};
+use diesel::{mysql::MysqlConnection, r2d2::ConnectionManager};
 use r2d2::Pool;
 use std::error;
 use std::fmt;

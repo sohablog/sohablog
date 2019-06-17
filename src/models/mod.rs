@@ -179,8 +179,8 @@ macro_rules! find_by {
 }
 
 pub mod category;
+pub mod comment;
 pub mod content;
+pub mod file;
 pub mod tag;
 pub mod user;
-pub mod file;
-pub mod comment;
