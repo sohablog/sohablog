@@ -32,11 +32,15 @@ pub struct SessionInfo {
 }
 impl SessionInfo {
 	pub fn persist(&self, cookies: &mut Cookies, system_config: &SystemConfig) {
+		if let Some(cookie_name) = &system_config.csrf_cookie_name {
+			cookies.add(Cookie::build(cookie_name.to_owned(), self.csrf_token.to_string()).max_age(time::Duration::days(3)).path("/").finish());
+		}
+
 		cookies.add_private(
 			Cookie::build(system_config.session_name.to_owned(), serde_json::to_string(self).unwrap_or("".into()))
 				.path("/")
 				.finish()
-		)
+		);
 	}
 }
 impl Default for SessionInfo {
@@ -52,11 +56,12 @@ impl<'a, 'r> FromRequest<'a, 'r> for SessionInfo {
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
 		let system_config = request.guard::<State<SystemConfig>>().unwrap();
 		let mut cookies = request.cookies();
-		Outcome::Success(cookies
+		let session = cookies
 			.get_private(&system_config.session_name.as_str())
 			.and_then(|c| serde_json::from_str::<SessionInfo>(c.value()).ok())
-			.unwrap_or_default()
-		)
+			.unwrap_or_default();
+		session.persist(&mut cookies, &system_config);
+		Outcome::Success(session)
 	}
 }
 
@@ -118,6 +123,10 @@ impl CSRFToken {
 			Err(Error::CSRFViolation)
 		}
 	}
+
+	pub fn as_str(&self) -> &str {
+		self.0.as_str()
+	}
 }
 impl From<Uuid> for CSRFToken {
 	fn from(uuid: Uuid) -> Self {
@@ -129,7 +138,13 @@ impl From<String> for CSRFToken {
 		Self(s)
 	}
 }
+impl std::string::ToString for CSRFToken {
+	fn to_string(&self) -> String {
+		self.0.to_owned()
+	}
+}
 
+#[derive(Debug)]
 pub struct CSRFTokenValidation(pub Option<String>);
 impl Fairing for CSRFTokenValidation {
 	fn info(&self) -> FairingInfo {
@@ -160,6 +175,7 @@ impl Fairing for CSRFTokenValidation {
 					.split('&')
 					.filter_map(|s| s.find('=').and_then(|l| {
 						let (key, value) = s.split_at(l + 1);
+						let key = &key[0..l];
 						if key == system_config.csrf_field_name.as_str() {
 							Some(value)
 						} else {

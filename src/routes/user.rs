@@ -24,6 +24,7 @@ pub struct LoginForm {
 #[post("/user/login", data = "<form>")]
 pub fn login_post(
 	mut gctx: GlobalContext,
+	_csrf: CSRFTokenValidation,
 	mut cookies: Cookies,
 	form: LenientForm<LoginForm>,
 ) -> Result<Redirect, RenderResult> {
