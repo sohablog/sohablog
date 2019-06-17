@@ -1,5 +1,6 @@
 @use super::misc::base;
 @use super::statics;
+@use super::misc::csrf_input;
 @use crate::models::content::Content as PostContent;
 @use crate::models::comment::Author;
 @use crate::render::*;
@@ -44,6 +45,7 @@
 					<p><input type="text" name="link" placeholder="Your website"  @if let Some(o) = &previous_author {@if let Some(s) = &o.link {value="@s" }}/></p>
 				}<br />
 				<textarea name="text"></textarea>
+				@:csrf_input(ctx)
 				<input type="submit" value="Send!" /><button id="cancel-reply" style="display: none;">Cancel Reply</button>
 			</form>
 		</div>

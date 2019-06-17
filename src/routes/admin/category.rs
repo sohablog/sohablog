@@ -36,6 +36,7 @@ pub fn update(
 	db: State<Database>,
 	form: LenientForm<PostForm>,
 	current_user: User,
+	_csrf: CSRFTokenValidation,
 ) -> Result<Redirect, Error> {
 	current_user.check_permission(user::PERM_CATEGORY_MANAGE)?;
 

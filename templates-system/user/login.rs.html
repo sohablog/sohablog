@@ -1,5 +1,6 @@
 @use super::super::base;
 @use crate::render::*;
+@use super::super::misc::csrf_hidden_input;
 
 @(ctx: &GlobalContext, message: Option<String>, username: Option<String>)
 
@@ -15,6 +16,7 @@
 		<br />
 		<input type="password" placeholder="Password" name="password" />
 		<br />
+		@:csrf_hidden_input(ctx)
 		<input type="submit" />
 	</form>
 }, {})

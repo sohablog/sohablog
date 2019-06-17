@@ -1,5 +1,6 @@
 @use super::super::super::statics;
 @use super::super::super::base;
+@use super::super::super::misc::csrf_hidden_input;
 @use crate::models::content::Content;
 @use crate::models::content::ContentStatus;
 @use crate::models::category::Category;
@@ -41,6 +42,7 @@
 		</select>
 		<br />
 		<input type="hidden" id="save_draft" name="save_draft" value="true" />
+		@:csrf_hidden_input(ctx)
 		<input type="submit" id="submit_draft" value="Draft" />
 		<input type="submit" id="submit" value="Save" />
 	</form>

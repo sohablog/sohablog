@@ -1,5 +1,6 @@
 @use super::super::super::base;
 @use crate::models::category::Category;
+@use super::super::super::misc::csrf_hidden_input;
 @use crate::render::*;
 
 @(ctx: &GlobalContext, categories: Vec<Category>)
@@ -25,6 +26,7 @@
 					<td><textarea name="description">@if let Some(desc) = cat.description {@desc}</textarea></td>
 					<td><input type="number" name="order" value="@cat.order" /></td>
 					<td><input type="text" name="parent" @if let Some(pid) = cat.parent {value="@pid" }/></td>
+					@:csrf_hidden_input(ctx)
 					<td><input type="submit" value="Modify"/></td>
 				</form>
 			</tr>}
@@ -35,6 +37,7 @@
 					<td><textarea name="description" placeholder="Description"></textarea></td>
 					<td><input type="number" name="order" value="0" /></td>
 					<td><input type="text" name="parent" placeholder="Parent slug (optional)" /></td>
+					@:csrf_hidden_input(ctx)
 					<td><input type="submit" value="Add"/></td>
 				</form>
 			</tr>

@@ -30,6 +30,7 @@ pub fn new_content_comment(
 	content_id: i32,
 	data: LenientForm<NewCommentForm>,
 	gctx: GlobalContext,
+	_csrf: CSRFTokenValidation,
 	mut cookies: Cookies,
 ) -> Result<JsonOrNormal<ApiResult<CommentSerializedNormal>, Redirect>, Error> {
 	let content = content::Content::find(&gctx.db, content_id)?;

@@ -30,6 +30,7 @@ pub fn find_by_content(content_id: i32, db: State<Database>, _user: User) -> Res
 	Ok(Json(list))
 }
 
+// is CSRFTokenValidation needed?
 #[delete("/admin/file/<id>")]
 pub fn delete_by_id(id: i32, db: State<Database>, system_config: State<SystemConfig>, _user: User) -> Result<Status, Error> {
 	let file: File = File::find(&db, id)?;
@@ -44,6 +45,7 @@ pub fn delete_by_id(id: i32, db: State<Database>, system_config: State<SystemCon
 	Ok(Status::NoContent)
 }
 
+// is CSRFTokenValidation needed?
 #[post("/admin/file/upload", data = "<data>")]
 pub fn upload(
 	data: Data,

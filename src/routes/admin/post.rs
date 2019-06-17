@@ -89,6 +89,7 @@ pub fn edit_post(
 	db: State<Database>,
 	form: LenientForm<PostForm>,
 	current_user: User,
+	_csrf: CSRFTokenValidation,
 ) -> Result<Redirect, Error> {
 	current_user.check_permission(user::PERM_POST_EDIT)?;
 	let title = form.title.as_ref().and_then(|t| if t.trim().len() == 0 { None } else { Some(t.trim().to_string()) });
