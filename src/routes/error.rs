@@ -15,6 +15,7 @@ pub enum Error {
 	SerdeJson(serde_json::Error),
 	NotFound,
 	PermissionDenied,
+	CSRFViolation,
 	BadRequest(&'static str),
 	Io(std::io::Error),
 	OptionNone,

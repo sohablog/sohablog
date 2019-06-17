@@ -37,6 +37,7 @@ fn main() {
 		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/")),
 		upload_route: env::var("SOHABLOG_UPLOAD_ROUTE").unwrap_or(String::from("/static/upload")),
 		session_name: env::var("SOHABLOG_SESSION_NAME").unwrap_or(String::from("SOHABLOG_SESSION")),
+		csrf_field_name: env::var("SOHABLOG_CSRF_FIELD_NAME").unwrap_or(String::from("_token")),
 		real_ip_header: env::var("SOHABLOG_REAL_IP_HEADER").ok(),
 		csrf_cookie_name: env::var("SOHABLOG_CSRF_COOKIE_NAME").ok(),
 		is_prod: rocket_config.environment.is_prod(),
@@ -82,6 +83,7 @@ fn main() {
 				.attach(AdHoc::on_response("General Info Header", |_, res| {
 					res.set_raw_header("X-Powered-By", concat!("SOHABlog/", env!("CARGO_PKG_VERSION")));
 				}))
+				.attach(CSRFTokenValidation(None))
 				.manage(db)
 				.manage(system_config)
 				.launch();
