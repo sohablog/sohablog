@@ -22,7 +22,7 @@
 		<div style="height: 600px;">
 			<div id="content-mp"></div>
 		</div>
-		<textarea style="display: none;" id="content" name="content">@if let Some(p) = &post {@p.content}</textarea>
+		<textarea style="display: none;" id="content" name="content">@if let Some(p) = &post {@if let Some(c) = &p.draft_content {@c} else {@p.content}}</textarea>
 		<br />
 		<p><b>Category</b></p>
 		<p>
