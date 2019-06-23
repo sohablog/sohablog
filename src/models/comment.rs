@@ -58,7 +58,7 @@ impl Comment {
 	insert!(comment, NewComment);
 	find_pk!(comment);
 	find_by!(comment, find_by_content_id, content as i32);
-	find_by!(comment, find_by_parent, parent as i32);
+	find_by!(comment, find_by_parent, parent as i32, status as CommentStatus);
 	update!();
 
 	pub fn count_by_status(db: &Database, status: &CommentStatus) -> Result<i64> {
@@ -84,7 +84,7 @@ impl Comment {
 	}
 
 	pub fn get_children(&self, db: &Database) -> Result<Vec<Self>> {
-		Self::find_by_parent(db, self.id)
+		Self::find_by_parent(db, self.id, CommentStatus::Normal)
 	}
 
 	pub fn serialize_normal(&self) -> CommentSerializedNormal {
@@ -101,6 +101,7 @@ impl Comment {
 
 	pub fn find_parents_by_content_id(db: &Database, content_id: i32) -> Result<Vec<Self>> {
 		comment::table
+			.filter(comment::status.eq(CommentStatus::Normal))
 			.filter(comment::parent.is_null())
 			.filter(comment::content.eq(content_id))
 			.load::<Self>(&*db.pool().get()?)

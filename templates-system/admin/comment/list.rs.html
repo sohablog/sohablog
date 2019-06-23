@@ -1,3 +1,4 @@
+@use super::super::super::statics;
 @use super::super::super::base;
 @use super::super::super::misc::paginator;
 @use crate::models::comment::Comment;
@@ -10,21 +11,40 @@
 
 @:base(ctx, "Comment List", {}, {}, {
 	<p>
-		<a@if status == CommentStatus::Normal { href="@uri!(crate::routes::admin::comment::list: status = Some(CommentStatus::Normal), page = Some(Page::new(1, 1)))"}>Normal</a>
+		<a@if status != CommentStatus::Normal { href="@uri!(crate::routes::admin::comment::list: status = Some(CommentStatus::Normal), page = Some(Page::new(1, 1)))"}>Normal</a>
+		&nbsp;
+		<a@if status != CommentStatus::Spam { href="@uri!(crate::routes::admin::comment::list: status = Some(CommentStatus::Spam), page = Some(Page::new(1, 1)))"}>Spam</a>
+		&nbsp;
+		<a@if status != CommentStatus::PendingReview { href="@uri!(crate::routes::admin::comment::list: status = Some(CommentStatus::PendingReview), page = Some(Page::new(1, 1)))"}>PendingReview</a>
 		&nbsp;
 	</p>
-	<table>
-		<thead>
+	@for comment in comments {
+		<hr />
+		<a@if let Some(l) = &comment.author_link { href="@l"}>@comment.author_name</a>@if let Some(i) = &comment.ip {&nbsp;/&nbsp;@i}@if let Some(i) = &comment.author_mail {&nbsp;/&nbsp;@i}@if let Some(i) = &comment.user_agent {&nbsp;/&nbsp;<small>@i</small>}
+		<br />
+		<span>@comment.time</span>
+		<br />
+		<p>@comment.text</p>
+		<table class="set-status-buttons" data-id="@comment.id">
 			<tr>
-				<th>ID</th>
-				<th>Name</th>
-				<th>Category</th>
-				<th>Time</th>
+				<td><b>Mark as</b></td>
+				<td><button data-status="@CommentStatus::Normal"@if comment.status == CommentStatus::Normal { disabled}>Normal</button></td>
+				<td><button data-status="@CommentStatus::Spam"@if comment.status == CommentStatus::Spam { disabled}>Spam</button></td>
+				<td><button data-status="@CommentStatus::PendingReview"@if comment.status == CommentStatus::PendingReview { disabled}>PendingReview</button></td>
+				<td><button data-status="@CommentStatus::Deleted"@if comment.status == CommentStatus::Deleted { disabled}>Deleted</button></td>
 			</tr>
-		</thead>
-		<tbody>
-		</tbody>
-	</table>
+		</table>
+	}
 	<hr />
 	@:paginator(page)
-}, {})
+}, {
+	<script src="/static/system/@statics::jquery_3_4_1_min_js.name"></script>
+	<script src="/static/system/@statics::admin_comment_js.name"></script>
+	<script>
+		window.__injectData = @{
+			token: "@ctx.session_info.csrf_token.as_str()",
+			tokenFieldName: "@ctx.system_config.csrf_field_name",
+			setStatusUrl: "@uri!(crate::routes::admin::comment::set_status: id = -20001003, status = -20000309)"
+		@};
+	</script>
+})
