@@ -12,11 +12,11 @@
 		</div>
 	}
 	<form method="POST">
+		@:csrf_hidden_input(ctx)
 		<input type="text" placeholder="Username" name="username" @if let Some(s) = username {value="@s" }/>
 		<br />
 		<input type="password" placeholder="Password" name="password" />
 		<br />
-		@:csrf_hidden_input(ctx)
 		<input type="submit" />
 	</form>
 }, {})

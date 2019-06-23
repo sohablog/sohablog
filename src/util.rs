@@ -164,6 +164,9 @@ impl Fairing for CSRFTokenValidation {
 			kind: FairingKind::Request,
 		}
 	}
+
+	// FIXME: or as a feature?
+	/// `csrf_field` should appear in the front of the form, cuz we didn't use data.peek for the second time. The full stream will not be loaded.
 	fn on_request(&self, request: &mut Request, data: &Data) {
 		let system_config = request.guard::<State<SystemConfig>>().unwrap();
 
@@ -177,7 +180,6 @@ impl Fairing for CSRFTokenValidation {
 				.filter(|m| m.top() == "multipart" && m.sub() == "form-data")
 				.is_some()
 			{
-				dbg!("multipart request");
 				let field_disposition_str: String = format!(
 					"Content-Disposition: form-data; name=\"{}\"",
 					&system_config.csrf_field_name
@@ -202,7 +204,6 @@ impl Fairing for CSRFTokenValidation {
 					.filter_map(|s| {
 						s.find('=').and_then(|l| {
 							let (key, value) = s.split_at(l + 1);
-							dbg!((&key, &value));
 							let key = &key[0..l];
 							if key == system_config.csrf_field_name.as_str() {
 								Some(value)
@@ -214,7 +215,6 @@ impl Fairing for CSRFTokenValidation {
 					.next()
 			}
 			.and_then(|s| Some(String::from(s)));
-			dbg!(&token);
 			request.local_cache(|| CSRFTokenValidation(token));
 		}
 	}
@@ -223,11 +223,8 @@ impl<'a, 'r> FromRequest<'a, 'r> for CSRFTokenValidation {
 	type Error = Error;
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, Error> {
 		let token: &CSRFTokenValidation = request.local_cache(|| CSRFTokenValidation(None));
-		dbg!(&token);
 		if let Some(token) = &token.0 {
-			dbg!(&token);
 			if let Outcome::Success(session_info) = request.guard::<SessionInfo>() {
-				dbg!(&session_info);
 				if let Ok(_) = session_info.csrf_token.validate(&token) {
 					return Outcome::Success(Self(None));
 				}

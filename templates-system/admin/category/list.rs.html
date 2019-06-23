@@ -20,24 +20,24 @@
 		<tbody>@for cat in categories {
 			<tr>
 				<form method="POST" action="/admin/category/update">
+					@:csrf_hidden_input(ctx)
 					<input type="hidden" name="target" value="@cat.id" />
 					<td><input type="text" name="slug" value="@cat.slug" /></td>
 					<td><input type="text" name="name" value="@cat.name" /></td>
 					<td><textarea name="description">@if let Some(desc) = cat.description {@desc}</textarea></td>
 					<td><input type="number" name="order" value="@cat.order" /></td>
 					<td><input type="text" name="parent" @if let Some(pid) = cat.parent {value="@pid" }/></td>
-					@:csrf_hidden_input(ctx)
 					<td><input type="submit" value="Modify"/></td>
 				</form>
 			</tr>}
 			<tr>
 				<form method="POST" action="/admin/category/update">
+					@:csrf_hidden_input(ctx)
 					<td><input type="text" name="slug" placeholder="Slug" /></td>
 					<td><input type="text" name="name" placeholder="Name" /></td>
 					<td><textarea name="description" placeholder="Description"></textarea></td>
 					<td><input type="number" name="order" value="0" /></td>
 					<td><input type="text" name="parent" placeholder="Parent slug (optional)" /></td>
-					@:csrf_hidden_input(ctx)
 					<td><input type="submit" value="Add"/></td>
 				</form>
 			</tr>

@@ -14,6 +14,7 @@
 	<link href="/static/system/@statics::markdown_palettes_0_4_11_css.name" rel="stylesheet" />
 }, {
 	<form action="@uri!(crate::routes::admin::post::edit_post)" method="POST">
+		@:csrf_hidden_input(ctx)
 		@if let Some(p) = &post {<input type="hidden" name="id" value="@p.id" />}
 		<input type="text" placeholder="Title" name="title" @if let Some(p) = &post {@if let Some(t) = &p.title {value="@t" }}/>
 		<br />
@@ -42,7 +43,6 @@
 		</select>
 		<br />
 		<input type="hidden" id="save_draft" name="save_draft" value="true" />
-		@:csrf_hidden_input(ctx)
 		<input type="submit" id="submit_draft" value="Draft" />
 		<input type="submit" id="submit" value="Save" />
 	</form>

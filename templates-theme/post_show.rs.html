@@ -39,13 +39,13 @@
 		<h1>Comments</h1>
 		<div id="comment-form-wrapper">
 			<form id="comment-form" action="@post.get_comment_url()" method="POST">
+				@:csrf_input(ctx)
 				@if let Some(u) = &ctx.user {<i>You are logged in as @u.name</i>} else {
 					<p><input type="text" name="name" placeholder="Your name" @if let Some(o) = &previous_author {value="@o.name" }/></p>
 					<p><input type="text" name="mail" placeholder="Your e-mail" @if let Some(o) = &previous_author {@if let Some(s) = &o.mail {value="@s" }}/></p>
 					<p><input type="text" name="link" placeholder="Your website"  @if let Some(o) = &previous_author {@if let Some(s) = &o.link {value="@s" }}/></p>
 				}<br />
 				<textarea name="text"></textarea>
-				@:csrf_input(ctx)
 				<input type="submit" value="Send!" /><button id="cancel-reply" style="display: none;">Cancel Reply</button>
 			</form>
 		</div>
