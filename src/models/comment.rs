@@ -108,6 +108,10 @@ impl Comment {
 			.map_err(Error::from)
 	}
 
+	pub fn get_content(&self, db: &Database) -> Result<Content> {
+		Content::find(db, self.content)
+	}
+
 	pub fn new(
 		author: Author,
 		ip: Option<String>,

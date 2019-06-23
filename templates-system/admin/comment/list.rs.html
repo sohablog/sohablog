@@ -22,7 +22,7 @@
 		<hr />
 		<a@if let Some(l) = &comment.author_link { href="@l"}>@comment.author_name</a>@if let Some(i) = &comment.ip {&nbsp;/&nbsp;@i}@if let Some(i) = &comment.author_mail {&nbsp;/&nbsp;@i}@if let Some(i) = &comment.user_agent {&nbsp;/&nbsp;<small>@i</small>}
 		<br />
-		<span>@comment.time</span>
+		<span>@comment.time</span>&nbsp;@@<span>@if let Ok(post) = comment.get_content(&ctx.db) {<a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a>}</span>
 		<br />
 		<p>@comment.text</p>
 		<table class="set-status-buttons" data-id="@comment.id">
