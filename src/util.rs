@@ -212,6 +212,7 @@ impl Fairing for CSRFTokenValidation {
 					.next()
 			}
 			.and_then(|s| Some(String::from(s)));
+			dbg!(&token);
 			request.local_cache(|| CSRFTokenValidation(token));
 		}
 	}
@@ -220,8 +221,11 @@ impl<'a, 'r> FromRequest<'a, 'r> for CSRFTokenValidation {
 	type Error = Error;
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, Error> {
 		let token: &CSRFTokenValidation = request.local_cache(|| CSRFTokenValidation(None));
+		dbg!(&token);
 		if let Some(token) = &token.0 {
+			dbg!(&token);
 			if let Outcome::Success(session_info) = request.guard::<SessionInfo>() {
+				dbg!(&session_info);
 				if let Ok(_) = session_info.csrf_token.validate(&token) {
 					return Outcome::Success(Self(None));
 				}
