@@ -14,6 +14,7 @@ use rocket::{
 	request::LenientForm,
 	response::Redirect,
 };
+use regex::Regex;
 
 #[derive(Default, FromForm, Debug)]
 pub struct NewCommentForm {
@@ -91,6 +92,11 @@ pub fn new_content_comment(
 	} else {
 		None
 	};
+	
+	// comment content cannot contains too much continuous empty line
+	let comment_text = data.text.replace("\r\n", "\n").replace("\r", "\n");
+	let re = Regex::new(r"\n{3,}").unwrap();
+	let comment_text = re.replace_all(&comment_text, "\n\n");
 
 	cookies.add_private(
 		Cookie::build("comment_author", serde_json::to_string(&author)?)
@@ -102,7 +108,7 @@ pub fn new_content_comment(
 		author,
 		Some(gctx.ip.to_string()),
 		gctx.user_agent.to_owned(),
-		data.text.to_owned(),
+		comment_text.to_string(),
 		reply_to,
 		parent,
 		content_id,
