@@ -177,6 +177,7 @@ impl Fairing for CSRFTokenValidation {
 				.filter(|m| m.top() == "multipart" && m.sub() == "form-data")
 				.is_some()
 			{
+				dbg!("multipart request");
 				let field_disposition_str: String = format!(
 					"Content-Disposition: form-data; name=\"{}\"",
 					&system_config.csrf_field_name
@@ -201,6 +202,7 @@ impl Fairing for CSRFTokenValidation {
 					.filter_map(|s| {
 						s.find('=').and_then(|l| {
 							let (key, value) = s.split_at(l + 1);
+							dbg!((&key, &value));
 							let key = &key[0..l];
 							if key == system_config.csrf_field_name.as_str() {
 								Some(value)
