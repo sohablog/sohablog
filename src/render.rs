@@ -67,6 +67,11 @@ pub fn markdown_to_html(out: &mut dyn Write, s: &str) -> IoResult<()> {
 	write!(out, "{}", s)
 }
 
+pub fn nl2br(out: &mut dyn Write, s: &str) -> IoResult<()> {
+	let s = s.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "<br />");
+	write!(out, "{}", s)
+}
+
 pub fn date_format(time: &chrono::NaiveDateTime, fmt: &str) -> String {
 	time.format(fmt).to_string()
 }

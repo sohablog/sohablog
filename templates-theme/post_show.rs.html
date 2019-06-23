@@ -50,11 +50,11 @@
 			</form>
 		</div>
 		@for comment in comments {<div class="comment">
-			<p>@comment.text</p>
+			<p>@:nl2br(comment.text.as_str())</p>
 			<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id">Reply</button>
 			@if let Ok(comments) = &comment.get_children(&ctx.db) {
 				@for comment in comments {<div class="comment">
-					<p>@comment.text</p>
+					<p>@:nl2br(comment.text.as_str())</p>
 					<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id">Reply</button>
 				</div>}
 		}</div>}
