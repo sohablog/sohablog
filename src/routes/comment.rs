@@ -14,7 +14,6 @@ use rocket::{
 	request::LenientForm,
 	response::Redirect,
 };
-use validator;
 
 #[derive(Default, FromForm, Debug)]
 pub struct NewCommentForm {
@@ -76,7 +75,7 @@ pub fn new_content_comment(
 				}
 			} else {
 				// TODO: Check if link is required field
-				return Err(Error::BadRequest("Field `link` is required"));
+				// return Err(Error::BadRequest("Field `link` is required"));
 			}
 			comment::Author::new(name, mail, link)
 		}

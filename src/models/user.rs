@@ -16,6 +16,8 @@ pub const PERM_POST_EDIT: u32 = 1 << 2; // create & edit post
 pub const PERM_POST_DELETE: u32 = 1 << 3; // delete post
 #[allow(dead_code)]
 pub const PERM_CATEGORY_MANAGE: u32 = 1 << 4; // manage category
+#[allow(dead_code)]
+pub const PERM_COMMENT_MANAGE: u32 = 1 << 5; // manage category
 
 #[derive(Identifiable, Debug, Queryable, Clone, Serialize)]
 #[primary_key(id)]

@@ -1,0 +1,30 @@
+@use super::super::super::base;
+@use super::super::super::misc::paginator;
+@use crate::models::comment::Comment;
+@use crate::models::comment::CommentStatus;
+@use crate::routes::Page;
+@use crate::render::*;
+@use rocket_codegen::*;
+
+@(ctx: &GlobalContext, page: Page, status: CommentStatus, comments: Vec<Comment>)
+
+@:base(ctx, "Comment List", {}, {}, {
+	<p>
+		<a@if status == CommentStatus::Normal { href="@uri!(crate::routes::admin::comment::list: status = Some(CommentStatus::Normal), page = Some(Page::new(1, 1)))"}>Normal</a>
+		&nbsp;
+	</p>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>Category</th>
+				<th>Time</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	<hr />
+	@:paginator(page)
+}, {})

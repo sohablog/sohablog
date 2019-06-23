@@ -70,6 +70,11 @@ impl Page {
 		((self.current - 1) * limit, self.current * limit)
 	}
 }
+impl Default for Page {
+	fn default() -> Self {
+		Page::new(1, 1)
+	}
+}
 impl UriDisplay<Query> for Page {
 	fn fmt(&self, f: &mut uri::Formatter<Query>) -> FmtResult {
 		f.write_value(&format!("{}", self.current))

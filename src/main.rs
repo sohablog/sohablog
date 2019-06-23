@@ -62,6 +62,7 @@ fn main() {
 						router::admin::post::new_get,
 						router::admin::post::edit_get,
 						router::admin::post::edit_post,
+						router::admin::comment::list,
 						router::admin::category::list,
 						router::admin::category::update,
 						router::admin::file::upload,

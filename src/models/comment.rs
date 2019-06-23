@@ -61,6 +61,28 @@ impl Comment {
 	find_by!(comment, find_by_parent, parent as i32);
 	update!();
 
+	pub fn count_by_status(db: &Database, status: &CommentStatus) -> Result<i64> {
+		comment::table
+			.filter(comment::status.eq(status))
+			.count()
+			.get_result(&*db.pool().get()?)
+			.map_err(Error::from)
+	}
+
+	pub fn find_by_status(
+		db: &Database,
+		(min, max): (i32, i32),
+		status: &CommentStatus
+	) -> Result<Vec<Self>> {
+		let mut query = comment::table.into_boxed();
+
+		query = query
+			.filter(comment::status.eq(status))
+			.order(comment::time.desc())
+			.offset(min.into()).limit((max - min).into());
+		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+	}
+
 	pub fn get_children(&self, db: &Database) -> Result<Vec<Self>> {
 		Self::find_by_parent(db, self.id)
 	}
@@ -188,5 +210,35 @@ impl ToSql<Integer, Mysql> for CommentStatus {
 impl ToHtml for CommentStatus {
 	fn to_html(&self, out: &mut dyn std::io::Write) -> std::io::Result<()> {
 		write!(out, "{}", *self as i32)
+	}
+}
+use rocket::{
+	http::{
+		uri::{self, FromUriParam, Query, UriDisplay},
+		RawStr,
+	},
+	request::FromFormValue,
+};
+impl<'a> FromFormValue<'a> for CommentStatus {
+	type Error = &'a RawStr;
+	fn default() -> Option<Self> {
+		Some(Self::Normal)
+	}
+	fn from_form_value(form_value: &'a RawStr) -> std::result::Result<Self, &'a RawStr> {
+		match form_value.parse::<i32>() {
+			Ok(status) => Ok(Self::try_from(status).map_err(|_| RawStr::from_str("No such CommentStatus"))?),
+			_ => Err("Error when parsing `CommentStatus`".into()),
+		}
+	}
+}
+impl FromUriParam<Query, Option<CommentStatus>> for CommentStatus {
+	type Target = CommentStatus;
+	fn from_uri_param(v: Option<Self>) -> Self {
+		v.unwrap_or(Self::Normal)
+	}
+}
+impl UriDisplay<Query> for CommentStatus {
+	fn fmt(&self, f: &mut uri::Formatter<Query>) -> std::fmt::Result {
+		f.write_value(&format!("{}", *self as i32))
 	}
 }
