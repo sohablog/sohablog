@@ -27,3 +27,4 @@ validator = "0.8.0"
 time = "0.1.42"
 uuid = { version = "0.7.4", default-features = false, features = [ "v4" ] }
 data-encoding = "2.1.2"
+regex = "1.1.7"
