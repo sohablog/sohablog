@@ -96,7 +96,7 @@ use rocket::request::{FromRequest, Outcome};
 impl<'a, 'r> FromRequest<'a, 'r> for User {
 	type Error = ();
 	fn from_request(request: &'a rocket::request::Request<'r>) -> Outcome<User, ()> {
-		let db = request.guard::<rocket::State<Database>>()?;
+		let db = request.guard::<rocket::State<Box<Database>>>()?;
 		let session: SessionInfo = request.guard::<SessionInfo>()?;
 		session
 			.user

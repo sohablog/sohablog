@@ -48,7 +48,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for SessionInfo {
 /// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
 pub struct GlobalContext<'a> {
 	pub ip: VisitorIP,
-	pub db: &'a Database,
+	pub db: &'a Box<Database>,
 	pub user: Option<user::User>,
 	pub system_config: &'a SystemConfig,
 	pub user_agent: Option<String>,
@@ -59,7 +59,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
 		Outcome::Success(Self {
 			ip: request.guard::<VisitorIP>().unwrap(), // FIXME: Needs to process errors properly
-			db: request.guard::<State<Database>>()?.inner(),
+			db: request.guard::<State<Box<Database>>>()?.inner(),
 			user: request.guard::<Option<user::User>>().unwrap(),
 			system_config: request.guard::<State<SystemConfig>>()?.inner(),
 			user_agent: request
@@ -71,13 +71,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	}
 }
 
-#[derive(Debug)]
-pub struct VisitorIP(std::net::IpAddr);
-impl ToString for VisitorIP {
-	fn to_string(&self) -> String {
-		self.0.to_string()
-	}
-}
 impl<'a, 'r> FromRequest<'a, 'r> for VisitorIP {
 	type Error = Error;
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, Error> {

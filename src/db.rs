@@ -74,7 +74,7 @@ impl DatabaseConnection for Database {
 	type Connection = PooledConnection<ConnectionManager<MysqlConnection>>;
 	type Error = r2d2::Error;
 
-	fn conn(&self) -> Result<Self::Connection, Self::Error> {
+	fn conn(&self) -> Result<PooledConnection<ConnectionManager<MysqlConnection>>, Self::Error> {
 		self.pool().get()
 	}
 }

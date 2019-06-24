@@ -18,3 +18,11 @@ pub struct SystemConfig {
 	pub csrf_field_name: String,
 	pub is_prod: bool,
 }
+
+#[derive(Debug)]
+pub struct VisitorIP(pub std::net::IpAddr);
+impl ToString for VisitorIP {
+	fn to_string(&self) -> String {
+		self.0.to_string()
+	}
+}

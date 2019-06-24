@@ -87,7 +87,7 @@ fn main() {
 					);
 				}))
 				.attach(CSRFTokenValidation(None))
-				.manage(db)
+				.manage(Box::new(db))
 				.manage(system_config)
 				.launch();
 		}
