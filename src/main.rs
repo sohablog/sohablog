@@ -15,6 +15,7 @@ extern crate diesel;
 mod db;
 mod models;
 mod utils;
+mod plugin;
 mod util;
 #[macro_use]
 mod render;
