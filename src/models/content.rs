@@ -52,7 +52,7 @@ impl Content {
 			.filter(content::type_.eq(ContentType::Article))
 			.filter(content::status.eq_any(status))
 			.count()
-			.get_result(&*db.pool().get()?)
+			.get_result(&db.conn()?)
 			.map_err(Error::from)
 	}
 
@@ -74,7 +74,7 @@ impl Content {
 			query.order(content::time.desc())
 		};
 		query = query.offset(min.into()).limit((max - min).into());
-		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+		query.load::<Self>(&db.conn()?).map_err(Error::from)
 	}
 
 	pub fn get_tags(&self, db: &Database) -> Result<Vec<Tag>> {
@@ -171,7 +171,7 @@ impl Content {
 
 		query = query.limit(limit);
 
-		match query.get_result::<Self>(&*db.pool().get()?) {
+		match query.get_result::<Self>(&db.conn()?) {
 			Ok(v) => Ok(Some(v)),
 			Err(diesel::result::Error::NotFound) => Ok(None),
 			Err(e) => Err(Error::from(e)),

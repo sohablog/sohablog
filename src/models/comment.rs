@@ -65,7 +65,7 @@ impl Comment {
 		comment::table
 			.filter(comment::status.eq(status))
 			.count()
-			.get_result(&*db.pool().get()?)
+			.get_result(&db.conn()?)
 			.map_err(Error::from)
 	}
 
@@ -80,7 +80,7 @@ impl Comment {
 			.filter(comment::status.eq(status))
 			.order(comment::time.desc())
 			.offset(min.into()).limit((max - min).into());
-		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+		query.load::<Self>(&db.conn()?).map_err(Error::from)
 	}
 
 	pub fn get_children(&self, db: &Database) -> Result<Vec<Self>> {
@@ -104,7 +104,7 @@ impl Comment {
 			.filter(comment::status.eq(CommentStatus::Normal))
 			.filter(comment::parent.is_null())
 			.filter(comment::content.eq(content_id))
-			.load::<Self>(&*db.pool().get()?)
+			.load::<Self>(&db.conn()?)
 			.map_err(Error::from)
 	}
 

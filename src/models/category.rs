@@ -26,7 +26,7 @@ impl Category {
 	pub fn find_all(db: &Database) -> Result<Vec<Self>> {
 		let mut query = category::table.into_boxed();
 		query = query.order(category::order.desc());
-		query.load::<Self>(&*db.pool().get()?).map_err(Error::from)
+		query.load::<Self>(&db.conn()?).map_err(Error::from)
 	}
 }
 impl PartialEq for Category {

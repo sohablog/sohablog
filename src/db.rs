@@ -1,5 +1,5 @@
 use diesel::{mysql::MysqlConnection, r2d2::ConnectionManager};
-use r2d2::Pool;
+use r2d2::{Pool, PooledConnection};
 use std::error;
 use std::fmt;
 
@@ -42,10 +42,11 @@ impl From<r2d2::Error> for Error {
 	}
 }
 
+type DatabasePool = Pool<ConnectionManager<MysqlConnection>>;
 pub use crate::utils::DatabaseConnection;
 
 pub struct Database {
-	pool: Option<Pool<ConnectionManager<MysqlConnection>>>,
+	pool: Option<DatabasePool>,
 	conn_url: String,
 }
 impl Database {
@@ -62,12 +63,18 @@ impl Database {
 		self.pool = Some(pool);
 		Ok(())
 	}
-}
-impl DatabaseConnection for Database {
-	type Pool = Pool<ConnectionManager<MysqlConnection>>;
-	fn pool(&self) -> &Self::Pool {
+
+	pub fn pool(&self) -> &DatabasePool {
 		self.pool
 			.as_ref()
 			.expect("Database pool unavailable, forgot `init()`?")
+	}
+}
+impl DatabaseConnection for Database {
+	type Connection = PooledConnection<ConnectionManager<MysqlConnection>>;
+	type Error = r2d2::Error;
+
+	fn conn(&self) -> Result<Self::Connection, Self::Error> {
+		self.pool().get()
 	}
 }

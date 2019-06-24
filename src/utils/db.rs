@@ -1,4 +1,6 @@
 pub trait DatabaseConnection {
-	type Pool;
-	fn pool(&self) -> &Self::Pool;
+	type Connection;
+	type Error;
+
+	fn conn(&self) -> Result<Self::Connection, Self::Error>;
 }

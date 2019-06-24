@@ -51,7 +51,7 @@ impl User {
 	pub fn set_password_hash(&self, db: &Database, pwd: &str) -> Result<()> {
 		diesel::update(self)
 			.set(user::password_hash.eq(pwd))
-			.execute(&*db.pool().get()?)
+			.execute(&db.conn()?)
 			.map(|_| ())
 			.map_err(Error::from)
 	}

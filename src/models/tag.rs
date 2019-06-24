@@ -29,7 +29,7 @@ impl Tag {
 	pub fn find_by_name(db: &Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
 		let exist_tags = tag::table
 			.filter(tag::name.eq_any(&tags))
-			.load::<Self>(&*db.pool().get()?)
+			.load::<Self>(&db.conn()?)
 			.map_err(Error::from)?;
 		let mut new_tags: Vec<NewTag> = Vec::new();
 		for tag in &tags {
@@ -39,12 +39,12 @@ impl Tag {
 		}
 		diesel::insert_into(tag::table)
 			.values(&new_tags)
-			.execute(&*db.pool().get()?)?;
+			.execute(&db.conn()?)?;
 
 		// SB MySQL doesn't support `RETURNING` clause
 		tag::table
 			.filter(tag::name.eq_any(&tags))
-			.load::<Self>(&*db.pool().get()?)
+			.load::<Self>(&db.conn()?)
 			.map_err(Error::from)
 	}
 
@@ -52,7 +52,7 @@ impl Tag {
 		tag::table
 			.into_boxed()
 			.filter(tag::id.eq_any(tags))
-			.load::<Self>(&*db.pool().get()?)
+			.load::<Self>(&db.conn()?)
 			.map_err(Error::from)
 	}
 }
@@ -78,7 +78,7 @@ impl AssocTagContent {
 		assoc_tag_content::table
 			.into_boxed()
 			.filter(assoc_tag_content::content.eq(content_id))
-			.load::<Self>(&*db.pool().get()?)
+			.load::<Self>(&db.conn()?)
 			.map_err(Error::from)
 	}
 
@@ -106,11 +106,11 @@ impl AssocTagContent {
 		diesel::delete(assoc_tag_content::table)
 			.filter(assoc_tag_content::content.eq(content_id))
 			.filter(assoc_tag_content::tag.eq_any(removing_ids))
-			.execute(&*db.pool().get()?)?;
+			.execute(&db.conn()?)?;
 		// then insert new added tags
 		diesel::insert_into(assoc_tag_content::table)
 			.values(&adding_objects)
-			.execute(&*db.pool().get()?)?;
+			.execute(&db.conn()?)?;
 		Ok(())
 	}
 }
