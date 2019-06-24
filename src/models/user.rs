@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use super::{Error, Result};
-use crate::{db::Database, schema::*, util::SessionInfo};
+use crate::{db::Database, schema::*, util::{SessionInfo, UserSessionInfo}};
 
 use bcrypt;
 
@@ -112,12 +112,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
 			})
 			.or_forward(())
 	}
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UserSessionInfo {
-	pub id: i32,
-	pub password_hash: String,
 }
 
 // integer constants

@@ -1,32 +1,15 @@
 use crate::{db::Database, models::user};
+pub use crate::utils::*;
 use rocket::{
 	fairing::{Fairing, Info as FairingInfo, Kind as FairingKind},
 	http::{Cookie, Cookies, Method, Status},
 	request::{FromRequest, Outcome, Request, State},
 	Data,
 };
-use serde_derive::*;
-use std::{default::Default, str::FromStr};
-use uuid::Uuid;
+use std::str::FromStr;
 
 use crate::routes::error::Error; // temp solution
 
-#[derive(Debug)]
-pub struct SystemConfig {
-	pub upload_dir: String,
-	pub upload_route: String,
-	pub session_name: String,
-	pub real_ip_header: Option<String>,
-	pub csrf_cookie_name: Option<String>,
-	pub csrf_field_name: String,
-	pub is_prod: bool,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SessionInfo {
-	pub user: Option<user::UserSessionInfo>,
-	pub csrf_token: CSRFToken,
-}
 impl SessionInfo {
 	pub fn persist(&self, cookies: &mut Cookies, system_config: &SystemConfig) {
 		if let Some(cookie_name) = &system_config.csrf_cookie_name {
@@ -48,14 +31,6 @@ impl SessionInfo {
 		);
 	}
 }
-impl Default for SessionInfo {
-	fn default() -> Self {
-		Self {
-			user: None,
-			csrf_token: Uuid::new_v4().into(),
-		}
-	}
-}
 impl<'a, 'r> FromRequest<'a, 'r> for SessionInfo {
 	type Error = ();
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
@@ -73,9 +48,9 @@ impl<'a, 'r> FromRequest<'a, 'r> for SessionInfo {
 /// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
 pub struct GlobalContext<'a> {
 	pub ip: VisitorIP,
-	pub db: State<'a, Database>,
+	pub db: &'a Database,
 	pub user: Option<user::User>,
-	pub system_config: State<'a, SystemConfig>,
+	pub system_config: &'a SystemConfig,
 	pub user_agent: Option<String>,
 	pub session_info: SessionInfo,
 }
@@ -84,9 +59,9 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
 		Outcome::Success(Self {
 			ip: request.guard::<VisitorIP>().unwrap(), // FIXME: Needs to process errors properly
-			db: request.guard::<State<Database>>()?,
+			db: request.guard::<State<Database>>()?.inner(),
 			user: request.guard::<Option<user::User>>().unwrap(),
-			system_config: request.guard::<State<SystemConfig>>()?,
+			system_config: request.guard::<State<SystemConfig>>()?.inner(),
 			user_agent: request
 				.headers()
 				.get_one("User-Agent")
@@ -121,37 +96,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for VisitorIP {
 			Some(ip) => Outcome::Success(Self(ip)),
 			None => Outcome::Failure((Status::BadRequest, Error::BadRequest("Invalid remote IP"))),
 		}
-	}
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CSRFToken(String);
-impl CSRFToken {
-	pub fn validate(&self, s: &String) -> Result<(), Error> {
-		if &self.0 == s {
-			Ok(())
-		} else {
-			Err(Error::CSRFViolation)
-		}
-	}
-
-	pub fn as_str(&self) -> &str {
-		self.0.as_str()
-	}
-}
-impl From<Uuid> for CSRFToken {
-	fn from(uuid: Uuid) -> Self {
-		Self(uuid.to_simple().to_string())
-	}
-}
-impl From<String> for CSRFToken {
-	fn from(s: String) -> Self {
-		Self(s)
-	}
-}
-impl std::string::ToString for CSRFToken {
-	fn to_string(&self) -> String {
-		self.0.to_owned()
 	}
 }
 
