@@ -9,7 +9,7 @@ use super::{
 	user::User,
 	Error, Result,
 };
-use crate::{db::Database, schema::*, templates::ToHtml};
+use crate::{db::Database, utils::*, schema::*, templates::ToHtml};
 
 #[derive(Debug, Queryable, Associations, Clone, Serialize, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]

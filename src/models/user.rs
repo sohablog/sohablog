@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use super::{Error, Result};
-use crate::{db::Database, schema::*, util::{SessionInfo, UserSessionInfo}};
+use crate::{db::Database, utils::*, schema::*};
 
 use bcrypt;
 

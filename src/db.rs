@@ -42,10 +42,10 @@ impl From<r2d2::Error> for Error {
 	}
 }
 
-type DatabasePool = Pool<ConnectionManager<MysqlConnection>>;
+pub use crate::utils::DatabaseConnection;
 
 pub struct Database {
-	pool: Option<DatabasePool>,
+	pool: Option<Pool<ConnectionManager<MysqlConnection>>>,
 	conn_url: String,
 }
 impl Database {
@@ -62,8 +62,10 @@ impl Database {
 		self.pool = Some(pool);
 		Ok(())
 	}
-
-	pub fn pool(&self) -> &DatabasePool {
+}
+impl DatabaseConnection for Database {
+	type Pool = Pool<ConnectionManager<MysqlConnection>>;
+	fn pool(&self) -> &Self::Pool {
 		self.pool
 			.as_ref()
 			.expect("Database pool unavailable, forgot `init()`?")

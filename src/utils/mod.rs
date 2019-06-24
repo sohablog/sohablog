@@ -1,10 +1,12 @@
 mod page;
 mod session_info;
 mod csrf;
+mod db;
 
 pub use page::Page;
 pub use session_info::{SessionInfo, UserSessionInfo};
 pub use csrf::CSRFToken;
+pub use db::DatabaseConnection;
 
 #[derive(Debug)]
 pub struct SystemConfig {

@@ -45,6 +45,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 macro_rules! insert {
 	($table:ident, $from:ident) => {
 		pub fn insert(db: &crate::db::Database, new: $from) -> Result<Self> {
+			use crate::utils::DatabaseConnection;
 			diesel::insert_into($table::table)
 				.values(new)
 				.execute(&*db.pool().get()?)?;
@@ -64,6 +65,7 @@ macro_rules! insert {
 macro_rules! insert_non_incremental {
 	($table:ident, $from:ident, $pk_field:ident) => {
 		pub fn insert(db: &crate::db::Database, new: $from) -> Result<Self> {
+			use crate::utils::DatabaseConnection;
 			diesel::insert_into($table::table)
 				.values(&new)
 				.execute(&*db.pool().get()?)?;
@@ -82,6 +84,7 @@ macro_rules! insert_non_incremental {
 macro_rules! update {
 	()=>{
 		pub fn update(&self,db: &crate::db::Database) -> Result<()>{
+			use crate::utils::DatabaseConnection;
 			diesel::update(self).set(self).execute(&*db.pool().get()?)?;
 			Ok(())
 		}
@@ -93,6 +96,7 @@ macro_rules! update {
 macro_rules! delete {
 	() => {
 		pub fn delete(&self,db: &crate::db::Database) -> Result<()> {
+			use crate::utils::DatabaseConnection;
 			diesel::delete(self)
 				.execute(&*db.pool().get()?)?;
 			Ok(())
@@ -113,6 +117,7 @@ macro_rules! last {
 	};
 	($table:ident, $field:ident) => {
 		pub fn last(db: &crate::db::Database) -> Result<Self> {
+			use crate::utils::DatabaseConnection;
 			$table::table
 				.order_by($table::$field.desc())
 				.limit(1)
@@ -137,6 +142,7 @@ macro_rules! find_pk {
 	};
 	($table:ident, $field:ident as $field_type:ty) => {
 		pub fn find(db: &crate::db::Database, pkv: $field_type) -> Result<Self> {
+			use crate::utils::DatabaseConnection;
 			$table::table
 				.filter($table::$field.eq(pkv))
 				.limit(1)
@@ -158,6 +164,7 @@ macro_rules! find_pk {
 macro_rules! find_one_by {
 	($table:ident, $fn:ident, $($col:ident as $type:ty),+)=>{
 		pub fn $fn(db: &crate::db::Database,$($col: $type),+)->Result<Self>{
+			use crate::utils::DatabaseConnection;
 			$table::table$(.filter($table::$col.eq($col)))+.limit(1).load::<Self>(&*db.pool().get()?)?.into_iter().next().ok_or(Error::NotFound)
 		}
 	};
@@ -173,6 +180,7 @@ macro_rules! find_one_by {
 macro_rules! find_by {
 	($table:ident, $fn:ident, $($col:ident as $type:ty),+)=>{
 		pub fn $fn(db: &crate::db::Database,$($col: $type),+)->Result<Vec<Self>>{
+			use crate::utils::DatabaseConnection;
 			$table::table$(.filter($table::$col.eq($col)))+.load::<Self>(&*db.pool().get()?).map_err(Error::from)
 		}
 	};

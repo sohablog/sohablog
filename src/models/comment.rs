@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use super::{content::Content, user::User, Error, Result};
-use crate::{db::Database, schema::*, templates::ToHtml};
+use crate::{db::Database, utils::*, schema::*, templates::ToHtml};
 use chrono::{DateTime, NaiveDateTime, Utc};
 
 #[derive(Debug, Queryable, Associations, Clone, Identifiable, AsChangeset)]
