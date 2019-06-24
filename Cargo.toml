@@ -1,6 +1,6 @@
 [package]
-name = "soha-blog"
-version = "0.2.0"
+name = "sohablog"
+version = "0.2.1"
 authors = ["Soha Jin"]
 edition = "2018"
 
@@ -28,3 +28,7 @@ time = "0.1.42"
 uuid = { version = "0.7.4", default-features = false, features = [ "v4" ] }
 data-encoding = "2.1.2"
 regex = "1.1.7"
+libloading = "0.5.1"
+
+# [lib]
+# path = "src/lib.rs"

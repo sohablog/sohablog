@@ -24,5 +24,5 @@ RUN mkdir -p /app/bin \
 	&& apt-get update \
 	&& apt-get install -y libmysqlclient* \
 	&& apt-get autoremove -y && apt-get clean && apt-get autoclean && rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/*  /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin
-COPY --from=stage-build /app/build/target/release/soha-blog /app/bin/
-CMD ["/app/bin/soha-blog"]
+COPY --from=stage-build /app/build/target/release/sohablog /app/bin/
+CMD ["/app/bin/sohablog"]
