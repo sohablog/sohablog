@@ -1,6 +1,6 @@
 use rocket::{
 	http::{
-		uri::{self, FromUriParam, Query, UriDisplay},
+		uri::{self, FromUriParam, Query, UriDisplay, Origin},
 		RawStr,
 	},
 	request::{FromFormValue, Request},
@@ -8,7 +8,8 @@ use rocket::{
 };
 use rocket_contrib::json::Json;
 use serde_derive::*;
-use std::{fmt::Result as FmtResult, string::ToString};
+use crate::render::{RenderResult, ToHtml as RenderToHtml};
+use std::{fmt::Result as FmtResult, string::ToString, io::{Result as IoResult, Write}};
 
 pub mod error;
 
@@ -66,6 +67,17 @@ impl<'a> FromFormValue<'a> for Page {
 			Ok(page) => Ok(Page::new(page, 1)),
 			_ => Err(form_value),
 		}
+	}
+}
+
+impl<'r> Responder<'r> for RenderResult {
+	fn respond_to(self, req: &Request) -> response::Result<'r> {
+		response::content::Html(self.0).respond_to(req)
+	}
+}
+impl RenderToHtml for Origin<'_> {
+	fn to_html(&self, out: &mut dyn Write) -> IoResult<()> {
+		write!(out, "{}", &self.to_string())
 	}
 }
 

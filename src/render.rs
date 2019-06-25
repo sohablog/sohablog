@@ -1,10 +1,5 @@
 pub use crate::util::GlobalContext;
 use comrak::{self, ComrakOptions};
-use rocket::{
-	http::uri::Origin,
-	response::{self, Responder},
-	Request,
-};
 use std::io::{Result as IoResult, Write};
 
 #[derive(Debug)]
@@ -16,11 +11,6 @@ pub enum Error {
 /// `RenderResult` wraps a Vec<u8> which is the HTML render result.
 #[derive(Debug)]
 pub struct RenderResult(pub Vec<u8>);
-impl<'r> Responder<'r> for RenderResult {
-	fn respond_to(self, req: &Request) -> response::Result<'r> {
-		response::content::Html(self.0).respond_to(req)
-	}
-}
 
 /// returns `RenderResult`
 #[macro_export]
@@ -36,11 +26,6 @@ macro_rules! render {
 
 pub trait ToHtml {
 	fn to_html(&self, out: &mut dyn Write) -> IoResult<()>;
-}
-impl ToHtml for Origin<'_> {
-	fn to_html(&self, out: &mut dyn Write) -> IoResult<()> {
-		write!(out, "{}", &self.to_string())
-	}
 }
 
 /// Options for `comrak` which is a Markdown parser
