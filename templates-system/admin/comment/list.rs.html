@@ -1,13 +1,13 @@
 @use super::super::super::statics;
 @use super::super::super::base;
 @use super::super::super::misc::paginator;
-@use crate::models::comment::Comment;
-@use crate::models::comment::CommentStatus;
-@use crate::routes::Page;
+@use crate::interfaces::models::Comment as CommentInterface;
+@use crate::types::CommentStatus;
+@use crate::utils::Page;
 @use crate::render::*;
 @use rocket_codegen::*;
 
-@(ctx: &GlobalContext, page: Page, status: CommentStatus, comments: Vec<Comment>)
+@(ctx: &GlobalContext, page: Page, status: CommentStatus, comments: Vec<Box<CommentInterface>>)
 
 @:base(ctx, "Comment List", {}, {}, {
 	<p>
@@ -20,18 +20,18 @@
 	</p>
 	@for comment in comments {
 		<hr />
-		<a@if let Some(l) = &comment.author_link { href="@l"}>@comment.author_name</a>@if let Some(i) = &comment.ip {&nbsp;/&nbsp;@i}@if let Some(i) = &comment.author_mail {&nbsp;/&nbsp;@i}@if let Some(i) = &comment.user_agent {&nbsp;/&nbsp;<small>@i</small>}
+		<a@if let Some(l) = comment.author().link() { href="@l"}>@comment.author().name()</a>@if let Some(i) = comment.ip() {&nbsp;/&nbsp;@i}@if let Some(i) = comment.author().mail() {&nbsp;/&nbsp;@i}@if let Some(i) = comment.user_agent() {&nbsp;/&nbsp;<small>@i</small>}
 		<br />
-		<span>@comment.time</span>&nbsp;@@<span>@if let Ok(post) = comment.get_content(&ctx.db) {<a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a>}</span>
+		<span>@comment.time()</span>&nbsp;@@<span>@if let Some(post) = Some(comment.content()) {<a href="@post.link()">@if let Some(t) = post.title() {@t} else {Untitled}</a>}</span>
 		<br />
-		<p>@comment.text</p>
-		<table class="set-status-buttons" data-id="@comment.id">
+		<p>@comment.text()</p>
+		<table class="set-status-buttons" data-id="@comment.id()">
 			<tr>
 				<td><b>Mark as</b></td>
-				<td><button data-status="@CommentStatus::Normal"@if comment.status == CommentStatus::Normal { disabled}>Normal</button></td>
-				<td><button data-status="@CommentStatus::Spam"@if comment.status == CommentStatus::Spam { disabled}>Spam</button></td>
-				<td><button data-status="@CommentStatus::PendingReview"@if comment.status == CommentStatus::PendingReview { disabled}>PendingReview</button></td>
-				<td><button data-status="@CommentStatus::Deleted"@if comment.status == CommentStatus::Deleted { disabled}>Deleted</button></td>
+				<td><button data-status="@CommentStatus::Normal"@if comment.status() == CommentStatus::Normal { disabled}>Normal</button></td>
+				<td><button data-status="@CommentStatus::Spam"@if comment.status() == CommentStatus::Spam { disabled}>Spam</button></td>
+				<td><button data-status="@CommentStatus::PendingReview"@if comment.status() == CommentStatus::PendingReview { disabled}>PendingReview</button></td>
+				<td><button data-status="@CommentStatus::Deleted"@if comment.status() == CommentStatus::Deleted { disabled}>Deleted</button></td>
 			</tr>
 		</table>
 	}

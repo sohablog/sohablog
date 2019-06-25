@@ -1,6 +1,6 @@
 @use super::super::super::base;
-@use crate::interfaces::models::Category as CategoryInterface;
 @use super::super::super::misc::csrf_hidden_input;
+@use crate::interfaces::models::Category as CategoryInterface;
 @use crate::render::*;
 
 @(ctx: &GlobalContext, categories: Vec<Box<CategoryInterface>>)

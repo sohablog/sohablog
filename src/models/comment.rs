@@ -176,6 +176,12 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	}
 }
 
+impl IntoInterface<Box<CommentInterface>> for Comment {
+	fn into_interface(self, db: &Box<Database>) -> Box<CommentInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<CommentInterface>
+	}
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Author {
 	pub name: String,

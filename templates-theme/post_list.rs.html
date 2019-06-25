@@ -1,15 +1,15 @@
 @use super::misc::base;
 @use super::misc::paginator;
-@use crate::models::content::Content;
-@use crate::routes::Page;
+@use crate::interfaces::models::Content as ContentInterface;
+@use crate::utils::Page;
 @use crate::render::*;
 
-@(ctx: &GlobalContext, title: &str, page: Page, posts: Vec<Content>)
+@(ctx: &GlobalContext, title: &str, page: Page, posts: Vec<Box<ContentInterface>>)
 
 @:base(ctx, title, {}, {}, {
 	@for post in posts {<div>
-		<h2><a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a></h2>
-		<small><b>@if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized}</b> · @date_format(&post.time, "%Y-%m-%d")</small>
+		<h2><a href="@post.link()">@if let Some(t) = post.title() {@t} else {Untitled}</a></h2>
+		<small><b>@if let Some(cat) = post.category() {@cat.name()} else {Uncategorized}</b> · @date_format(&post.time(), "%Y-%m-%d")</small>
 	</div><hr />}
 	@:paginator(page)
 }, {})

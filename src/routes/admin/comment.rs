@@ -3,6 +3,7 @@ use crate::{
 	models::{
 		comment::{Comment, CommentStatus},
 		user::{self, User},
+		IntoInterface,
 	},
 	render::RenderResult,
 	templates,
@@ -30,7 +31,7 @@ pub fn list(
 		ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(templates::admin::comment::list, &gctx, page, status, comments))
+	Ok(render!(templates::admin::comment::list, &gctx, page, status, comments.into_interface(&gctx.db)))
 }
 
 

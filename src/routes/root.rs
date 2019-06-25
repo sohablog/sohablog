@@ -26,7 +26,7 @@ pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error>
 		super::post::ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(templates::post_list, &gctx, "Index", page, posts))
+	Ok(render!(templates::post_list, &gctx, "Index", page, posts.into_interface(&gctx.db)))
 }
 
 #[get("/<path>")]
