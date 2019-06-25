@@ -34,6 +34,8 @@ impl From<std::option::NoneError> for Error {
 }
 pub type Result<T> = std::result::Result<T, Error>;
 
+pub struct RepositoryWrapper<T, D>(pub T, pub D);
+
 /**
  * Insert a new row
  *

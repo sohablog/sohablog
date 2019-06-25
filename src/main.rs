@@ -14,6 +14,8 @@ extern crate diesel;
 
 mod db;
 mod models;
+mod types;
+mod template_interfaces;
 mod utils;
 mod plugin;
 mod util;

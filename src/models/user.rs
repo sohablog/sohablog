@@ -122,13 +122,7 @@ use diesel::{
 	sql_types::Integer,
 };
 
-#[derive(Copy, Clone, Serialize, Deserialize, Debug, FromSqlRow)]
-#[repr(u8)]
-#[serde(rename_all = "lowercase")]
-pub enum UserStatus {
-	Normal = 0,
-	Deleted = 1,
-}
+pub use crate::types::UserStatus;
 impl FromSql<Integer, Mysql> for UserStatus {
 	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
 		match <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)? {

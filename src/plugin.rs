@@ -14,37 +14,6 @@ use std::{
 };
 use libloading::{Library, Symbol};
 
-pub struct PluginManager {
-	plugins: Vec<Box<Plugin>>,
-	themes: HashMap<&'static str, Box<Theme>>,
-	loaded_libraries: Vec<Library>,
-}
-impl PluginManager {
-	pub fn new() -> Self {
-		Self {
-			plugins: Vec::new(),
-			themes: HashMap::new(),
-			loaded_libraries: Vec::new(),
-		}
-	}
-
-	pub unsafe fn load_theme<T: AsRef<OsStr>>(&mut self, filename: T) -> Result<(), &str> {
-		type PluginConstructor = unsafe fn () -> *mut Theme;
-		let lib = Library::new(filename.as_ref()).map_err(|_| "Unable to load the theme")?;
-		self.loaded_libraries.push(lib);
-		let lib = self.loaded_libraries.last().unwrap();
-		let constructor: Symbol<PluginConstructor> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
-		let raw_box = constructor();
-		let theme: Box<Theme> = Box::from_raw(raw_box);
-		if theme.plugin_version() != THEME_TRAIT_VERSION {
-			return Err("Plugin version is not compatible.")
-		}
-		self.themes.insert(&theme.identity(), theme);
-
-		Ok(())
-	}
-}
-
 pub const THEME_TRAIT_VERSION: u32 = 1;
 /// Although theme is also a dynamically loaded plugin, it needs a special interface
 pub trait Theme: Any + Send + Sync {
@@ -90,4 +59,35 @@ macro_rules! declare_plugin {
 			Box::into_raw(boxed)
 		}
 	};
+}
+
+pub struct PluginManager {
+	plugins: Vec<Box<Plugin>>,
+	themes: HashMap<&'static str, Box<Theme>>,
+	loaded_libraries: Vec<Library>,
+}
+impl PluginManager {
+	pub fn new() -> Self {
+		Self {
+			plugins: Vec::new(),
+			themes: HashMap::new(),
+			loaded_libraries: Vec::new(),
+		}
+	}
+
+	pub unsafe fn load_theme<T: AsRef<OsStr>>(&mut self, filename: T) -> Result<(), &str> {
+		type PluginConstructor = unsafe fn () -> *mut Theme;
+		let lib = Library::new(filename.as_ref()).map_err(|_| "Unable to load the theme")?;
+		self.loaded_libraries.push(lib);
+		let lib = self.loaded_libraries.last().unwrap();
+		let constructor: Symbol<PluginConstructor> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
+		let raw_box = constructor();
+		let theme: Box<Theme> = Box::from_raw(raw_box);
+		if theme.plugin_version() != THEME_TRAIT_VERSION {
+			return Err("Plugin version is not compatible.")
+		}
+		self.themes.insert(&theme.identity(), theme);
+
+		Ok(())
+	}
 }

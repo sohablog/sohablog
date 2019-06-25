@@ -173,28 +173,7 @@ use diesel::{
 	sql_types::Integer,
 };
 
-#[derive(Copy, Clone, Serialize, Deserialize, Debug, FromSqlRow, AsExpression, PartialEq)]
-#[repr(u8)]
-#[sql_type = "Integer"]
-#[serde(rename_all = "lowercase")]
-pub enum CommentStatus {
-	Normal = 0,
-	Deleted = 1,
-	Spam = 2,
-	PendingReview = 3,
-}
-impl CommentStatus {
-	// not impl std::convert::TryFrom　for some reasons
-	pub fn try_from(n: i32) -> Result<Self> {
-		match n {
-			0 => Ok(CommentStatus::Normal),
-			1 => Ok(CommentStatus::Deleted),
-			2 => Ok(CommentStatus::Spam),
-			3 => Ok(CommentStatus::PendingReview),
-			n => Err(Error::NoEnumNumber("CommentStatus".to_string(), n)),
-		}
-	}
-}
+pub use crate::types::CommentStatus;
 impl FromSql<Integer, Mysql> for CommentStatus {
 	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
 		let i = <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)?;

@@ -20,6 +20,7 @@ pub enum Error {
 	Io(std::io::Error),
 	OptionNone,
 	HttpStatus(Status),
+	EnumType(crate::types::Error),
 }
 impl From<std::option::NoneError> for Error {
 	fn from(_: std::option::NoneError) -> Self {
@@ -53,6 +54,11 @@ impl From<serde_json::Error> for Error {
 impl From<std::io::Error> for Error {
 	fn from(err: std::io::Error) -> Self {
 		Self::Io(err)
+	}
+}
+impl From<crate::types::Error> for Error {
+	fn from(e: crate::types::Error) -> Self {
+		Self::EnumType(e)
 	}
 }
 
