@@ -6,6 +6,7 @@ use crate::{
 		content::{self, Content},
 		user::{self, User},
 		RepositoryWrapper,
+		IntoInterface,
 	},
 	render::RenderResult,
 	templates,
@@ -32,7 +33,7 @@ pub fn list(
 		ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(templates::admin::post::list, &gctx, page, posts))
+	Ok(render!(templates::admin::post::list, &gctx, page, posts.into_interface(&gctx.db)))
 }
 
 #[get("/admin/post/_new")]
@@ -45,7 +46,7 @@ pub fn new_get(gctx: GlobalContext, current_user: User) -> Result<RenderResult, 
 		&gctx,
 		"New Post",
 		None,
-		categories
+		categories.into_interface(&gctx.db)
 	))
 }
 #[get("/admin/post/<post_id>")]
@@ -71,7 +72,7 @@ pub fn edit_get(
 		)
 		.as_str(),
 		Some(Box::new(RepositoryWrapper(post, gctx.db.clone())) as Box<model_interfaces::Content>),
-		categories
+		categories.into_interface(&gctx.db)
 	))
 }
 #[derive(Default, FromForm, Debug)]

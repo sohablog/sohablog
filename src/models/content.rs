@@ -8,6 +8,7 @@ use super::{
 	tag::{AssocTagContent, Tag},
 	user::User,
 	RepositoryWrapper,
+	IntoInterface,
 	Error, Result,
 };
 use crate::{db::Database, utils::*, schema::*, templates::ToHtml};
@@ -211,6 +212,12 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	}
 	fn get_parent_comments(&self) -> Vec<Box<CommentInterface>> {
 		Comment::find_parents_by_content_id(&self.1, self.0.id).unwrap().into_iter().map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<CommentInterface>).collect::<Vec<Box<CommentInterface>>>()
+	}
+}
+
+impl IntoInterface<Vec<Box<ContentInterface>>> for Vec<Content> {
+	fn into_interface(self, db: &Box<Database>) -> Vec<Box<ContentInterface>> {
+		self.into_iter().map(|c| Box::new(RepositoryWrapper(c, db.clone())) as Box<ContentInterface>).collect::<Vec<Box<ContentInterface>>>()
 	}
 }
 

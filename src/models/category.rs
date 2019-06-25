@@ -1,4 +1,4 @@
-use super::{Error, Result, RepositoryWrapper};
+use super::{Error, Result, RepositoryWrapper, IntoInterface};
 use crate::{db::Database, utils::*, schema::*};
 use diesel::prelude::*;
 use serde_derive::*;
@@ -37,11 +37,18 @@ impl PartialEq for Category {
 
 use crate::interfaces::models::Category as CategoryInterface;
 impl CategoryInterface for RepositoryWrapper<Category, Box<Database>> {
+	fn id(&self) -> i32 { self.0.id }
 	fn slug(&self) -> &String { &self.0.slug }
 	fn name(&self) -> &String { &self.0.name }
 	fn description(&self) -> Option<&String> { self.0.description.as_ref() }
 	fn order(&self) -> i32 { self.0.order }
 	fn parent(&self) -> Option<i32> { self.0.parent }
+}
+
+impl IntoInterface<Vec<Box<CategoryInterface>>> for Vec<Category> {
+	fn into_interface(self, db: &Box<Database>) -> Vec<Box<CategoryInterface>> {
+		self.into_iter().map(|c| Box::new(RepositoryWrapper(c, db.clone())) as Box<CategoryInterface>).collect::<Vec<Box<CategoryInterface>>>()
+	}
 }
 
 #[derive(Insertable, Debug)]

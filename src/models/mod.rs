@@ -36,6 +36,10 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 pub struct RepositoryWrapper<T, D>(pub T, pub D);
 
+pub trait IntoInterface<T>: Sized {
+	fn into_interface(self, db: &Box<crate::db::Database>) -> T;
+}
+
 /**
  * Insert a new row
  *

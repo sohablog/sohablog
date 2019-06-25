@@ -2,13 +2,13 @@
 @use super::super::super::base;
 @use super::super::super::misc::csrf_hidden_input;
 @use crate::interfaces::models::Content as ContentInterface;
-@use crate::models::content::ContentStatus;
-@use crate::models::category::Category;
+@use crate::interfaces::models::Category as CategoryInterface;
+@use crate::types::ContentStatus;
 @use crate::render::*;
 @use rocket_codegen::*;
 @use chrono::prelude::Utc;
 
-@(ctx: &GlobalContext, title: &str, post: Option<Box<ContentInterface>>, categories: Vec<Category>)
+@(ctx: &GlobalContext, title: &str, post: Option<Box<ContentInterface>>, categories: Vec<Box<CategoryInterface>>)
 
 @:base(ctx, title, {}, {
 	<link href="/static/system/@statics::markdown_palettes_0_4_11_css.name" rel="stylesheet" />
@@ -28,7 +28,7 @@
 		<p><b>Category</b></p>
 		<p>
 			<input type="radio" name="category" value="" @if let Some(p) = &post {@if let None = p.category_id() {checked }} else {checked }/>&nbsp;Uncategorized <br />@for cat in categories {
-			<input type="radio" name="category" value="@cat.id" @if let Some(p) = &post {@if let Some(cid) = p.category_id() {@if cid == cat.id {checked }}}/>&nbsp;@cat.name <br />}
+			<input type="radio" name="category" value="@cat.id()" @if let Some(p) = &post {@if let Some(cid) = p.category_id() {@if cid == cat.id() {checked }}}/>&nbsp;@cat.name() <br />}
 		</p>
 		<br />
 		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time()} else {@date_format(&Utc::now().naive_local(), "%Y-%m-%d %H:%M:%S")}" />

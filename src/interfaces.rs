@@ -22,6 +22,7 @@ pub mod models {
 	}
 
 	pub trait Category {
+		fn id(&self) -> i32;
 		fn slug(&self) -> &String;
 		fn name(&self) -> &String;
 		fn description(&self) -> Option<&String>;
