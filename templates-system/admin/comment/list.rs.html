@@ -4,8 +4,8 @@
 @use crate::interfaces::models::Comment as CommentInterface;
 @use crate::types::CommentStatus;
 @use crate::utils::Page;
-@use crate::render::*;
 @use rocket_codegen::*;
+@use crate::render::*;
 
 @(ctx: &TemplateContext, page: Page, status: CommentStatus, comments: Vec<Box<CommentInterface>>)
 
@@ -28,10 +28,10 @@
 		<table class="set-status-buttons" data-id="@comment.id()">
 			<tr>
 				<td><b>Mark as</b></td>
-				<td><button data-status="@CommentStatus::Normal"@if comment.status() == CommentStatus::Normal { disabled}>Normal</button></td>
-				<td><button data-status="@CommentStatus::Spam"@if comment.status() == CommentStatus::Spam { disabled}>Spam</button></td>
-				<td><button data-status="@CommentStatus::PendingReview"@if comment.status() == CommentStatus::PendingReview { disabled}>PendingReview</button></td>
-				<td><button data-status="@CommentStatus::Deleted"@if comment.status() == CommentStatus::Deleted { disabled}>Deleted</button></td>
+				<td><button data-status="@CommentStatus::Normal.number()"@if comment.status() == CommentStatus::Normal { disabled}>Normal</button></td>
+				<td><button data-status="@CommentStatus::Spam.number()"@if comment.status() == CommentStatus::Spam { disabled}>Spam</button></td>
+				<td><button data-status="@CommentStatus::PendingReview.number()"@if comment.status() == CommentStatus::PendingReview { disabled}>PendingReview</button></td>
+				<td><button data-status="@CommentStatus::Deleted.number()"@if comment.status() == CommentStatus::Deleted { disabled}>Deleted</button></td>
 			</tr>
 		</table>
 	}

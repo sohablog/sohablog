@@ -10,6 +10,7 @@ use crate::{
 	render::RenderResult,
 	templates,
 	util::*,
+	types::EnumType,
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;

@@ -11,7 +11,7 @@ use super::{
 	IntoInterface,
 	Error, Result,
 };
-use crate::{db::Database, utils::*, schema::*, templates::ToHtml};
+use crate::{db::Database, utils::*, schema::*};
 
 #[derive(Debug, Queryable, Associations, Clone, Serialize, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]
@@ -242,54 +242,5 @@ pub struct NewContent {
 	pub category: Option<i32>,
 }
 
-//integer constants
-
-use diesel::{
-	deserialize::{self, FromSql},
-	mysql::Mysql,
-	serialize::{self, ToSql},
-	sql_types::Integer,
-};
-
 pub use crate::types::ContentStatus;
-impl FromSql<Integer, Mysql> for ContentStatus {
-	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		let i = <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)?;
-		match Self::try_from(i) {
-			Ok(s) => Ok(s),
-			Err(_) => Err(format!("Failed convert `{}` to ContentStatus", i).into()),
-		}
-	}
-}
-impl ToSql<Integer, Mysql> for ContentStatus {
-	fn to_sql<W: std::io::Write>(
-		&self,
-		out: &mut serialize::Output<W, Mysql>,
-	) -> serialize::Result {
-		ToSql::<Integer, Mysql>::to_sql(&(*self as i32), out)
-	}
-}
-impl ToHtml for ContentStatus {
-	fn to_html(&self, out: &mut dyn std::io::Write) -> std::io::Result<()> {
-		write!(out, "{}", *self as i32)
-	}
-}
-
 pub use crate::types::ContentType;
-impl FromSql<Integer, Mysql> for ContentType {
-	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		match <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)? {
-			0 => Ok(ContentType::Article),
-			1 => Ok(ContentType::SinglePage),
-			n => Err(format!("Unknown ContentType: {}", n).into()),
-		}
-	}
-}
-impl ToSql<Integer, Mysql> for ContentType {
-	fn to_sql<W: std::io::Write>(
-		&self,
-		out: &mut serialize::Output<W, Mysql>,
-	) -> serialize::Result {
-		ToSql::<Integer, Mysql>::to_sql(&(*self as i32), out)
-	}
-}

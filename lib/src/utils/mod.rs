@@ -1,11 +1,16 @@
 mod page;
-mod session_info;
-mod csrf;
-mod db;
-
 pub use page::Page;
+
+mod session_info;
 pub use session_info::{SessionInfo, UserSessionInfo};
+
+mod csrf;
 pub use csrf::CSRFToken;
+
+mod visitor_ip;
+pub use visitor_ip::VisitorIP;
+
+mod db;
 pub use db::DatabaseConnection;
 
 use crate::interfaces::models::User;
@@ -19,14 +24,6 @@ pub struct SystemConfig {
 	pub csrf_cookie_name: Option<String>,
 	pub csrf_field_name: String,
 	pub is_prod: bool,
-}
-
-#[derive(Debug)]
-pub struct VisitorIP(pub std::net::IpAddr);
-impl ToString for VisitorIP {
-	fn to_string(&self) -> String {
-		self.0.to_string()
-	}
 }
 
 pub struct TemplateContext<'a> {

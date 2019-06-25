@@ -2,48 +2,12 @@ use crate::{db::Database, models::{user, IntoInterface}};
 pub use crate::utils::*;
 use rocket::{
 	fairing::{Fairing, Info as FairingInfo, Kind as FairingKind},
-	http::{Cookie, Cookies, Method, Status},
+	http::{Method, Status},
 	request::{FromRequest, Outcome, Request, State},
 	Data,
 };
-use std::str::FromStr;
 
 use crate::routes::error::Error; // temp solution
-
-impl SessionInfo {
-	pub fn persist(&self, cookies: &mut Cookies, system_config: &SystemConfig) {
-		if let Some(cookie_name) = &system_config.csrf_cookie_name {
-			cookies.add(
-				Cookie::build(cookie_name.to_owned(), self.csrf_token.to_string())
-					.max_age(time::Duration::days(3))
-					.path("/")
-					.finish(),
-			);
-		}
-
-		cookies.add_private(
-			Cookie::build(
-				system_config.session_name.to_owned(),
-				serde_json::to_string(self).unwrap_or("".into()),
-			)
-			.path("/")
-			.finish(),
-		);
-	}
-}
-impl<'a, 'r> FromRequest<'a, 'r> for SessionInfo {
-	type Error = ();
-	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
-		let system_config = request.guard::<State<SystemConfig>>().unwrap();
-		let mut cookies = request.cookies();
-		let session = cookies
-			.get_private(&system_config.session_name.as_str())
-			.and_then(|c| serde_json::from_str::<SessionInfo>(c.value()).ok())
-			.unwrap_or_default();
-		session.persist(&mut cookies, &system_config);
-		Outcome::Success(session)
-	}
-}
 
 /// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
 pub struct GlobalContext<'a> {
@@ -79,27 +43,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 				.and_then(|s| Some(s.to_string())),
 			session_info: request.guard::<SessionInfo>()?,
 		})
-	}
-}
-
-impl<'a, 'r> FromRequest<'a, 'r> for VisitorIP {
-	type Error = Error;
-	fn from_request(request: &'a Request<'r>) -> Outcome<Self, Error> {
-		let system_config = request.guard::<'a, State<SystemConfig>>().unwrap();
-		let remote = request.remote().and_then(|o| Some(o.ip()));
-		let real_ip = system_config
-			.real_ip_header
-			.as_ref()
-			.and_then(|o| request.headers().get_one(o.as_str()));
-		let ip_addr = if let Some(ip_str) = real_ip {
-			std::net::IpAddr::from_str(ip_str).ok()
-		} else {
-			remote
-		};
-		match ip_addr {
-			Some(ip) => Outcome::Success(Self(ip)),
-			None => Outcome::Failure((Status::BadRequest, Error::BadRequest("Invalid remote IP"))),
-		}
 	}
 }
 

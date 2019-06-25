@@ -1,8 +1,9 @@
 use uuid::Uuid;
+#[cfg(feature = "main")]
 use serde_derive::*;
 
 #[derive(Debug)]
-#[cfg_attr(not(feature = "lib-only"), derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "main", derive(Serialize, Deserialize))]
 pub struct CSRFToken(String);
 impl CSRFToken {
 	pub fn validate(&self, s: &String) -> Result<(), ()> {

@@ -1,17 +1,18 @@
 use crate::{
-	util::GlobalContext,
-	utils::Page,
-	models::{
-		content::Content,
-		comment::Author
-	},
+	utils::{Page, TemplateContext},
+	interfaces::models::{Content, Author}
 };
 use std::{
 	io,
 	any::Any,
+};
+#[cfg(feature = "main")]
+use std::{
 	collections::HashMap,
 	ffi::OsStr,
 };
+
+#[cfg(feature = "main")]
 use libloading::{Library, Symbol};
 
 pub const THEME_TRAIT_VERSION: u32 = 1;
@@ -29,9 +30,9 @@ pub trait Theme: Any + Send + Sync {
 	/// Theme version
 	fn version(&self) -> &'static str;
 	/// This function should write the render result for post list page to `out`
-	fn post_list(&self, out: &mut io::Write, ctx: &GlobalContext, title: &str, page: Page, posts: Vec<Content>) -> io::Result<()>;
+	fn post_list(&self, out: &mut io::Write, ctx: &TemplateContext, title: &str, page: Page, posts: Vec<Box<Content>>) -> io::Result<()>;
 	/// This function should write the render result for post detail page to `out`
-	fn post_show(&self, out: &mut io::Write, ctx: &GlobalContext, title: &str, post: Content, previous_author: Option<Author>) -> io::Result<()>;
+	fn post_show(&self, out: &mut io::Write, ctx: &TemplateContext, title: &str, post: Box<Content>, previous_author: Option<Box<Author>>) -> io::Result<()>;
 }
 
 pub const PLUGIN_TRAIT_VERSION: u32 = 0;
@@ -61,15 +62,17 @@ macro_rules! declare_plugin {
 	};
 }
 
+#[cfg(feature = "main")]
 pub struct PluginManager {
-	plugins: Vec<Box<Plugin>>,
+	// plugins: Vec<Box<Plugin>>,
 	themes: HashMap<&'static str, Box<Theme>>,
 	loaded_libraries: Vec<Library>,
 }
+#[cfg(feature = "main")]
 impl PluginManager {
 	pub fn new() -> Self {
 		Self {
-			plugins: Vec::new(),
+			// plugins: Vec::new(),
 			themes: HashMap::new(),
 			loaded_libraries: Vec::new(),
 		}

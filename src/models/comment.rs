@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 
 use super::{content::Content, user::User, Error, Result, RepositoryWrapper, IntoInterface};
-use crate::{db::Database, utils::*, schema::*, templates::ToHtml};
+use crate::{db::Database, utils::*, schema::*};
 use chrono::{DateTime, NaiveDateTime, Utc};
 
 #[derive(Debug, Queryable, Associations, Clone, Identifiable, AsChangeset)]
@@ -220,64 +220,4 @@ impl IntoInterface<Box<AuthorInterface>> for Author {
 	}
 }
 
-//integer constants
-use diesel::{
-	deserialize::{self, FromSql},
-	mysql::Mysql,
-	serialize::{self, ToSql},
-	sql_types::Integer,
-};
-
 pub use crate::types::CommentStatus;
-impl FromSql<Integer, Mysql> for CommentStatus {
-	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		let i = <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)?;
-		match Self::try_from(i) {
-			Ok(s) => Ok(s),
-			Err(_) => Err(format!("Failed convert `{}` to CommentStatus", i).into()),
-		}
-	}
-}
-impl ToSql<Integer, Mysql> for CommentStatus {
-	fn to_sql<W: std::io::Write>(
-		&self,
-		out: &mut serialize::Output<W, Mysql>,
-	) -> serialize::Result {
-		ToSql::<Integer, Mysql>::to_sql(&(*self as i32), out)
-	}
-}
-impl ToHtml for CommentStatus {
-	fn to_html(&self, out: &mut dyn std::io::Write) -> std::io::Result<()> {
-		write!(out, "{}", *self as i32)
-	}
-}
-use rocket::{
-	http::{
-		uri::{self, FromUriParam, Query, UriDisplay},
-		RawStr,
-	},
-	request::FromFormValue,
-};
-impl<'a> FromFormValue<'a> for CommentStatus {
-	type Error = &'a RawStr;
-	fn default() -> Option<Self> {
-		Some(Self::Normal)
-	}
-	fn from_form_value(form_value: &'a RawStr) -> std::result::Result<Self, &'a RawStr> {
-		match form_value.parse::<i32>() {
-			Ok(status) => Ok(Self::try_from(status).map_err(|_| RawStr::from_str("No such CommentStatus"))?),
-			_ => Err("Error when parsing `CommentStatus`".into()),
-		}
-	}
-}
-impl FromUriParam<Query, Option<CommentStatus>> for CommentStatus {
-	type Target = CommentStatus;
-	fn from_uri_param(v: Option<Self>) -> Self {
-		v.unwrap_or(Self::Normal)
-	}
-}
-impl UriDisplay<Query> for CommentStatus {
-	fn fmt(&self, f: &mut uri::Formatter<Query>) -> std::fmt::Result {
-		f.write_value(&format!("{}", *self as i32))
-	}
-}

@@ -135,21 +135,4 @@ impl<'a, 'r> FromRequest<'a, 'r> for User {
 	}
 }
 
-// integer constants
-
-use diesel::{
-	deserialize::{self, FromSql},
-	mysql::Mysql,
-	sql_types::Integer,
-};
-
 pub use crate::types::UserStatus;
-impl FromSql<Integer, Mysql> for UserStatus {
-	fn from_sql(bytes: Option<&[u8]>) -> deserialize::Result<Self> {
-		match <i32 as FromSql<Integer, Mysql>>::from_sql(bytes)? {
-			0 => Ok(UserStatus::Normal),
-			1 => Ok(UserStatus::Deleted),
-			n => Err(format!("Unknown UserStatus: {}", n).into()),
-		}
-	}
-}

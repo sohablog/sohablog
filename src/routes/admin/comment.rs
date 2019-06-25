@@ -1,12 +1,14 @@
 use super::super::{error::Error, Page, ApiResult, JsonOrNormal};
 use crate::{
 	models::{
-		comment::{Comment, CommentStatus},
+		comment::Comment,
 		user::{self, User},
 		IntoInterface,
 	},
+	types::CommentStatus,
 	render::RenderResult,
 	templates,
+	types::EnumType,
 	util::*,
 };
 use rocket::response::Redirect;

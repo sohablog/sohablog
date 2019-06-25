@@ -4,9 +4,10 @@ use super::error::Error;
 use super::{ApiResult, JsonOrNormal};
 use crate::{
 	models::{
-		comment::{self, Comment, CommentSerializedNormal, CommentStatus},
+		comment::{self, Comment, CommentSerializedNormal},
 		content,
 	},
+	types::CommentStatus,
 	util::*,
 };
 use rocket::{

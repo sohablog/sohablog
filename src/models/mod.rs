@@ -10,7 +10,7 @@ pub enum Error {
 	NotFound,
 	UserHasNoPermission,
 	OptionNone,
-	NoEnumNumber(String, i32),
+	EnumType(crate::types::Error),
 }
 impl From<bcrypt::BcryptError> for Error {
 	fn from(e: bcrypt::BcryptError) -> Self {
@@ -30,6 +30,11 @@ impl From<r2d2::Error> for Error {
 impl From<std::option::NoneError> for Error {
 	fn from(_: std::option::NoneError) -> Self {
 		Error::OptionNone
+	}
+}
+impl From<crate::types::Error> for Error {
+	fn from(e: crate::types::Error) -> Self {
+		Self::EnumType(e)
 	}
 }
 pub type Result<T> = std::result::Result<T, Error>;

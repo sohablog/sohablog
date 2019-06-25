@@ -2,8 +2,8 @@
 @use super::super::super::misc::paginator;
 @use crate::interfaces::models::Content as ContentInterface;
 @use crate::utils::Page;
-@use crate::render::*;
 @use rocket_codegen::*;
+@use crate::render::*;
 
 @(ctx: &TemplateContext, page: Page, posts: Vec<Box<ContentInterface>>)
 
