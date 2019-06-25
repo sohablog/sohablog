@@ -59,7 +59,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	fn from_request(request: &'a Request<'r>) -> Outcome<Self, ()> {
 		Outcome::Success(Self {
 			ip: request.guard::<VisitorIP>().unwrap(), // FIXME: Needs to process errors properly
-			db: *request.guard::<State<Box<Database>>>()?,
+			db: request.guard::<State<Box<Database>>>()?.inner().clone(),
 			user: request.guard::<Option<user::User>>().unwrap(),
 			system_config: request.guard::<State<SystemConfig>>()?.inner(),
 			user_agent: request

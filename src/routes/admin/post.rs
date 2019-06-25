@@ -5,10 +5,12 @@ use crate::{
 		self,
 		content::{self, Content},
 		user::{self, User},
+		RepositoryWrapper,
 	},
 	render::RenderResult,
 	templates,
 	util::*,
+	interfaces::models as model_interfaces,
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
@@ -68,7 +70,7 @@ pub fn edit_get(
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))
 		)
 		.as_str(),
-		Some(post),
+		Some(Box::new(RepositoryWrapper(post, gctx.db.clone())) as Box<model_interfaces::Content>),
 		categories
 	))
 }

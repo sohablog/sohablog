@@ -165,14 +165,14 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	fn reply_to(&self) -> Option<i32> { self.0.reply_to }
 
 	fn parent(&self) -> Option<Box<CommentInterface>> {
-		self.0.parent.map(|id| Box::new(RepositoryWrapper(Comment::find(&self.1, id).unwrap(), self.1)) as Box<CommentInterface>)
+		self.0.parent.map(|id| Box::new(RepositoryWrapper(Comment::find(&self.1, id).unwrap(), self.1.clone())) as Box<CommentInterface>)
 	}
 	fn content(&self) -> Box<ContentInterface> {
-		Box::new(RepositoryWrapper(Content::find(&self.1, self.0.content).unwrap(), self.1)) as Box<ContentInterface>
+		Box::new(RepositoryWrapper(Content::find(&self.1, self.0.content).unwrap(), self.1.clone())) as Box<ContentInterface>
 	}
 	
 	fn children(&self) -> Vec<Box<CommentInterface>> {
-		self.0.get_children(&self.1).unwrap().into_iter().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<CommentInterface>).collect::<Vec<Box<CommentInterface>>>()
+		self.0.get_children(&self.1).unwrap().into_iter().map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<CommentInterface>).collect::<Vec<Box<CommentInterface>>>()
 	}
 }
 

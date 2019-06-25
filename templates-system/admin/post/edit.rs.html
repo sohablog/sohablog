@@ -1,45 +1,45 @@
 @use super::super::super::statics;
 @use super::super::super::base;
 @use super::super::super::misc::csrf_hidden_input;
-@use crate::models::content::Content;
+@use crate::interfaces::models::Content as ContentInterface;
 @use crate::models::content::ContentStatus;
 @use crate::models::category::Category;
 @use crate::render::*;
 @use rocket_codegen::*;
 @use chrono::prelude::Utc;
 
-@(ctx: &GlobalContext, title: &str, post: Option<Content>, categories: Vec<Category>)
+@(ctx: &GlobalContext, title: &str, post: Option<Box<ContentInterface>>, categories: Vec<Category>)
 
 @:base(ctx, title, {}, {
 	<link href="/static/system/@statics::markdown_palettes_0_4_11_css.name" rel="stylesheet" />
 }, {
 	<form action="@uri!(crate::routes::admin::post::edit_post)" method="POST">
 		@:csrf_hidden_input(ctx)
-		@if let Some(p) = &post {<input type="hidden" name="id" value="@p.id" />}
-		<input type="text" placeholder="Title" name="title" @if let Some(p) = &post {@if let Some(t) = &p.title {value="@t" }}/>
+		@if let Some(p) = &post {<input type="hidden" name="id" value="@p.id()" />}
+		<input type="text" placeholder="Title" name="title" @if let Some(p) = &post {@if let Some(t) = p.title() {value="@t" }}/>
 		<br />
-		<input type="text" placeholder="Slug" name="slug" @if let Some(p) = &post {@if let Some(t) = &p.slug {value="@t" }}/>
+		<input type="text" placeholder="Slug" name="slug" @if let Some(p) = &post {@if let Some(t) = p.slug() {value="@t" }}/>
 		<br />
 		<div style="height: 600px;">
 			<div id="content-mp"></div>
 		</div>
-		<textarea style="display: none;" id="content" name="content">@if let Some(p) = &post {@if let Some(c) = &p.draft_content {@c} else {@p.content}}</textarea>
+		<textarea style="display: none;" id="content" name="content">@if let Some(p) = &post {@if let Some(c) = p.draft_content() {@c} else {@p.content()}}</textarea>
 		<br />
 		<p><b>Category</b></p>
 		<p>
-			<input type="radio" name="category" value="" @if let Some(p) = &post {@if let None = p.category {checked }} else {checked }/>&nbsp;Uncategorized <br />@for cat in categories {
-			<input type="radio" name="category" value="@cat.id" @if let Some(p) = &post {@if let Some(cid) = p.category {@if cid == cat.id {checked }}}/>&nbsp;@cat.name <br />}
+			<input type="radio" name="category" value="" @if let Some(p) = &post {@if let None = p.category_id() {checked }} else {checked }/>&nbsp;Uncategorized <br />@for cat in categories {
+			<input type="radio" name="category" value="@cat.id" @if let Some(p) = &post {@if let Some(cid) = p.category_id() {@if cid == cat.id {checked }}}/>&nbsp;@cat.name <br />}
 		</p>
 		<br />
-		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time} else {@date_format(&Utc::now().naive_local(), "%Y-%m-%d %H:%M:%S")}" />
+		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time()} else {@date_format(&Utc::now().naive_local(), "%Y-%m-%d %H:%M:%S")}" />
 		<br />
-		<input type="text" placeholder="Tags (split with comma)" name="tags" @if let Some(p) = &post {value="@(p.get_tags_name(&ctx.db).unwrap().join(", "))" }/>
+		<input type="text" placeholder="Tags (split with comma)" name="tags" @if let Some(p) = &post {value="@(p.get_tags_name().join(", "))" }/>
 		<br />
 		<select name="status">
-			<option value="@ContentStatus::Unpublished"@if let Some(p) = &post {@if p.status == ContentStatus::Unpublished { selected}}>Unpublished</option>
-			<option value="@ContentStatus::Normal"@if let Some(p) = &post {@if p.status == ContentStatus::Normal { selected}} else { selected}>Normal</option>
-			<option value="@ContentStatus::Hidden"@if let Some(p) = &post {@if p.status == ContentStatus::Hidden { selected}}>Hidden</option>
-			<option value="@ContentStatus::WithAccessOnly"@if let Some(p) = &post {@if p.status == ContentStatus::WithAccessOnly { selected}}>Only with Access</option>
+			<option value="@ContentStatus::Unpublished"@if let Some(p) = &post {@if p.status() == ContentStatus::Unpublished { selected}}>Unpublished</option>
+			<option value="@ContentStatus::Normal"@if let Some(p) = &post {@if p.status() == ContentStatus::Normal { selected}} else { selected}>Normal</option>
+			<option value="@ContentStatus::Hidden"@if let Some(p) = &post {@if p.status() == ContentStatus::Hidden { selected}}>Hidden</option>
+			<option value="@ContentStatus::WithAccessOnly"@if let Some(p) = &post {@if p.status() == ContentStatus::WithAccessOnly { selected}}>Only with Access</option>
 		</select>
 		<br />
 		<input type="hidden" id="save_draft" name="save_draft" value="true" />
@@ -50,10 +50,10 @@
 	<h3>Attachments</h3>
 	@if let Some(p) = &post {<form id="attachment-upload" action="@uri!(crate::routes::admin::file::upload)" method="POST">
 		<input type="file" name="file" />
-		<input type="hidden" name="related_content_id" value="@p.id" />
+		<input type="hidden" name="related_content_id" value="@p.id()" />
 		<input type="submit" value="Upload" />
 	</form>
-	<div id="attachments-container" data-url="@uri!(crate::routes::admin::file::find_by_content: content_id=p.id)" data-delete-route="@uri!(crate::routes::admin::file::delete_by_id: id=-20001003)" data-upload-route="@(ctx.system_config.upload_route)">
+	<div id="attachments-container" data-url="@uri!(crate::routes::admin::file::find_by_content: content_id=p.id())" data-delete-route="@uri!(crate::routes::admin::file::delete_by_id: id=-20001003)" data-upload-route="@(ctx.system_config.upload_route)">
 		<div id="list">Fetching...</div>
 	</div>} else {<p><i>You should draft or post first in order to upload attachments.</i></p>}
 }, {

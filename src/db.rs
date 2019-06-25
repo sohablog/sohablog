@@ -45,6 +45,7 @@ impl From<r2d2::Error> for Error {
 type DatabasePool = Pool<ConnectionManager<MysqlConnection>>;
 pub use crate::utils::DatabaseConnection;
 
+#[derive(Clone)]
 pub struct Database {
 	pool: Option<DatabasePool>,
 	conn_url: String,

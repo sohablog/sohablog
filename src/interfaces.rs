@@ -43,6 +43,7 @@ pub mod models {
 		fn r#type(&self) -> ContentType;
 		fn status(&self) -> ContentStatus;
 		fn allow_comment(&self) -> bool;
+		fn category_id(&self) -> Option<i32>;
 		fn category(&self) -> Option<Box<Category>>;
 		fn tags(&self) -> Vec<Box<Tag>>;
 

@@ -59,7 +59,7 @@ pub fn page_show(
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))
 		)
 		.as_str(),
-		Box::new(RepositoryWrapper(post, gctx.db)) as Box<model_interfaces::Content>,
+		Box::new(RepositoryWrapper(post, gctx.db.clone())) as Box<model_interfaces::Content>,
 		previous_author
 	))
 }
