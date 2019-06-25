@@ -1,41 +1,41 @@
 @use super::misc::base;
 @use super::statics;
 @use super::misc::csrf_input;
-@use crate::models::content::Content as PostContent;
+@use crate::interfaces::models::Content as ContentInterface;
 @use crate::models::comment::Author;
 @use crate::render::*;
 
-@(ctx: &GlobalContext, title: &str, post: PostContent, previous_author: Option<Author>)
+@(ctx: &GlobalContext, title: &str, post: Box<ContentInterface>, previous_author: Option<Author>)
 
 @:base(ctx, title, {}, {
 	<link href="/static/theme/@statics::comment_css.name" rel="stylesheet" />
 }, {
-	<h1><a href="@post.get_link()">@if let Some(t) = &post.title {@t} else {Untitled}</a></h1>
-	<small>by @(post.get_user(&ctx.db).unwrap().name) in @if let Some(cat_name) = &post.get_category_name(&ctx.db).unwrap() {@cat_name} else {Uncategorized} · @date_format(&post.time, "%Y-%m-%d")</small>
+	<h1><a href="@post.link()">@if let Some(t) = post.title() {@t} else {Untitled}</a></h1>
+	<small>by @(post.user().name()) in @if let Some(cat) = &post.category() {@cat.name()} else {Uncategorized} · @date_format(post.time(), "%Y-%m-%d")</small>
 	<article>
-		@:markdown_to_html(&post.content.as_str())
+		@:markdown_to_html(post.content().as_str())
 	</article>
 	<hr />
-	<p><small>Tags:</small> @(post.get_tags_name(&ctx.db).unwrap().join(", "))</p>
+	<p><small>Tags:</small> @(post.get_tags_name().join(", "))</p>
 	<hr />
 	<p>
 		<b>上一篇: </b>
-		@if let Some(p) = post.find_neighbor_post(&ctx.db, true, 1).unwrap() {
-		<a href="@p.get_link()">@if let Some(t) = &p.title {@t} else {Untitled}</a>
+		@if let Some(p) = post.get_neighbor_post(true) {
+		<a href="@p.link()">@if let Some(t) = p.title() {@t} else {Untitled}</a>
 		} else {
 		<i>没有了</i>
 		}
 	</p>
 	<p>
 		<b>下一篇: </b>
-		@if let Some(p) = post.find_neighbor_post(&ctx.db, false, 1).unwrap() {
-		<a href="@p.get_link()">@if let Some(t) = &p.title {@t} else {Untitled}</a>
+		@if let Some(p) = post.get_neighbor_post(false) {
+		<a href="@p.link()">@if let Some(t) = p.title() {@t} else {Untitled}</a>
 		} else {
 		<i>没有了</i>
 		}
 	</p>
 	<hr />
-	<div>@if let Ok(comments) = &post.get_parent_comments(&ctx.db) {
+	<div>
 		<h1>Comments</h1>
 		<div id="comment-form-wrapper">
 			<form id="comment-form" action="@post.get_comment_url()" method="POST">
@@ -49,16 +49,15 @@
 				<input type="submit" value="Send!" /><button id="cancel-reply" style="display: none;">Cancel Reply</button>
 			</form>
 		</div>
-		@for comment in comments {<div class="comment">
-			<p>@:nl2br(comment.text.as_str())</p>
-			<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id">Reply</button>
-			@if let Ok(comments) = &comment.get_children(&ctx.db) {
-				@for comment in comments {<div class="comment">
-					<p>@:nl2br(comment.text.as_str())</p>
-					<small>by @comment.author_name @@ @date_format(&comment.time, "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id">Reply</button>
-				</div>}
+		@for comment in post.get_parent_comments() {<div class="comment">
+			<p>@:nl2br(comment.text().as_str())</p>
+			<small>by @comment.author().name() @@ @date_format(comment.time(), "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id()">Reply</button>
+			@for comment in comment.children() {<div class="comment">
+				<p>@:nl2br(comment.text().as_str())</p>
+				<small>by @comment.author().name() @@ @date_format(comment.time(), "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id()">Reply</button>
+			</div>
 		}</div>}
-	}</div>
+	</div>
 }, {
 	<script src="/static/theme/@statics::jquery_3_4_1_min_js.name"></script>
 	<script src="/static/theme/@statics::comment_js.name"></script>

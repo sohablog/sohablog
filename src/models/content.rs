@@ -170,7 +170,7 @@ use crate::interfaces::models::{
 	Category as CategoryInterface,
 	Tag as TagInterface,
 };
-impl ContentInterface for RepositoryWrapper<Content, &'static Database> {
+impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	fn id(&self) -> i32 { self.0.id }
 	fn created_at(&self) -> &chrono::NaiveDateTime { &self.0.created_at }
 	fn modified_at(&self) -> &chrono::NaiveDateTime { &self.0.modified_at }
@@ -185,13 +185,13 @@ impl ContentInterface for RepositoryWrapper<Content, &'static Database> {
 	fn allow_comment(&self) -> bool { self.0.allow_comment }
 
 	fn user(&self) -> Box<UserInterface> {
-		Box::new(RepositoryWrapper(self.0.get_user(self.1).unwrap(), self.1)) as Box<UserInterface>
+		Box::new(RepositoryWrapper(self.0.get_user(&self.1).unwrap(), self.1)) as Box<UserInterface>
 	}
 	fn category(&self) -> Option<Box<CategoryInterface>> {
-		self.0.get_category(self.1).unwrap().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<CategoryInterface>)
+		self.0.get_category(&self.1).unwrap().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<CategoryInterface>)
 	}
 	fn tags(&self) -> Vec<Box<TagInterface>> {
-		self.0.get_tags(self.1).unwrap().into_iter().map(|t| Box::new(RepositoryWrapper(t, self.1)) as Box<TagInterface>).collect::<Vec<Box<TagInterface>>>()
+		self.0.get_tags(&self.1).unwrap().into_iter().map(|t| Box::new(RepositoryWrapper(t, self.1)) as Box<TagInterface>).collect::<Vec<Box<TagInterface>>>()
 	}
 
 	fn link(&self) -> String { self.0.get_link() }
@@ -200,16 +200,16 @@ impl ContentInterface for RepositoryWrapper<Content, &'static Database> {
 	}
 	fn get_tags_name(&self) -> Vec<String> {
 		self.0
-			.get_tags(self.1).unwrap()
+			.get_tags(&self.1).unwrap()
 			.iter()
 			.map(|t| t.name.to_owned())
 			.collect::<Vec<String>>()
 	}
 	fn get_neighbor_post(&self, prev: bool) -> Option<Box<ContentInterface>> {
-		self.0.find_neighbor_post(self.1, prev, 1).unwrap().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<ContentInterface>)
+		self.0.find_neighbor_post(&self.1, prev, 1).unwrap().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<ContentInterface>)
 	}
 	fn get_parent_comments(&self) -> Vec<Box<CommentInterface>> {
-		Comment::find_parents_by_content_id(self.1, self.0.id).unwrap().into_iter().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<CommentInterface>).collect::<Vec<Box<CommentInterface>>>()
+		Comment::find_parents_by_content_id(&self.1, self.0.id).unwrap().into_iter().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<CommentInterface>).collect::<Vec<Box<CommentInterface>>>()
 	}
 }
 

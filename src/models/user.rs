@@ -80,7 +80,7 @@ impl User {
 }
 
 use crate::interfaces::models::User as UserInterface;
-impl UserInterface for RepositoryWrapper<User, &'static Database> {
+impl UserInterface for RepositoryWrapper<User, Box<Database>> {
 	fn id(&self) -> i32 { self.0.id }
 	fn username(&self) -> &String { &self.0.username }
 	fn name(&self) -> &String { &self.0.name }

@@ -36,7 +36,7 @@ impl PartialEq for Category {
 }
 
 use crate::interfaces::models::Category as CategoryInterface;
-impl CategoryInterface for RepositoryWrapper<Category, &'static Database> {
+impl CategoryInterface for RepositoryWrapper<Category, Box<Database>> {
 	fn slug(&self) -> &String { &self.0.slug }
 	fn name(&self) -> &String { &self.0.name }
 	fn description(&self) -> Option<&String> { self.0.description.as_ref() }
