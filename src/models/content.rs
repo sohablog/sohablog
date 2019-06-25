@@ -163,7 +163,7 @@ impl Content {
 	}
 }
 
-use crate::template_interfaces::models::{
+use crate::interfaces::models::{
 	Content as ContentInterface,
 	Comment as CommentInterface,
 	User as UserInterface,

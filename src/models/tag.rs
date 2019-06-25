@@ -57,7 +57,7 @@ impl Tag {
 	}
 }
 
-use crate::template_interfaces::models::Tag as TagInterface;
+use crate::interfaces::models::Tag as TagInterface;
 impl TagInterface for RepositoryWrapper<Tag, &'static Database> {
 	fn name(&self) -> &String { &self.0.name }
 }

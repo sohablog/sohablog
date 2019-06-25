@@ -138,7 +138,7 @@ impl Comment {
 	}
 }
 
-use crate::template_interfaces::models::{
+use crate::interfaces::models::{
 	Comment as CommentInterface,
 	Author as AuthorInterface,
 	Content as ContentInterface,
