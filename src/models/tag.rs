@@ -1,4 +1,4 @@
-use super::{Error, Result};
+use super::{Error, Result, RepositoryWrapper};
 use crate::{db::Database, utils::*, schema::*};
 use diesel::prelude::*;
 use serde_derive::*;
@@ -55,6 +55,11 @@ impl Tag {
 			.load::<Self>(&db.conn()?)
 			.map_err(Error::from)
 	}
+}
+
+use crate::template_interfaces::models::Tag as TagInterface;
+impl TagInterface for RepositoryWrapper<Tag, &'static Database> {
+	fn name(&self) -> &String { &self.0.name }
 }
 
 /* Things for associations between Tag and Content */

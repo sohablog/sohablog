@@ -1,4 +1,4 @@
-use super::{Error, Result};
+use super::{Error, Result, RepositoryWrapper};
 use crate::{db::Database, utils::*, schema::*};
 use diesel::prelude::*;
 use serde_derive::*;
@@ -33,6 +33,15 @@ impl PartialEq for Category {
 	fn eq(&self, other: &Self) -> bool {
 		self.slug == other.slug
 	}
+}
+
+use crate::template_interfaces::models::Category as CategoryInterface;
+impl CategoryInterface for RepositoryWrapper<Category, &'static Database> {
+	fn slug(&self) -> &String { &self.0.slug }
+	fn name(&self) -> &String { &self.0.name }
+	fn description(&self) -> Option<&String> { self.0.description.as_ref() }
+	fn order(&self) -> i32 { self.0.order }
+	fn parent(&self) -> Option<i32> { self.0.parent }
 }
 
 #[derive(Insertable, Debug)]

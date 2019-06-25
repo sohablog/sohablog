@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{Error, Result};
+use super::{Error, Result, RepositoryWrapper};
 use crate::{db::Database, utils::*, schema::*};
 
 use bcrypt;
@@ -77,6 +77,21 @@ impl User {
 			password_hash: self.password_hash.to_owned(),
 		}
 	}
+}
+
+use crate::template_interfaces::models::User as UserInterface;
+impl UserInterface for RepositoryWrapper<User, &'static Database> {
+	fn id(&self) -> i32 { self.0.id }
+	fn username(&self) -> &String { &self.0.username }
+	fn name(&self) -> &String { &self.0.name }
+	fn email(&self) -> &String { &self.0.email }
+	fn website(&self) -> Option<&String> { self.0.website.as_ref() }
+	fn avatar_url(&self) -> Option<&String> { self.0.avatar_url.as_ref() }
+	fn permission(&self) -> u32 { self.0.permission }
+	fn created_at(&self) -> &chrono::NaiveDateTime { &self.0.created_at }
+	fn modified_at(&self) -> &chrono::NaiveDateTime { &self.0.modified_at }
+	fn last_login_time(&self) -> &chrono::NaiveDateTime { &self.0.last_login_time }
+	fn status(&self) -> UserStatus { self.0.status }
 }
 
 #[derive(Insertable)]

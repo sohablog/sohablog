@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{content::Content, user::User, Error, Result};
+use super::{content::Content, user::User, Error, Result, RepositoryWrapper};
 use crate::{db::Database, utils::*, schema::*, templates::ToHtml};
 use chrono::{DateTime, NaiveDateTime, Utc};
 
@@ -138,6 +138,44 @@ impl Comment {
 	}
 }
 
+use crate::template_interfaces::models::{
+	Comment as CommentInterface,
+	Author as AuthorInterface,
+	Content as ContentInterface,
+};
+impl CommentInterface for RepositoryWrapper<Comment, &'static Database> {
+	fn id(&self) -> i32 { self.0.id }
+	fn author(&self) -> Box<AuthorInterface> {
+		Box::new(if let Some(user) = self.0.user.and_then(|uid| User::find(self.1, uid).ok()) {
+			Author::from_user(&user)
+		} else {
+			Author {
+				local_user: None,
+				name: self.0.author_name.to_owned(),
+				mail: self.0.author_mail.to_owned(),
+				link: self.0.author_link.to_owned(),
+			}
+		}) as Box<AuthorInterface>
+	}
+	fn ip(&self) -> Option<&String> { self.0.ip.as_ref() }
+	fn user_agent(&self) -> Option<&String> { self.0.user_agent.as_ref() }
+	fn text(&self) -> &String { &self.0.text }
+	fn time(&self) -> &chrono::NaiveDateTime { &self.0.time }
+	fn status(&self) -> CommentStatus { self.0.status }
+	fn reply_to(&self) -> Option<i32> { self.0.reply_to }
+
+	fn parent(&self) -> Option<Box<CommentInterface>> {
+		self.0.parent.map(|id| Box::new(RepositoryWrapper(Comment::find(self.1, id).unwrap(), self.1)) as Box<CommentInterface>)
+	}
+	fn content(&self) -> Box<ContentInterface> {
+		Box::new(RepositoryWrapper(Content::find(self.1, self.0.content).unwrap(), self.1)) as Box<ContentInterface>
+	}
+	
+	fn children(&self) -> Vec<Box<CommentInterface>> {
+		self.0.get_children(self.1).unwrap().into_iter().map(|c| Box::new(RepositoryWrapper(c, self.1)) as Box<CommentInterface>).collect::<Vec<Box<CommentInterface>>>()
+	}
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Author {
 	pub name: String,
@@ -163,6 +201,11 @@ impl Author {
 			local_user: None,
 		}
 	}
+}
+impl AuthorInterface for Author {
+	fn name(&self) -> &String { &self.name }
+	fn mail(&self) -> Option<&String> { self.mail.as_ref() }
+	fn link(&self) -> Option<&String> { self.link.as_ref() }
 }
 
 //integer constants
