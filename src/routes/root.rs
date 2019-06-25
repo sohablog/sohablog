@@ -1,10 +1,9 @@
 use super::{error::Error, Page};
 use crate::{
-	models::{comment::Author, content, RepositoryWrapper},
+	models::{comment::Author, content, IntoInterface},
 	render::RenderResult,
 	theme::templates,
 	util::*,
-	interfaces::models as model_interfaces,
 };
 use rocket::http::Cookies;
 use rocket_codegen::*;
@@ -59,7 +58,7 @@ pub fn page_show(
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))
 		)
 		.as_str(),
-		Box::new(RepositoryWrapper(post, gctx.db.clone())) as Box<model_interfaces::Content>,
-		previous_author
+		post.into_interface(&gctx.db),
+		previous_author.into_interface(&gctx.db)
 	))
 }

@@ -42,12 +42,16 @@ impl CategoryInterface for RepositoryWrapper<Category, Box<Database>> {
 	fn name(&self) -> &String { &self.0.name }
 	fn description(&self) -> Option<&String> { self.0.description.as_ref() }
 	fn order(&self) -> i32 { self.0.order }
-	fn parent(&self) -> Option<i32> { self.0.parent }
+	fn parent_id(&self) -> Option<i32> { self.0.parent }
+
+	fn parent(&self) -> Option<Box<CategoryInterface>> {
+		self.0.parent.map(|id| Box::new(RepositoryWrapper(Category::find(&self.1, id).unwrap(), self.1.clone())) as Box<CategoryInterface>)
+	}
 }
 
-impl IntoInterface<Vec<Box<CategoryInterface>>> for Vec<Category> {
-	fn into_interface(self, db: &Box<Database>) -> Vec<Box<CategoryInterface>> {
-		self.into_iter().map(|c| Box::new(RepositoryWrapper(c, db.clone())) as Box<CategoryInterface>).collect::<Vec<Box<CategoryInterface>>>()
+impl IntoInterface<Box<CategoryInterface>> for Category {
+	fn into_interface(self, db: &Box<Database>) -> Box<CategoryInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<CategoryInterface>
 	}
 }
 

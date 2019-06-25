@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{content::Content, user::User, Error, Result, RepositoryWrapper};
+use super::{content::Content, user::User, Error, Result, RepositoryWrapper, IntoInterface};
 use crate::{db::Database, utils::*, schema::*, templates::ToHtml};
 use chrono::{DateTime, NaiveDateTime, Utc};
 
@@ -206,6 +206,12 @@ impl AuthorInterface for Author {
 	fn name(&self) -> &String { &self.name }
 	fn mail(&self) -> Option<&String> { self.mail.as_ref() }
 	fn link(&self) -> Option<&String> { self.link.as_ref() }
+}
+
+impl IntoInterface<Box<AuthorInterface>> for Author {
+	fn into_interface(self, _: &Box<Database>) -> Box<AuthorInterface> {
+		Box::new(self) as Box<AuthorInterface>
+	}
 }
 
 //integer constants

@@ -27,7 +27,8 @@ pub mod models {
 		fn name(&self) -> &String;
 		fn description(&self) -> Option<&String>;
 		fn order(&self) -> i32;
-		fn parent(&self) -> Option<i32>;
+		fn parent_id(&self) -> Option<i32>;
+		fn parent(&self) -> Option<Box<Category>>;
 	}
 
 	pub trait Content {

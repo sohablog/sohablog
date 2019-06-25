@@ -1,9 +1,9 @@
 @use super::super::super::base;
-@use crate::models::category::Category;
+@use crate::interfaces::models::Category as CategoryInterface;
 @use super::super::super::misc::csrf_hidden_input;
 @use crate::render::*;
 
-@(ctx: &GlobalContext, categories: Vec<Category>)
+@(ctx: &GlobalContext, categories: Vec<Box<CategoryInterface>>)
 
 @:base(ctx, "Categories", {}, {}, {
 	<table>
@@ -21,12 +21,12 @@
 			<tr>
 				<form method="POST" action="/admin/category/update">
 					@:csrf_hidden_input(ctx)
-					<input type="hidden" name="target" value="@cat.id" />
-					<td><input type="text" name="slug" value="@cat.slug" /></td>
-					<td><input type="text" name="name" value="@cat.name" /></td>
-					<td><textarea name="description">@if let Some(desc) = cat.description {@desc}</textarea></td>
-					<td><input type="number" name="order" value="@cat.order" /></td>
-					<td><input type="text" name="parent" @if let Some(pid) = cat.parent {value="@pid" }/></td>
+					<input type="hidden" name="target" value="@cat.id()" />
+					<td><input type="text" name="slug" value="@cat.slug()" /></td>
+					<td><input type="text" name="name" value="@cat.name()" /></td>
+					<td><textarea name="description">@if let Some(desc) = cat.description() {@desc}</textarea></td>
+					<td><input type="number" name="order" value="@cat.order()" /></td>
+					<td><input type="text" name="parent" @if let Some(pid) = cat.parent_id() {value="@pid" }/></td>
 					<td><input type="submit" value="Modify"/></td>
 				</form>
 			</tr>}

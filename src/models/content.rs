@@ -215,9 +215,9 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	}
 }
 
-impl IntoInterface<Vec<Box<ContentInterface>>> for Vec<Content> {
-	fn into_interface(self, db: &Box<Database>) -> Vec<Box<ContentInterface>> {
-		self.into_iter().map(|c| Box::new(RepositoryWrapper(c, db.clone())) as Box<ContentInterface>).collect::<Vec<Box<ContentInterface>>>()
+impl IntoInterface<Box<ContentInterface>> for Content {
+	fn into_interface(self, db: &Box<Database>) -> Box<ContentInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<ContentInterface>
 	}
 }
 
