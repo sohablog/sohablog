@@ -7,7 +7,7 @@
 @use crate::render::*;
 @use rocket_codegen::*;
 
-@(ctx: &GlobalContext, page: Page, status: CommentStatus, comments: Vec<Box<CommentInterface>>)
+@(ctx: &TemplateContext, page: Page, status: CommentStatus, comments: Vec<Box<CommentInterface>>)
 
 @:base(ctx, "Comment List", {}, {}, {
 	<p>

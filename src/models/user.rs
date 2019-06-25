@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{Error, Result, RepositoryWrapper};
+use super::{Error, Result, RepositoryWrapper, IntoInterface};
 use crate::{db::Database, utils::*, schema::*};
 
 use bcrypt;
@@ -92,6 +92,12 @@ impl UserInterface for RepositoryWrapper<User, Box<Database>> {
 	fn modified_at(&self) -> &chrono::NaiveDateTime { &self.0.modified_at }
 	fn last_login_time(&self) -> &chrono::NaiveDateTime { &self.0.last_login_time }
 	fn status(&self) -> UserStatus { self.0.status }
+}
+
+impl IntoInterface<Box<UserInterface>> for User {
+	fn into_interface(self, db: &Box<Database>) -> Box<UserInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<UserInterface>
+	}
 }
 
 #[derive(Insertable)]

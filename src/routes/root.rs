@@ -26,7 +26,7 @@ pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error>
 		super::post::ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(templates::post_list, &gctx, "Index", page, posts.into_interface(&gctx.db)))
+	Ok(render!(templates::post_list, &gctx.get_template_context(), "Index", page, posts.into_interface(&gctx.db)))
 }
 
 #[get("/<path>")]
@@ -52,7 +52,7 @@ pub fn page_show(
 		.and_then(|c| serde_json::from_str::<Author>(c.value()).ok());
 	Ok(render!(
 		templates::post_show,
-		&gctx,
+		&gctx.get_template_context(),
 		format!(
 			"{}",
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))

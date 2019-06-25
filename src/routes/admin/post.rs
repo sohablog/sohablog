@@ -31,7 +31,7 @@ pub fn list(
 		ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(templates::admin::post::list, &gctx, page, posts.into_interface(&gctx.db)))
+	Ok(render!(templates::admin::post::list, &gctx.get_template_context(), page, posts.into_interface(&gctx.db)))
 }
 
 #[get("/admin/post/_new")]
@@ -41,7 +41,7 @@ pub fn new_get(gctx: GlobalContext, current_user: User) -> Result<RenderResult, 
 
 	Ok(render!(
 		templates::admin::post::edit,
-		&gctx,
+		&gctx.get_template_context(),
 		"New Post",
 		None,
 		categories.into_interface(&gctx.db)
@@ -63,7 +63,7 @@ pub fn edit_get(
 	let categories = models::category::Category::find_all(&gctx.db)?;
 	Ok(render!(
 		templates::admin::post::edit,
-		&gctx,
+		&gctx.get_template_context(),
 		format!(
 			"Edit {}",
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))

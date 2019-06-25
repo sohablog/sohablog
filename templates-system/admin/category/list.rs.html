@@ -3,7 +3,7 @@
 @use crate::interfaces::models::Category as CategoryInterface;
 @use crate::render::*;
 
-@(ctx: &GlobalContext, categories: Vec<Box<CategoryInterface>>)
+@(ctx: &TemplateContext, categories: Vec<Box<CategoryInterface>>)
 
 @:base(ctx, "Categories", {}, {}, {
 	<table>

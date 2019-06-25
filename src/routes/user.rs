@@ -4,7 +4,7 @@ use rocket_codegen::*;
 
 #[get("/user/login")]
 pub fn login_get(gctx: GlobalContext) -> RenderResult {
-	render!(templates::user::login, &gctx, None, None)
+	render!(templates::user::login, &gctx.get_template_context(), None, None)
 }
 
 #[derive(Default, FromForm, Debug)]
@@ -28,7 +28,7 @@ pub fn login_post(
 	}
 	Err(render!(
 		templates::user::login,
-		&gctx,
+		&gctx.get_template_context(),
 		Some(String::from("Wrong username or password")),
 		Some(String::from(&form.username))
 	))

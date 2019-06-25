@@ -1,7 +1,7 @@
 @use crate::render::*;
 @use rocket_codegen::*;
 
-@(ctx: &GlobalContext, title: &str, head: Content, meta: Content, content: Content, foot: Content)
+@(ctx: &TemplateContext, title: &str, head: Content, meta: Content, content: Content, foot: Content)
 
 <!doctype html>
 <html>
@@ -15,7 +15,7 @@
 	</head>
 	<body>
 		@if let Some(user) = &ctx.user {
-			<p>Admin - @user.username | <a href="@uri!(crate::routes::admin::post::list: page = None)">Post</a> | <a href="@uri!(crate::routes::admin::comment::list: page=Some(crate::routes::Page::new(1, 1)), status=Some(crate::models::comment::CommentStatus::Normal))">Comment</a> | <a href="@uri!(crate::routes::admin::category::list)">Category</a></p>
+			<p>Admin - @user.name() | <a href="@uri!(crate::routes::admin::post::list: page = None)">Post</a> | <a href="@uri!(crate::routes::admin::comment::list: page=Some(crate::routes::Page::new(1, 1)), status=Some(crate::models::comment::CommentStatus::Normal))">Comment</a> | <a href="@uri!(crate::routes::admin::category::list)">Category</a></p>
 			<hr>
 		}
 @:content()

@@ -1,4 +1,4 @@
-use crate::{db::Database, models::user};
+use crate::{db::Database, models::{user, IntoInterface}};
 pub use crate::utils::*;
 use rocket::{
 	fairing::{Fairing, Info as FairingInfo, Kind as FairingKind},
@@ -53,6 +53,17 @@ pub struct GlobalContext<'a> {
 	pub system_config: &'a SystemConfig,
 	pub user_agent: Option<String>,
 	pub session_info: SessionInfo,
+}
+impl<'a> GlobalContext<'a> {
+	pub fn get_template_context(&self) -> TemplateContext {
+		TemplateContext {
+			ip: &self.ip,
+			user: self.user.clone().into_interface(&self.db),
+			system_config: &self.system_config,
+			user_agent: self.user_agent.as_ref(),
+			session_info: &self.session_info,
+		}
+	}
 }
 impl<'a, 'r> FromRequest<'a, 'r> for GlobalContext<'r> {
 	type Error = ();

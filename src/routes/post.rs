@@ -37,7 +37,7 @@ pub fn post_show(
 
 	Ok(render!(
 		templates::post_show,
-		&gctx,
+		&gctx.get_template_context(),
 		format!(
 			"{}",
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))

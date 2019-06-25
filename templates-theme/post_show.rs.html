@@ -5,7 +5,7 @@
 @use crate::interfaces::models::Author as AuthorInterface;
 @use crate::render::*;
 
-@(ctx: &GlobalContext, title: &str, post: Box<ContentInterface>, previous_author: Option<Box<AuthorInterface>>)
+@(ctx: &TemplateContext, title: &str, post: Box<ContentInterface>, previous_author: Option<Box<AuthorInterface>>)
 
 @:base(ctx, title, {}, {
 	<link href="/static/theme/@statics::comment_css.name" rel="stylesheet" />
@@ -40,7 +40,7 @@
 		<div id="comment-form-wrapper">
 			<form id="comment-form" action="@post.get_comment_url()" method="POST">
 				@:csrf_input(ctx)
-				@if let Some(u) = &ctx.user {<i>You are logged in as @u.name</i>} else {
+				@if let Some(u) = &ctx.user {<i>You are logged in as @u.name()</i>} else {
 					<p><input type="text" name="name" placeholder="Your name" @if let Some(o) = &previous_author {value="@o.name()" }/></p>
 					<p><input type="text" name="mail" placeholder="Your e-mail" @if let Some(o) = &previous_author {@if let Some(s) = &o.mail() {value="@s" }}/></p>
 					<p><input type="text" name="link" placeholder="Your website"  @if let Some(o) = &previous_author {@if let Some(s) = &o.link() {value="@s" }}/></p>

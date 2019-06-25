@@ -31,7 +31,7 @@ pub fn list(
 		ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(templates::admin::comment::list, &gctx, page, status, comments.into_interface(&gctx.db)))
+	Ok(render!(templates::admin::comment::list, &gctx.get_template_context(), page, status, comments.into_interface(&gctx.db)))
 }
 
 

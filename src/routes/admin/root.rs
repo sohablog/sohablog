@@ -4,7 +4,7 @@ use rocket_codegen::*;
 
 #[get("/admin")]
 pub fn index(gctx: GlobalContext, _user: User) -> render::RenderResult {
-	render!(templates::admin::index, &gctx)
+	render!(templates::admin::index, &gctx.get_template_context())
 }
 
 #[get("/admin/generatePasswordHash?<p>")]

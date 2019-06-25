@@ -2,7 +2,7 @@
 @use super::super::misc::csrf_hidden_input;
 @use crate::render::*;
 
-@(ctx: &GlobalContext, message: Option<String>, username: Option<String>)
+@(ctx: &TemplateContext, message: Option<String>, username: Option<String>)
 
 @:base(ctx, "Login", {}, {}, {
 	<h1>Login</h1>

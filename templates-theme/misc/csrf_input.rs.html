@@ -1,5 +1,5 @@
-@use crate::render::GlobalContext;
+@use crate::render::*;
 
-@(ctx: &GlobalContext)
+@(ctx: &TemplateContext)
 
 <input type="hidden" name="@ctx.system_config.csrf_field_name" value="@ctx.session_info.csrf_token.as_str()" />

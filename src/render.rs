@@ -1,4 +1,4 @@
-pub use crate::util::GlobalContext;
+pub use crate::utils::TemplateContext;
 use comrak::{self, ComrakOptions};
 use std::io::{Result as IoResult, Write};
 

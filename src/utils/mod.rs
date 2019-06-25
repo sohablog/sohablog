@@ -8,6 +8,8 @@ pub use session_info::{SessionInfo, UserSessionInfo};
 pub use csrf::CSRFToken;
 pub use db::DatabaseConnection;
 
+use crate::interfaces::models::User;
+
 #[derive(Debug)]
 pub struct SystemConfig {
 	pub upload_dir: String,
@@ -25,4 +27,12 @@ impl ToString for VisitorIP {
 	fn to_string(&self) -> String {
 		self.0.to_string()
 	}
+}
+
+pub struct TemplateContext<'a> {
+	pub ip: &'a VisitorIP,
+	pub user: Option<Box<User>>,
+	pub system_config: &'a SystemConfig,
+	pub user_agent: Option<&'a String>,
+	pub session_info: &'a SessionInfo,
 }

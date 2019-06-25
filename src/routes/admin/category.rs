@@ -18,7 +18,7 @@ pub fn list(gctx: GlobalContext, current_user: User) -> Result<RenderResult, Err
 	current_user.check_permission(user::PERM_CATEGORY_MANAGE)?;
 	Ok(render!(
 		templates::admin::category::list,
-		&gctx,
+		&gctx.get_template_context(),
 		Category::find_all(&gctx.db)?.into_interface(&gctx.db)
 	))
 }

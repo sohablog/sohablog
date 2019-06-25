@@ -5,7 +5,7 @@
 @use crate::render::*;
 @use rocket_codegen::*;
 
-@(ctx: &GlobalContext, page: Page, posts: Vec<Box<ContentInterface>>)
+@(ctx: &TemplateContext, page: Page, posts: Vec<Box<ContentInterface>>)
 
 @:base(ctx, "Post List", {}, {}, {
 	<p>

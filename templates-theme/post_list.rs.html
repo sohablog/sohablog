@@ -4,7 +4,7 @@
 @use crate::utils::Page;
 @use crate::render::*;
 
-@(ctx: &GlobalContext, title: &str, page: Page, posts: Vec<Box<ContentInterface>>)
+@(ctx: &TemplateContext, title: &str, page: Page, posts: Vec<Box<ContentInterface>>)
 
 @:base(ctx, title, {}, {}, {
 	@for post in posts {<div>
