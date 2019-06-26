@@ -10,6 +10,8 @@
 	@for post in posts {<div>
 		<h2><a href="@post.link()">@if let Some(t) = post.title() {@t} else {Untitled}</a></h2>
 		<small><b>@if let Some(cat) = post.category() {@cat.name()} else {Uncategorized}</b> · @ctx.render_helper.date_format(&post.time(), "%Y-%m-%d")</small>
+		<br />
+		@:truncate_content(ctx, post.content(), 100, true)
 	</div><hr />}
 	@:paginator(page)
 }, {})
