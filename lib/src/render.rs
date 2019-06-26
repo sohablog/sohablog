@@ -35,6 +35,8 @@ impl ToHtml for Origin<'_> {
 	}
 }
 
+// TODO: These functions below shouldn't be included in lib
+
 /// Options for `comrak` which is a Markdown parser
 const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
 	hardbreaks: false,

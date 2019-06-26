@@ -13,6 +13,9 @@ pub use visitor_ip::VisitorIP;
 mod db;
 pub use db::DatabaseConnection;
 
+mod static_file;
+pub use static_file::StaticFile;
+
 use crate::interfaces::models::User;
 
 #[derive(Debug)]

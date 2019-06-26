@@ -113,5 +113,13 @@ include!(concat!(env!("OUT_DIR"), "/templates-system/templates.rs"));
 
 // user theme templates
 mod theme {
+	use sohablog_lib::utils::StaticFile;
+
 	include!(concat!(env!("OUT_DIR"), "/templates-theme/templates.rs"));
+
+	impl StaticFile for &templates::statics::StaticFile {
+		fn content(&self) -> &'static [u8] { self.content }
+		fn name(&self) -> &'static str { self.name }
+		fn mime(&self) -> &'static mime::Mime { self.mime }
+	}
 }

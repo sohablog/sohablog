@@ -1,5 +1,5 @@
 use crate::{
-	utils::{Page, TemplateContext},
+	utils::{Page, TemplateContext, StaticFile},
 	interfaces::models::{Content, Author}
 };
 use std::{
@@ -42,6 +42,8 @@ pub trait Theme: PluginMetadata {
 	fn post_list(&self, out: &mut io::Write, ctx: &TemplateContext, title: &str, page: Page, posts: Vec<Box<Content>>) -> io::Result<()>;
 	/// This function should write the render result for post detail page to `out`
 	fn post_show(&self, out: &mut io::Write, ctx: &TemplateContext, title: &str, post: Box<Content>, previous_author: Option<Box<Author>>) -> io::Result<()>;
+	/// This function should return `StaticFile` struct for server to serve static files
+	fn static_file(&self, name: &str) -> Option<Box<StaticFile>>;
 }
 
 pub const PLUGIN_TRAIT_VERSION: u32 = 0;

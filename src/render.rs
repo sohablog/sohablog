@@ -15,7 +15,7 @@ macro_rules! render {
 pub mod theme {
 	use sohablog_lib::{
 		render::RenderResult,
-		utils::{Page, TemplateContext},
+		utils::{Page, TemplateContext, StaticFile},
 		interfaces::models::{Content, Author},
 	};
 	use crate::{
@@ -58,5 +58,16 @@ pub mod theme {
 				previous_author
 			)
 		})
+	}
+
+	pub fn get_static(ctx: &GlobalContext, name: &str) -> Option<Box<StaticFile>> {
+		let theme_name = &ctx.system_config.theme_name;
+		if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
+			theme.static_file(name)
+		} else if let Some(f) = templates::statics::StaticFile::get(name) {
+			Some(Box::new(f) as Box<StaticFile>)
+		} else {
+			None
+		}
 	}
 }

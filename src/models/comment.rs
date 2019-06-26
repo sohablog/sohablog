@@ -212,6 +212,7 @@ impl AuthorInterface for Author {
 	fn name(&self) -> &String { &self.name }
 	fn mail(&self) -> Option<&String> { self.mail.as_ref() }
 	fn link(&self) -> Option<&String> { self.link.as_ref() }
+	fn avatar_url(&self) -> Option<&String> { None } // TODO: IMPLEMENT!!!
 }
 
 impl IntoInterface<Box<AuthorInterface>> for Author {
