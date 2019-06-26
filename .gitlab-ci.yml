@@ -25,8 +25,9 @@ build:
 
 push-github:
   stage: build
-  image: alpine/git:latest
+  image: debian:stretch-slim
   before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
     - eval $(ssh-agent -s)
     - echo "$GITHUB_DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
