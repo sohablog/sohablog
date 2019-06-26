@@ -36,6 +36,7 @@ push-github:
     - chmod 644 ~/.ssh/known_hosts
   script:
     - git remote add github git@github.com:sohablog/sohablog.git
+    - git fetch github
     - git push github --all
     - git push github --tags
   when: manual
