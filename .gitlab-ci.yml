@@ -26,6 +26,8 @@ build:
 push-github:
   stage: build
   image: debian:stretch-slim
+  variables:
+    GIT_STRATEGY: clone
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
     - eval $(ssh-agent -s)
