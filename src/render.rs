@@ -18,13 +18,45 @@ pub mod theme {
 		utils::{Page, TemplateContext},
 		interfaces::models::{Content, Author},
 	};
-	fn post_list(ctx: &TemplateContext, title: &str, page: Page, posts: Vec<Box<Content>>) -> RenderResult {
-		let mut buf: Vec<u8> = vec![];
+	use crate::{
+		util::GlobalContext,
+		theme::templates,
+	};
+	use std::io::Result;
+
+	pub fn post_list(ctx: &GlobalContext, title: &str, page: Page, posts: Vec<Box<Content>>) -> Result<RenderResult> {
 		let theme_name = &ctx.system_config.theme_name;
-		RenderResult(buf)
+		let theme_context: TemplateContext = ctx.get_template_context();
+		Ok(if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
+			let mut buf: Vec<u8> = vec![];
+			theme.post_list(&mut buf, &theme_context, title, page, posts)?;
+			RenderResult(buf)
+		} else {
+			render!(
+				templates::post_list,
+				&theme_context,
+				title,
+				page,
+				posts
+			)
+		})
 	}
-	fn post_show(ctx: &TemplateContext, title: &str, post: Box<Content>, previous_author: Option<Box<Author>>) -> RenderResult {
-		let mut buf = vec![];
-		RenderResult(buf)
+
+	pub fn post_show(ctx: &GlobalContext, title: &str, post: Box<Content>, previous_author: Option<Box<Author>>) -> Result<RenderResult> {
+		let theme_name = &ctx.system_config.theme_name;
+		let theme_context: TemplateContext = ctx.get_template_context();
+		Ok(if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
+			let mut buf: Vec<u8> = vec![];
+			theme.post_show(&mut buf, &theme_context, title, post, previous_author)?;
+			RenderResult(buf)
+		} else {
+			render!(
+				templates::post_show,
+				&theme_context,
+				title,
+				post,
+				previous_author
+			)
+		})
 	}
 }

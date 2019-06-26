@@ -91,6 +91,10 @@ impl PluginManager {
 		}
 	}
 
+	pub fn get_theme(&self, name: &String) -> Option<&Box<Theme>> {
+		self.themes.get(name)
+	}
+
 	pub unsafe fn load<T: AsRef<OsStr>>(&mut self, filename: T) -> Result<(), &str> {
 		let lib = Library::new(filename.as_ref()).map_err(|_| "Unable to load the theme")?;
 		self.loaded_libraries.push(lib);

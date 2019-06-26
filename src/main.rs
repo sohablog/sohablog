@@ -101,6 +101,7 @@ fn main() {
 				.attach(CSRFTokenValidation(None))
 				.manage(Box::new(db))
 				.manage(system_config)
+				.manage(plugin_manager)
 				.launch();
 		}
 		Err(e) => println!("Met an error while initializing database: {}", e),

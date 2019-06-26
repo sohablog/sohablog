@@ -1,8 +1,7 @@
 use super::error::Error;
 use crate::{
 	models::{comment::Author, content, IntoInterface},
-	render::RenderResult,
-	theme::templates,
+	render::{RenderResult, theme},
 	util::*,
 };
 use rocket::http::Cookies;
@@ -35,9 +34,8 @@ pub fn post_show(
 		.get_private("comment_author")
 		.and_then(|c| serde_json::from_str::<Author>(c.value()).ok());
 
-	Ok(render!(
-		templates::post_show,
-		&gctx.get_template_context(),
+	Ok(theme::post_show(
+		&gctx,
 		format!(
 			"{}",
 			post.title.as_ref().unwrap_or(&String::from("Untitled"))
@@ -45,5 +43,5 @@ pub fn post_show(
 		.as_str(),
 		post.into_interface(&gctx.db),
 		previous_author.into_interface(&gctx.db)
-	))
+	)?)
 }
