@@ -17,6 +17,7 @@ use crate::interfaces::models::User;
 
 #[derive(Debug)]
 pub struct SystemConfig {
+	pub plugin_dir: String,
 	pub upload_dir: String,
 	pub upload_route: String,
 	pub session_name: String,
@@ -24,6 +25,7 @@ pub struct SystemConfig {
 	pub csrf_cookie_name: Option<String>,
 	pub csrf_field_name: String,
 	pub is_prod: bool,
+	pub theme_name: String,
 }
 
 pub struct TemplateContext<'a> {

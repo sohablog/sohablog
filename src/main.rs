@@ -32,16 +32,19 @@ fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
 	use crate::util::*;
+	use sohablog_lib::plugin::PluginManager;
 	use rocket::{config::Config as RocketConfig, fairing::AdHoc, routes};
 	use rocket_contrib::serve::StaticFiles;
 	use std::env;
 
 	dotenv::dotenv().ok();
 	let rocket_config = RocketConfig::active().unwrap();
+	let mut plugin_manager = PluginManager::new();
 
 	let db_url = env::var("DATABASE_URL").unwrap();
 	let mut db = Database::new(&db_url);
 	let system_config = SystemConfig {
+		plugin_dir: env::var("SOHABLOG_PLUGIN_DIR").unwrap_or(String::from("plugin/")),
 		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/")),
 		upload_route: env::var("SOHABLOG_UPLOAD_ROUTE").unwrap_or(String::from("/static/upload")),
 		session_name: env::var("SOHABLOG_SESSION_NAME").unwrap_or(String::from("SOHABLOG_SESSION")),
@@ -49,8 +52,10 @@ fn main() {
 		real_ip_header: env::var("SOHABLOG_REAL_IP_HEADER").ok(),
 		csrf_cookie_name: env::var("SOHABLOG_CSRF_COOKIE_NAME").ok(),
 		is_prod: rocket_config.environment.is_prod(),
+		theme_name: String::from("my-notebook"),
 	};
 	std::fs::create_dir_all(system_config.upload_dir.as_str()).unwrap();
+	plugin_manager.load_from_dir(&system_config.plugin_dir).unwrap();
 
 	match db.init() {
 		Ok(_) => {

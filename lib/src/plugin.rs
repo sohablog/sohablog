@@ -53,10 +53,10 @@ pub trait Plugin: PluginMetadata {
 macro_rules! declare_plugin_metadata {
 	($plugin:ty, $constructor:path) => {
 		#[no_mangle]
-		pub extern "C" fn _plugin_metadata() -> *mut $crate::PluginMetadata {
+		pub extern "C" fn _plugin_metadata() -> *mut $crate::plugin::PluginMetadata {
 			let constructor: fn() -> $plugin = $constructor;
 			let object = constructor();
-			let boxed: Box<$crate::PluginMetadata> = Box::new(object);
+			let boxed: Box<$crate::plugin::PluginMetadata> = Box::new(object);
 			Box::into_raw(boxed)
 		}
 	};
@@ -77,7 +77,7 @@ macro_rules! declare_plugin {
 #[cfg(feature = "main")]
 pub struct PluginManager {
 	plugins: Vec<Box<Plugin>>,
-	themes: HashMap<&'static str, Box<Theme>>,
+	themes: HashMap<String, Box<Theme>>,
 	loaded_libraries: Vec<Library>,
 }
 #[allow(unreachable_patterns)]
@@ -92,28 +92,26 @@ impl PluginManager {
 	}
 
 	pub unsafe fn load<T: AsRef<OsStr>>(&mut self, filename: T) -> Result<(), &str> {
-		type PluginMetadataConstructor = unsafe fn () -> *mut PluginMetadata;
 		let lib = Library::new(filename.as_ref()).map_err(|_| "Unable to load the theme")?;
 		self.loaded_libraries.push(lib);
 		let lib = self.loaded_libraries.last().unwrap();
-		let constructor: Symbol<PluginMetadataConstructor> = lib.get(b"_plugin_metadata").map_err(|_| "Not a valid plugin library")?;
+
+		let constructor: Symbol<unsafe extern fn () -> *mut PluginMetadata> = lib.get(b"_plugin_metadata").map_err(|_| "Not a valid plugin library")?;
 		let raw_box = constructor();
 		let metadata: Box<PluginMetadata> = Box::from_raw(raw_box);
 
 		match metadata.r#type() {
 			PluginType::Theme => {
-				type PluginConstructor = unsafe fn () -> *mut Theme;
-				let constructor: Symbol<PluginConstructor> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
+				let constructor: Symbol<unsafe extern fn () -> *mut Theme> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
 				let raw_box = constructor();
 				let theme: Box<Theme> = Box::from_raw(raw_box);
 				if theme.plugin_version() != THEME_TRAIT_VERSION {
-					return Err("Plugin version is not compatible.")
+					return Err("Theme version is not compatible.")
 				}
-				self.themes.insert(&theme.identity(), theme);
+				self.themes.insert(String::from(theme.identity()), theme);
 			},
 			_ => {
-				type PluginConstructor = unsafe fn () -> *mut Plugin;
-				let constructor: Symbol<PluginConstructor> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
+				let constructor: Symbol<unsafe extern fn () -> *mut Plugin> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
 				let raw_box = constructor();
 				let plugin: Box<Plugin> = Box::from_raw(raw_box);
 				if plugin.plugin_version() != PLUGIN_TRAIT_VERSION {
@@ -123,6 +121,28 @@ impl PluginManager {
 			}
 		}
 
+		Ok(())
+	}
+
+	pub fn load_from_dir(&mut self, path: &String) -> std::io::Result<()> {
+		use std::{path::{Path, PathBuf}, fs::read_dir};
+		let path = Path::new(path);
+		if path.is_dir() {
+			for file in read_dir(path)? {
+				let file = file?;
+				let path: PathBuf = file.path();
+				if path.is_file() {
+					// TODO: LOG
+					unsafe {
+						if let Err(e) = self.load(path.as_os_str()) {
+							dbg!(e);
+						} else {
+							dbg!(format!("library loaded from {:?}", path));
+						}
+					}
+				}
+			}
+		}
 		Ok(())
 	}
 }
