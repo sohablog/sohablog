@@ -8,8 +8,8 @@ before_script:
   - docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_TOKEN" $TIANHAI_REGISTRY
 
 stages:
-  - build
   - push-github
+  - build
 
 build-master:
   stage: build
