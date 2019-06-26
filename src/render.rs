@@ -33,6 +33,29 @@ impl RenderHelper for RenderFunctions {
 	fn date_format(&self, time: &chrono::NaiveDateTime, fmt: &str) -> String {
 		time.format(fmt).to_string()
 	}
+	fn truncate(&self, s: &str, len: usize) -> String {
+		String::from(match s.char_indices().nth(len) {
+			None => s,
+			Some((idx, _)) => &s[..idx],
+		})
+	}
+	fn truncate_content(&self, s: &str, len: usize, truncate_mark: bool) -> String {
+		if truncate_mark {
+			let v: Vec<&str> = s.split(CONTENT_TRUNCATE_MARK).collect();
+			if v.len() > 1 {
+				return self.markdown_to_html(v[0])
+			}
+		}
+		self.nl2br(
+			&self.truncate(
+				&ammonia::Builder::new()
+					.tags(std::collections::HashSet::new())
+					.clean(&self.markdown_to_html(s))
+					.to_string(),
+				len
+			)
+		)
+	}
 }
 
 /// call wrapped function and write them as HTML
@@ -43,6 +66,11 @@ pub fn markdown_to_html(out: &mut dyn Write, ctx: &TemplateContext, s: &str) -> 
 
 pub fn nl2br(out: &mut dyn Write, ctx: &TemplateContext, s: &str) -> IoResult<()> {
 	let s = ctx.render_helper.nl2br(s);
+	write!(out, "{}", s)
+}
+
+pub fn truncate_content(out: &mut dyn Write, ctx: &TemplateContext, s: &str, len: usize, truncate_mark: bool) -> IoResult<()> {
+	let s = ctx.render_helper.truncate_content(s, len, truncate_mark);
 	write!(out, "{}", s)
 }
 

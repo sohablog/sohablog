@@ -34,8 +34,16 @@ impl ToHtml for Origin<'_> {
 	}
 }
 
+pub const CONTENT_TRUNCATE_MARK: &str = "<!--more-->";
 pub trait RenderHelper {
 	fn markdown_to_html(&self, s: &str) -> String;
 	fn nl2br(&self, s: &str) -> String;
 	fn date_format(&self, time: &chrono::NaiveDateTime, fmt: &str) -> String;
+	fn truncate(&self, s: &str, len: usize) -> String;
+	/// Truncates an `Content.content`.
+	/// If `truncate_mark = true` and `<!--more-->` exists,
+	/// it will be truncated to there, otherwise truncated to specific length.
+	/// And all html format will be keeped.
+	/// If truncating depends on length, no HTML tag will be keeped.
+	fn truncate_content(&self, s: &str, len: usize, truncate_mark: bool) -> String;
 }

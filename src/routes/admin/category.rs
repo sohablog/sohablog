@@ -34,7 +34,7 @@ pub struct PostForm {
 }
 #[post("/admin/category/update", data = "<form>")]
 pub fn update(
-	db: State<Database>,
+	db: State<Box<Database>>,
 	form: LenientForm<PostForm>,
 	current_user: User,
 	_csrf: CSRFTokenValidation,

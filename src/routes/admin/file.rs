@@ -25,7 +25,7 @@ use uuid::Uuid;
 #[get("/admin/file/by-content/<content_id>")]
 pub fn find_by_content(
 	content_id: i32,
-	db: State<Database>,
+	db: State<Box<Database>>,
 	_user: User,
 ) -> Result<Json<Vec<File>>, Error> {
 	let content: Content = Content::find(&db, content_id)?;
@@ -42,7 +42,7 @@ pub fn find_by_content(
 #[delete("/admin/file/<id>")]
 pub fn delete_by_id(
 	id: i32,
-	db: State<Database>,
+	db: State<Box<Database>>,
 	system_config: State<SystemConfig>,
 	_user: User,
 ) -> Result<Status, Error> {
@@ -64,7 +64,7 @@ pub fn upload(
 	data: Data,
 	content_type: &ContentType,
 	system_config: State<SystemConfig>,
-	db: State<Database>,
+	db: State<Box<Database>>,
 	current_user: User,
 ) -> Result<Json<File>, Error> {
 	if !content_type.is_form_data() {

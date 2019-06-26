@@ -93,7 +93,7 @@ pub struct PostForm {
 }
 #[post("/admin/post/_edit", data = "<form>")]
 pub fn edit_post(
-	db: State<Database>,
+	db: State<Box<Database>>,
 	form: LenientForm<PostForm>,
 	current_user: User,
 	_csrf: CSRFTokenValidation,
