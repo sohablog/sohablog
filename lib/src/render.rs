@@ -25,18 +25,6 @@ impl<'r> Responder<'r> for RenderResult {
 	}
 }
 
-/// returns `RenderResult`
-#[macro_export]
-macro_rules! render {
-	($path:path, $($param:expr),*) => {{
-		use crate::render::RenderResult;
-
-		let mut buf = vec![];
-		$path(&mut buf,$($param),*).unwrap();
-		RenderResult(buf)
-	}}
-}
-
 pub trait ToHtml {
 	fn to_html(&self, out: &mut dyn Write) -> IoResult<()>;
 }

@@ -11,20 +11,19 @@
 
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate sohablog_lib;
 
 pub use sohablog_lib::{
 	types,
 	interfaces,
 	utils,
 	plugin,
-	render,
 };
 
 
 mod db;
 mod models;
+#[macro_use]
+mod render;
 mod util;
 mod routes;
 mod schema;
