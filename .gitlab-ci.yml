@@ -25,16 +25,22 @@ build:
 
 push-github:
   stage: build
-  image: alpine/git:latest
+  image: debian:stretch-slim
+  variables:
+    GIT_STRATEGY: clone
   before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
     - eval $(ssh-agent -s)
     - echo "$GITHUB_DEPLOY_KEY" | tr -d '\r' | ssh-add - > /dev/null
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
     - ssh-keyscan github.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
+    - git config --global user.email "gitlab-ci+deploy@tianhai.info"
+    - git config --global user.name "Tianhai Deploy"
   script:
     - git remote add github git@github.com:sohablog/sohablog.git
-    - git push github --all
-    - git push github --tags
+    - git fetch github
+    - for i in `git for-each-ref --format='%(refname)' refs/remotes/origin/`; do git checkout -t $i; git push -u github; done;
+    - git push --tags github
   when: manual
