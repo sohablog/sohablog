@@ -12,29 +12,23 @@
 #[macro_use]
 extern crate diesel;
 
-pub use sohablog_lib::{
-	types,
-	interfaces,
-	utils,
-	plugin,
-};
-
+pub use sohablog_lib::{interfaces, plugin, types, utils};
 
 mod db;
 mod models;
 #[macro_use]
 mod render;
-mod util;
 mod routes;
 mod schema;
+mod util;
 
 fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
 	use crate::util::*;
-	use sohablog_lib::plugin::PluginManager;
 	use rocket::{config::Config as RocketConfig, fairing::AdHoc, routes};
 	use rocket_contrib::serve::StaticFiles;
+	use sohablog_lib::plugin::PluginManager;
 	use std::env;
 
 	dotenv::dotenv().ok();
@@ -55,7 +49,9 @@ fn main() {
 		theme_name: String::from("my-notebook"),
 	};
 	std::fs::create_dir_all(system_config.upload_dir.as_str()).unwrap();
-	plugin_manager.load_from_dir(&system_config.plugin_dir).unwrap();
+	plugin_manager
+		.load_from_dir(&system_config.plugin_dir)
+		.unwrap();
 
 	match db.init() {
 		Ok(_) => {
@@ -118,8 +114,14 @@ mod theme {
 	include!(concat!(env!("OUT_DIR"), "/templates-theme/templates.rs"));
 
 	impl StaticFile for &templates::statics::StaticFile {
-		fn content(&self) -> &'static [u8] { self.content }
-		fn name(&self) -> &'static str { self.name }
-		fn mime(&self) -> &'static mime::Mime { self.mime }
+		fn content(&self) -> &'static [u8] {
+			self.content
+		}
+		fn name(&self) -> &'static str {
+			self.name
+		}
+		fn mime(&self) -> &'static mime::Mime {
+			self.mime
+		}
 	}
 }

@@ -1,7 +1,7 @@
 use super::error::Error;
 use crate::{
 	models::{comment::Author, content, IntoInterface},
-	render::{RenderResult, theme},
+	render::{theme, RenderResult},
 	util::*,
 };
 use rocket::http::Cookies;
@@ -42,6 +42,6 @@ pub fn post_show(
 		)
 		.as_str(),
 		post.into_interface(&gctx.db),
-		previous_author.into_interface(&gctx.db)
+		previous_author.into_interface(&gctx.db),
 	)?)
 }

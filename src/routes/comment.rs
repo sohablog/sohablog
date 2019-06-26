@@ -10,12 +10,12 @@ use crate::{
 	types::CommentStatus,
 	util::*,
 };
+use regex::Regex;
 use rocket::{
 	http::{Cookie, Cookies},
 	request::LenientForm,
 	response::Redirect,
 };
-use regex::Regex;
 
 #[derive(Default, FromForm, Debug)]
 pub struct NewCommentForm {
@@ -93,7 +93,6 @@ pub fn new_content_comment(
 	} else {
 		None
 	};
-	
 	// comment content cannot contains too much continuous empty line
 	let comment_text = data.text.replace("\r\n", "\n").replace("\r", "\n");
 	let re = Regex::new(r"\n{3,}").unwrap();

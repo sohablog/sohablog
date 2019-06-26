@@ -1,8 +1,8 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{content::Content, user::User, Error, Result, RepositoryWrapper, IntoInterface};
-use crate::{db::Database, utils::*, schema::*};
+use super::{content::Content, user::User, Error, IntoInterface, RepositoryWrapper, Result};
+use crate::{db::Database, schema::*, utils::*};
 use chrono::{DateTime, NaiveDateTime, Utc};
 
 #[derive(Debug, Queryable, Associations, Clone, Identifiable, AsChangeset)]
@@ -58,7 +58,12 @@ impl Comment {
 	insert!(comment, NewComment);
 	find_pk!(comment);
 	find_by!(comment, find_by_content_id, content as i32);
-	find_by!(comment, find_by_parent, parent as i32, status as CommentStatus);
+	find_by!(
+		comment,
+		find_by_parent,
+		parent as i32,
+		status as CommentStatus
+	);
 	update!();
 
 	pub fn count_by_status(db: &Database, status: &CommentStatus) -> Result<i64> {
@@ -72,14 +77,15 @@ impl Comment {
 	pub fn find_by_status(
 		db: &Database,
 		(min, max): (i32, i32),
-		status: &CommentStatus
+		status: &CommentStatus,
 	) -> Result<Vec<Self>> {
 		let mut query = comment::table.into_boxed();
 
 		query = query
 			.filter(comment::status.eq(status))
 			.order(comment::time.desc())
-			.offset(min.into()).limit((max - min).into());
+			.offset(min.into())
+			.limit((max - min).into());
 		query.load::<Self>(&db.conn()?).map_err(Error::from)
 	}
 
@@ -139,40 +145,66 @@ impl Comment {
 }
 
 use crate::interfaces::models::{
-	Comment as CommentInterface,
-	Author as AuthorInterface,
-	Content as ContentInterface,
+	Author as AuthorInterface, Comment as CommentInterface, Content as ContentInterface,
 };
 impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
-	fn id(&self) -> i32 { self.0.id }
-	fn author(&self) -> Box<AuthorInterface> {
-		Box::new(if let Some(user) = self.0.user.and_then(|uid| User::find(&self.1, uid).ok()) {
-			Author::from_user(&user)
-		} else {
-			Author {
-				local_user: None,
-				name: self.0.author_name.to_owned(),
-				mail: self.0.author_mail.to_owned(),
-				link: self.0.author_link.to_owned(),
-			}
-		}) as Box<AuthorInterface>
+	fn id(&self) -> i32 {
+		self.0.id
 	}
-	fn ip(&self) -> Option<&String> { self.0.ip.as_ref() }
-	fn user_agent(&self) -> Option<&String> { self.0.user_agent.as_ref() }
-	fn text(&self) -> &String { &self.0.text }
-	fn time(&self) -> &chrono::NaiveDateTime { &self.0.time }
-	fn status(&self) -> CommentStatus { self.0.status }
-	fn reply_to(&self) -> Option<i32> { self.0.reply_to }
+	fn author(&self) -> Box<AuthorInterface> {
+		Box::new(
+			if let Some(user) = self.0.user.and_then(|uid| User::find(&self.1, uid).ok()) {
+				Author::from_user(&user)
+			} else {
+				Author {
+					local_user: None,
+					name: self.0.author_name.to_owned(),
+					mail: self.0.author_mail.to_owned(),
+					link: self.0.author_link.to_owned(),
+				}
+			},
+		) as Box<AuthorInterface>
+	}
+	fn ip(&self) -> Option<&String> {
+		self.0.ip.as_ref()
+	}
+	fn user_agent(&self) -> Option<&String> {
+		self.0.user_agent.as_ref()
+	}
+	fn text(&self) -> &String {
+		&self.0.text
+	}
+	fn time(&self) -> &chrono::NaiveDateTime {
+		&self.0.time
+	}
+	fn status(&self) -> CommentStatus {
+		self.0.status
+	}
+	fn reply_to(&self) -> Option<i32> {
+		self.0.reply_to
+	}
 
 	fn parent(&self) -> Option<Box<CommentInterface>> {
-		self.0.parent.map(|id| Box::new(RepositoryWrapper(Comment::find(&self.1, id).unwrap(), self.1.clone())) as Box<CommentInterface>)
+		self.0.parent.map(|id| {
+			Box::new(RepositoryWrapper(
+				Comment::find(&self.1, id).unwrap(),
+				self.1.clone(),
+			)) as Box<CommentInterface>
+		})
 	}
 	fn content(&self) -> Box<ContentInterface> {
-		Box::new(RepositoryWrapper(Content::find(&self.1, self.0.content).unwrap(), self.1.clone())) as Box<ContentInterface>
+		Box::new(RepositoryWrapper(
+			Content::find(&self.1, self.0.content).unwrap(),
+			self.1.clone(),
+		)) as Box<ContentInterface>
 	}
-	
 	fn children(&self) -> Vec<Box<CommentInterface>> {
-		self.0.get_children(&self.1).unwrap().into_iter().map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<CommentInterface>).collect::<Vec<Box<CommentInterface>>>()
+		self.0
+			.get_children(&self.1)
+			.unwrap()
+			.into_iter()
+			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<CommentInterface>)
+			.collect::<Vec<Box<CommentInterface>>>()
 	}
 }
 
@@ -209,10 +241,18 @@ impl Author {
 	}
 }
 impl AuthorInterface for Author {
-	fn name(&self) -> &String { &self.name }
-	fn mail(&self) -> Option<&String> { self.mail.as_ref() }
-	fn link(&self) -> Option<&String> { self.link.as_ref() }
-	fn avatar_url(&self) -> Option<&String> { None } // TODO: IMPLEMENT!!!
+	fn name(&self) -> &String {
+		&self.name
+	}
+	fn mail(&self) -> Option<&String> {
+		self.mail.as_ref()
+	}
+	fn link(&self) -> Option<&String> {
+		self.link.as_ref()
+	}
+	fn avatar_url(&self) -> Option<&String> {
+		None
+	} // TODO: IMPLEMENT!!!
 }
 
 impl IntoInterface<Box<AuthorInterface>> for Author {

@@ -9,8 +9,8 @@ use crate::{
 	},
 	render::RenderResult,
 	templates,
-	util::*,
 	types::EnumType,
+	util::*,
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
@@ -32,7 +32,12 @@ pub fn list(
 		ITEMS_PER_PAGE,
 	);
 
-	Ok(render!(templates::admin::post::list, &gctx.get_template_context(), page, posts.into_interface(&gctx.db)))
+	Ok(render!(
+		templates::admin::post::list,
+		&gctx.get_template_context(),
+		page,
+		posts.into_interface(&gctx.db)
+	))
 }
 
 #[get("/admin/post/_new")]

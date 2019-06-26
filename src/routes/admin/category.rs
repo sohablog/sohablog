@@ -4,7 +4,7 @@ use crate::{
 	models::{
 		category::{Category, NewCategory},
 		user::{self, User},
-		IntoInterface
+		IntoInterface,
 	},
 	render::RenderResult,
 	templates,

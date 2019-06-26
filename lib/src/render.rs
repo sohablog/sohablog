@@ -1,4 +1,4 @@
-pub use crate::{utils::TemplateContext, types::EnumType};
+pub use crate::{types::EnumType, utils::TemplateContext};
 use comrak::{self, ComrakOptions};
 use std::io::{Result as IoResult, Write};
 
@@ -62,7 +62,10 @@ pub fn markdown_to_html(out: &mut dyn Write, s: &str) -> IoResult<()> {
 }
 
 pub fn nl2br(out: &mut dyn Write, s: &str) -> IoResult<()> {
-	let s = s.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "<br />");
+	let s = s
+		.replace("\r\n", "\n")
+		.replace("\r", "\n")
+		.replace("\n", "<br />");
 	write!(out, "{}", s)
 }
 

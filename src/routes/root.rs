@@ -1,7 +1,7 @@
 use super::{error::Error, Page};
 use crate::{
 	models::{comment::Author, content, IntoInterface},
-	render::{RenderResult, theme},
+	render::{theme, RenderResult},
 	util::*,
 };
 use rocket::http::Cookies;
@@ -25,7 +25,12 @@ pub fn index(gctx: GlobalContext, mut page: Page) -> Result<RenderResult, Error>
 		super::post::ITEMS_PER_PAGE,
 	);
 
-	Ok(theme::post_list(&gctx, "Index", page, posts.into_interface(&gctx.db))?)
+	Ok(theme::post_list(
+		&gctx,
+		"Index",
+		page,
+		posts.into_interface(&gctx.db),
+	)?)
 }
 
 #[get("/<path>")]
@@ -57,6 +62,6 @@ pub fn page_show(
 		)
 		.as_str(),
 		post.into_interface(&gctx.db),
-		previous_author.into_interface(&gctx.db)
+		previous_author.into_interface(&gctx.db),
 	)?)
 }

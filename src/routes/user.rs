@@ -4,7 +4,12 @@ use rocket_codegen::*;
 
 #[get("/user/login")]
 pub fn login_get(gctx: GlobalContext) -> RenderResult {
-	render!(templates::user::login, &gctx.get_template_context(), None, None)
+	render!(
+		templates::user::login,
+		&gctx.get_template_context(),
+		None,
+		None
+	)
 }
 
 #[derive(Default, FromForm, Debug)]

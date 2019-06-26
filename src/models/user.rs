@@ -1,8 +1,8 @@
 use diesel::prelude::*;
 use serde_derive::*;
 
-use super::{Error, Result, RepositoryWrapper, IntoInterface};
-use crate::{db::Database, utils::*, schema::*};
+use super::{Error, IntoInterface, RepositoryWrapper, Result};
+use crate::{db::Database, schema::*, utils::*};
 
 use bcrypt;
 
@@ -81,17 +81,39 @@ impl User {
 
 use crate::interfaces::models::User as UserInterface;
 impl UserInterface for RepositoryWrapper<User, Box<Database>> {
-	fn id(&self) -> i32 { self.0.id }
-	fn username(&self) -> &String { &self.0.username }
-	fn name(&self) -> &String { &self.0.name }
-	fn email(&self) -> &String { &self.0.email }
-	fn website(&self) -> Option<&String> { self.0.website.as_ref() }
-	fn avatar_url(&self) -> Option<&String> { self.0.avatar_url.as_ref() }
-	fn permission(&self) -> u32 { self.0.permission }
-	fn created_at(&self) -> &chrono::NaiveDateTime { &self.0.created_at }
-	fn modified_at(&self) -> &chrono::NaiveDateTime { &self.0.modified_at }
-	fn last_login_time(&self) -> &chrono::NaiveDateTime { &self.0.last_login_time }
-	fn status(&self) -> UserStatus { self.0.status }
+	fn id(&self) -> i32 {
+		self.0.id
+	}
+	fn username(&self) -> &String {
+		&self.0.username
+	}
+	fn name(&self) -> &String {
+		&self.0.name
+	}
+	fn email(&self) -> &String {
+		&self.0.email
+	}
+	fn website(&self) -> Option<&String> {
+		self.0.website.as_ref()
+	}
+	fn avatar_url(&self) -> Option<&String> {
+		self.0.avatar_url.as_ref()
+	}
+	fn permission(&self) -> u32 {
+		self.0.permission
+	}
+	fn created_at(&self) -> &chrono::NaiveDateTime {
+		&self.0.created_at
+	}
+	fn modified_at(&self) -> &chrono::NaiveDateTime {
+		&self.0.modified_at
+	}
+	fn last_login_time(&self) -> &chrono::NaiveDateTime {
+		&self.0.last_login_time
+	}
+	fn status(&self) -> UserStatus {
+		self.0.status
+	}
 }
 
 impl IntoInterface<Box<UserInterface>> for User {

@@ -44,14 +44,22 @@ pub struct RepositoryWrapper<T, D>(pub T, pub D);
 pub trait IntoInterface<T>: Sized {
 	fn into_interface(self, db: &Box<crate::db::Database>) -> T;
 }
-impl<T, E> IntoInterface<Option<T>> for Option<E> where E: IntoInterface<T> {
+impl<T, E> IntoInterface<Option<T>> for Option<E>
+where
+	E: IntoInterface<T>,
+{
 	fn into_interface(self, db: &Box<crate::db::Database>) -> Option<T> {
 		self.map(|c| c.into_interface(db))
 	}
 }
-impl<T, E> IntoInterface<Vec<T>> for Vec<E> where E: IntoInterface<T> {
+impl<T, E> IntoInterface<Vec<T>> for Vec<E>
+where
+	E: IntoInterface<T>,
+{
 	fn into_interface(self, db: &Box<crate::db::Database>) -> Vec<T> {
-		self.into_iter().map(|c| c.into_interface(db)).collect::<Vec<T>>()
+		self.into_iter()
+			.map(|c| c.into_interface(db))
+			.collect::<Vec<T>>()
 	}
 }
 

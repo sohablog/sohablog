@@ -1,5 +1,9 @@
-use crate::{db::Database, models::{user, IntoInterface}, plugin::PluginManager};
 pub use crate::utils::*;
+use crate::{
+	db::Database,
+	models::{user, IntoInterface},
+	plugin::PluginManager,
+};
 use rocket::{
 	fairing::{Fairing, Info as FairingInfo, Kind as FairingKind},
 	http::{Method, Status},
@@ -58,7 +62,6 @@ impl Fairing for CSRFTokenValidation {
 		}
 	}
 
-	// FIXME: or as a feature?
 	/// `csrf_field` should appear in the front of the form, cuz we didn't use data.peek for the second time. The full stream will not be loaded.
 	fn on_request(&self, request: &mut Request, data: &Data) {
 		let system_config = request.guard::<State<SystemConfig>>().unwrap();

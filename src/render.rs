@@ -13,51 +13,56 @@ macro_rules! render {
 }
 
 pub mod theme {
+	use crate::{theme::templates, util::GlobalContext};
 	use sohablog_lib::{
+		interfaces::models::{Author, Content},
 		render::RenderResult,
-		utils::{Page, TemplateContext, StaticFile},
-		interfaces::models::{Content, Author},
-	};
-	use crate::{
-		util::GlobalContext,
-		theme::templates,
+		utils::{Page, StaticFile, TemplateContext},
 	};
 	use std::io::Result;
 
-	pub fn post_list(ctx: &GlobalContext, title: &str, page: Page, posts: Vec<Box<Content>>) -> Result<RenderResult> {
+	pub fn post_list(
+		ctx: &GlobalContext,
+		title: &str,
+		page: Page,
+		posts: Vec<Box<Content>>,
+	) -> Result<RenderResult> {
 		let theme_name = &ctx.system_config.theme_name;
 		let theme_context: TemplateContext = ctx.get_template_context();
-		Ok(if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
-			let mut buf: Vec<u8> = vec![];
-			theme.post_list(&mut buf, &theme_context, title, page, posts)?;
-			RenderResult(buf)
-		} else {
-			render!(
-				templates::post_list,
-				&theme_context,
-				title,
-				page,
-				posts
-			)
-		})
+		Ok(
+			if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
+				let mut buf: Vec<u8> = vec![];
+				theme.post_list(&mut buf, &theme_context, title, page, posts)?;
+				RenderResult(buf)
+			} else {
+				render!(templates::post_list, &theme_context, title, page, posts)
+			},
+		)
 	}
 
-	pub fn post_show(ctx: &GlobalContext, title: &str, post: Box<Content>, previous_author: Option<Box<Author>>) -> Result<RenderResult> {
+	pub fn post_show(
+		ctx: &GlobalContext,
+		title: &str,
+		post: Box<Content>,
+		previous_author: Option<Box<Author>>,
+	) -> Result<RenderResult> {
 		let theme_name = &ctx.system_config.theme_name;
 		let theme_context: TemplateContext = ctx.get_template_context();
-		Ok(if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
-			let mut buf: Vec<u8> = vec![];
-			theme.post_show(&mut buf, &theme_context, title, post, previous_author)?;
-			RenderResult(buf)
-		} else {
-			render!(
-				templates::post_show,
-				&theme_context,
-				title,
-				post,
-				previous_author
-			)
-		})
+		Ok(
+			if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
+				let mut buf: Vec<u8> = vec![];
+				theme.post_show(&mut buf, &theme_context, title, post, previous_author)?;
+				RenderResult(buf)
+			} else {
+				render!(
+					templates::post_show,
+					&theme_context,
+					title,
+					post,
+					previous_author
+				)
+			},
+		)
 	}
 
 	pub fn get_static(ctx: &GlobalContext, name: &str) -> Option<Box<StaticFile>> {

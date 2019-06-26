@@ -1,5 +1,5 @@
-use super::{Error, Result, RepositoryWrapper, IntoInterface};
-use crate::{db::Database, utils::*, schema::*};
+use super::{Error, IntoInterface, RepositoryWrapper, Result};
+use crate::{db::Database, schema::*, utils::*};
 use diesel::prelude::*;
 use serde_derive::*;
 
@@ -37,15 +37,32 @@ impl PartialEq for Category {
 
 use crate::interfaces::models::Category as CategoryInterface;
 impl CategoryInterface for RepositoryWrapper<Category, Box<Database>> {
-	fn id(&self) -> i32 { self.0.id }
-	fn slug(&self) -> &String { &self.0.slug }
-	fn name(&self) -> &String { &self.0.name }
-	fn description(&self) -> Option<&String> { self.0.description.as_ref() }
-	fn order(&self) -> i32 { self.0.order }
-	fn parent_id(&self) -> Option<i32> { self.0.parent }
+	fn id(&self) -> i32 {
+		self.0.id
+	}
+	fn slug(&self) -> &String {
+		&self.0.slug
+	}
+	fn name(&self) -> &String {
+		&self.0.name
+	}
+	fn description(&self) -> Option<&String> {
+		self.0.description.as_ref()
+	}
+	fn order(&self) -> i32 {
+		self.0.order
+	}
+	fn parent_id(&self) -> Option<i32> {
+		self.0.parent
+	}
 
 	fn parent(&self) -> Option<Box<CategoryInterface>> {
-		self.0.parent.map(|id| Box::new(RepositoryWrapper(Category::find(&self.1, id).unwrap(), self.1.clone())) as Box<CategoryInterface>)
+		self.0.parent.map(|id| {
+			Box::new(RepositoryWrapper(
+				Category::find(&self.1, id).unwrap(),
+				self.1.clone(),
+			)) as Box<CategoryInterface>
+		})
 	}
 }
 

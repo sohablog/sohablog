@@ -1,8 +1,5 @@
 use crate::{
-	templates::statics::StaticFile as SystemStaticFile,
-	render::theme,
-	utils::StaticFile,
-	util::GlobalContext,
+	render::theme, templates::statics::StaticFile as SystemStaticFile, util::GlobalContext,
 };
 use mime::Mime;
 use rocket::{

@@ -1,7 +1,7 @@
 pub mod models {
 
-	use chrono::NaiveDateTime;
 	use crate::types::*;
+	use chrono::NaiveDateTime;
 
 	pub trait User {
 		fn id(&self) -> i32;

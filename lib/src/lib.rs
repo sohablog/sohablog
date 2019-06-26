@@ -1,8 +1,4 @@
-#![feature(
-	proc_macro_hygiene,
-	decl_macro,
-	type_alias_enum_variants
-)]
+#![feature(proc_macro_hygiene, decl_macro, type_alias_enum_variants)]
 
 #[cfg(feature = "main")]
 #[macro_use]

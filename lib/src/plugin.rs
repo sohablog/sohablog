@@ -1,16 +1,10 @@
 use crate::{
-	utils::{Page, TemplateContext, StaticFile},
-	interfaces::models::{Content, Author}
+	interfaces::models::{Author, Content},
+	utils::{Page, StaticFile, TemplateContext},
 };
-use std::{
-	io,
-	any::Any,
-};
+use std::{any::Any, io};
 #[cfg(feature = "main")]
-use std::{
-	collections::HashMap,
-	ffi::OsStr,
-};
+use std::{collections::HashMap, ffi::OsStr};
 
 #[cfg(feature = "main")]
 use libloading::{Library, Symbol};
@@ -39,9 +33,23 @@ pub trait Theme: PluginMetadata {
 	/// Theme identity string, should be unique
 	fn identity(&self) -> &'static str;
 	/// This function should write the render result for post list page to `out`
-	fn post_list(&self, out: &mut io::Write, ctx: &TemplateContext, title: &str, page: Page, posts: Vec<Box<Content>>) -> io::Result<()>;
+	fn post_list(
+		&self,
+		out: &mut io::Write,
+		ctx: &TemplateContext,
+		title: &str,
+		page: Page,
+		posts: Vec<Box<Content>>,
+	) -> io::Result<()>;
 	/// This function should write the render result for post detail page to `out`
-	fn post_show(&self, out: &mut io::Write, ctx: &TemplateContext, title: &str, post: Box<Content>, previous_author: Option<Box<Author>>) -> io::Result<()>;
+	fn post_show(
+		&self,
+		out: &mut io::Write,
+		ctx: &TemplateContext,
+		title: &str,
+		post: Box<Content>,
+		previous_author: Option<Box<Author>>,
+	) -> io::Result<()>;
 	/// This function should return `StaticFile` struct for server to serve static files
 	fn static_file(&self, name: &str) -> Option<Box<StaticFile>>;
 }
@@ -102,26 +110,32 @@ impl PluginManager {
 		self.loaded_libraries.push(lib);
 		let lib = self.loaded_libraries.last().unwrap();
 
-		let constructor: Symbol<unsafe extern fn () -> *mut PluginMetadata> = lib.get(b"_plugin_metadata").map_err(|_| "Not a valid plugin library")?;
+		let constructor: Symbol<unsafe extern "C" fn() -> *mut PluginMetadata> = lib
+			.get(b"_plugin_metadata")
+			.map_err(|_| "Not a valid plugin library")?;
 		let raw_box = constructor();
 		let metadata: Box<PluginMetadata> = Box::from_raw(raw_box);
 
 		match metadata.r#type() {
 			PluginType::Theme => {
-				let constructor: Symbol<unsafe extern fn () -> *mut Theme> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
+				let constructor: Symbol<unsafe extern "C" fn() -> *mut Theme> = lib
+					.get(b"_plugin_create")
+					.map_err(|_| "Not a valid plugin library")?;
 				let raw_box = constructor();
 				let theme: Box<Theme> = Box::from_raw(raw_box);
 				if theme.plugin_version() != THEME_TRAIT_VERSION {
-					return Err("Theme version is not compatible.")
+					return Err("Theme version is not compatible.");
 				}
 				self.themes.insert(String::from(theme.identity()), theme);
-			},
+			}
 			_ => {
-				let constructor: Symbol<unsafe extern fn () -> *mut Plugin> = lib.get(b"_plugin_create").map_err(|_| "Not a valid plugin library")?;
+				let constructor: Symbol<unsafe extern "C" fn() -> *mut Plugin> = lib
+					.get(b"_plugin_create")
+					.map_err(|_| "Not a valid plugin library")?;
 				let raw_box = constructor();
 				let plugin: Box<Plugin> = Box::from_raw(raw_box);
 				if plugin.plugin_version() != PLUGIN_TRAIT_VERSION {
-					return Err("Plugin version is not compatible.")
+					return Err("Plugin version is not compatible.");
 				}
 				self.plugins.push(plugin);
 			}
@@ -131,7 +145,10 @@ impl PluginManager {
 	}
 
 	pub fn load_from_dir(&mut self, path: &String) -> std::io::Result<()> {
-		use std::{path::{Path, PathBuf}, fs::read_dir};
+		use std::{
+			fs::read_dir,
+			path::{Path, PathBuf},
+		};
 		let path = Path::new(path);
 		if path.is_dir() {
 			for file in read_dir(path)? {

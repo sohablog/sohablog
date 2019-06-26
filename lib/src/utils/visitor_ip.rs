@@ -9,12 +9,12 @@ impl ToString for VisitorIP {
 }
 
 #[cfg(feature = "main")]
+use crate::utils::SystemConfig;
+#[cfg(feature = "main")]
 use rocket::{
-	http::{Status},
+	http::Status,
 	request::{FromRequest, Outcome, Request, State},
 };
-#[cfg(feature = "main")]
-use crate::utils::SystemConfig;
 #[cfg(feature = "main")]
 use std::str::FromStr;
 

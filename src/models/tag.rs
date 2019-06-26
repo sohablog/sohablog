@@ -1,5 +1,5 @@
-use super::{Error, Result, RepositoryWrapper};
-use crate::{db::Database, utils::*, schema::*};
+use super::{Error, RepositoryWrapper, Result};
+use crate::{db::Database, schema::*, utils::*};
 use diesel::prelude::*;
 use serde_derive::*;
 
@@ -59,7 +59,9 @@ impl Tag {
 
 use crate::interfaces::models::Tag as TagInterface;
 impl TagInterface for RepositoryWrapper<Tag, Box<Database>> {
-	fn name(&self) -> &String { &self.0.name }
+	fn name(&self) -> &String {
+		&self.0.name
+	}
 }
 
 /* Things for associations between Tag and Content */
