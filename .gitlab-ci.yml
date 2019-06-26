@@ -7,22 +7,6 @@ services:
 before_script:
   - docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_TOKEN" $TIANHAI_REGISTRY
 
-build-master:
-  stage: build
-  script:
-    - docker build --pull -t "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:dev-master" .
-    - docker push "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:dev-master"
-  only:
-    - master
-
-build:
-  stage: build
-  script:
-    - docker build --pull -t "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG" .
-    - docker push "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG"
-  except:
-    - master
-
 push-github:
   stage: build
   image: debian:stretch-slim
@@ -44,3 +28,19 @@ push-github:
     - for i in `git for-each-ref --format='%(refname)' refs/remotes/origin/`; do git checkout -t $i; git push -u github; done;
     - git push --tags github
 #   when: manual
+
+build-master:
+  stage: build
+  script:
+    - docker build --pull -t "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:dev-master" .
+    - docker push "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:dev-master"
+  only:
+    - master
+
+build:
+  stage: build
+  script:
+    - docker build --pull -t "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG" .
+    - docker push "$TIANHAI_REGISTRY/$CI_PROJECT_PATH:$CI_COMMIT_REF_SLUG"
+  except:
+    - master
