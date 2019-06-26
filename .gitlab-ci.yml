@@ -7,10 +7,6 @@ services:
 before_script:
   - docker login -u "$DOCKER_REGISTRY_USER" -p "$DOCKER_REGISTRY_TOKEN" $TIANHAI_REGISTRY
 
-stages:
-  - push-github
-  - build
-
 build-master:
   stage: build
   script:
@@ -28,7 +24,7 @@ build:
     - master
 
 push-github:
-  stage: push-github
+  stage: build
   image: alpine/git:latest
   before_script:
     - eval $(ssh-agent -s)
