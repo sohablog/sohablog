@@ -1,5 +1,4 @@
 pub use crate::{types::EnumType, utils::TemplateContext};
-use comrak::{self, ComrakOptions};
 use std::io::{Result as IoResult, Write};
 
 #[cfg(feature = "main")]
@@ -35,40 +34,8 @@ impl ToHtml for Origin<'_> {
 	}
 }
 
-// TODO: These functions below shouldn't be included in lib
-
-/// Options for `comrak` which is a Markdown parser
-const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
-	hardbreaks: false,
-	smart: true,
-	github_pre_lang: true,
-	width: 0,
-	default_info_string: None,
-	unsafe_: true,
-	ext_strikethrough: true,
-	ext_tagfilter: true,
-	ext_table: true,
-	ext_autolink: true,
-	ext_tasklist: true,
-	ext_superscript: true,
-	ext_header_ids: None,
-	ext_footnotes: true,
-	ext_description_lists: true,
-};
-/// Parses markdown to HTML
-pub fn markdown_to_html(out: &mut dyn Write, s: &str) -> IoResult<()> {
-	let s = comrak::markdown_to_html(s, &COMRAK_OPTIONS);
-	write!(out, "{}", s)
-}
-
-pub fn nl2br(out: &mut dyn Write, s: &str) -> IoResult<()> {
-	let s = s
-		.replace("\r\n", "\n")
-		.replace("\r", "\n")
-		.replace("\n", "<br />");
-	write!(out, "{}", s)
-}
-
-pub fn date_format(time: &chrono::NaiveDateTime, fmt: &str) -> String {
-	time.format(fmt).to_string()
+pub trait RenderHelper {
+	fn markdown_to_html(&self, s: &str) -> String;
+	fn nl2br(&self, s: &str) -> String;
+	fn date_format(&self, time: &chrono::NaiveDateTime, fmt: &str) -> String;
 }

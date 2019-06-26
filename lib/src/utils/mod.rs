@@ -17,6 +17,7 @@ mod static_file;
 pub use static_file::StaticFile;
 
 use crate::interfaces::models::User;
+use crate::render::RenderHelper;
 
 #[derive(Debug)]
 pub struct SystemConfig {
@@ -37,4 +38,5 @@ pub struct TemplateContext<'a> {
 	pub system_config: &'a SystemConfig,
 	pub user_agent: Option<&'a String>,
 	pub session_info: &'a SessionInfo,
+	pub render_helper: Box<RenderHelper>,
 }

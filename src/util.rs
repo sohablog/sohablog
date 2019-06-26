@@ -3,6 +3,7 @@ use crate::{
 	db::Database,
 	models::{user, IntoInterface},
 	plugin::PluginManager,
+	render::{RenderHelper, RenderFunctions},
 };
 use rocket::{
 	fairing::{Fairing, Info as FairingInfo, Kind as FairingKind},
@@ -31,6 +32,7 @@ impl<'a> GlobalContext<'a> {
 			system_config: &self.system_config,
 			user_agent: self.user_agent.as_ref(),
 			session_info: &self.session_info,
+			render_helper: Box::new(RenderFunctions::default()) as Box<RenderHelper>,
 		}
 	}
 }

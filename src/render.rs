@@ -1,4 +1,50 @@
 pub use sohablog_lib::render::*;
+use comrak::{self, ComrakOptions};
+use std::io::{Result as IoResult, Write};
+
+/// Options for `comrak` which is a Markdown parser
+const COMRAK_OPTIONS: ComrakOptions = ComrakOptions {
+	hardbreaks: false,
+	smart: true,
+	github_pre_lang: true,
+	width: 0,
+	default_info_string: None,
+	unsafe_: true,
+	ext_strikethrough: true,
+	ext_tagfilter: true,
+	ext_table: true,
+	ext_autolink: true,
+	ext_tasklist: true,
+	ext_superscript: true,
+	ext_header_ids: None,
+	ext_footnotes: true,
+	ext_description_lists: true,
+};
+
+#[derive(Default, Debug)]
+pub struct RenderFunctions;
+impl RenderHelper for RenderFunctions {
+	fn markdown_to_html(&self, s: &str) -> String {
+		comrak::markdown_to_html(s, &COMRAK_OPTIONS)
+	}
+	fn nl2br(&self, s: &str) -> String {
+		s.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "<br />")
+	}
+	fn date_format(&self, time: &chrono::NaiveDateTime, fmt: &str) -> String {
+		time.format(fmt).to_string()
+	}
+}
+
+/// call wrapped function and write them as HTML
+pub fn markdown_to_html(out: &mut dyn Write, ctx: &TemplateContext, s: &str) -> IoResult<()> {
+	let s = ctx.render_helper.markdown_to_html(s);
+	write!(out, "{}", s)
+}
+
+pub fn nl2br(out: &mut dyn Write, ctx: &TemplateContext, s: &str) -> IoResult<()> {
+	let s = ctx.render_helper.nl2br(s);
+	write!(out, "{}", s)
+}
 
 /// returns `RenderResult`
 #[macro_export]

@@ -1,6 +1,6 @@
 [package]
 name = "sohablog_lib"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["Soha Jin <soha@lohu.info>"]
 edition = "2018"
 
@@ -8,9 +8,8 @@ edition = "2018"
 main = [ "serde", "serde_derive", "serde_json", "rocket", "diesel", "libloading" ]
 
 [dependencies]
-chrono = { version = "0.4.6", features = [ "serde" ] }
+chrono = { version = "0.4.6", default-features = false }
 uuid = { version = "0.7.4", default-features = false, features = [ "v4" ] }
-comrak = "0.6.2"
 mime = "0.3.13"
 time = "0.1.42"
 
