@@ -42,5 +42,6 @@ push-github:
   script:
     - git fetch github
     - git push github '*:*'
+    - git push github --all
     - git push github --tags
   when: manual
