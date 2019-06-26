@@ -30,4 +30,5 @@ data-encoding = "2.1.2"
 regex = "1.1.7"
 libloading = "0.5.1"
 ammonia = "2.1.1"
+md5 = "0.6.1"
 sohablog_lib = { path = "./lib/", features = [ "main" ] }

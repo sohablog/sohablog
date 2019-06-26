@@ -60,7 +60,7 @@ pub mod models {
 		fn name(&self) -> &String;
 		fn mail(&self) -> Option<&String>;
 		fn link(&self) -> Option<&String>;
-		fn avatar_url(&self) -> Option<&String>;
+		fn avatar_url(&self, default_url: &str) -> String;
 	}
 
 	pub trait Comment {

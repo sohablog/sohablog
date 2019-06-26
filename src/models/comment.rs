@@ -158,6 +158,7 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 			} else {
 				Author {
 					local_user: None,
+					avatar_url: None,
 					name: self.0.author_name.to_owned(),
 					mail: self.0.author_mail.to_owned(),
 					link: self.0.author_link.to_owned(),
@@ -220,6 +221,7 @@ pub struct Author {
 	pub mail: Option<String>,
 	pub link: Option<String>,
 	pub local_user: Option<i32>,
+	pub avatar_url: Option<String>,
 }
 impl Author {
 	pub fn from_user(user: &User) -> Self {
@@ -228,6 +230,7 @@ impl Author {
 			mail: Some(user.email.to_owned()),
 			link: user.website.to_owned(),
 			local_user: Some(user.id),
+			avatar_url: user.avatar_url.to_owned(),
 		}
 	}
 
@@ -237,6 +240,7 @@ impl Author {
 			mail: mail,
 			link: link,
 			local_user: None,
+			avatar_url: None,
 		}
 	}
 }
@@ -250,9 +254,17 @@ impl AuthorInterface for Author {
 	fn link(&self) -> Option<&String> {
 		self.link.as_ref()
 	}
-	fn avatar_url(&self) -> Option<&String> {
-		None
-	} // TODO: IMPLEMENT!!!
+	fn avatar_url(&self, default_url: &str) -> String {
+		self.avatar_url.to_owned().unwrap_or(
+			format!("https://www.gravatar.com/avatar/{}?d={}",
+				self.mail.to_owned()
+					.map(|a| md5::compute(a.to_lowercase().trim()))
+					.map(|a| format!("{:x}", a))
+					.unwrap_or(String::from("00000000000000000000000000000000")),
+				default_url
+			)
+		)
+	}
 }
 
 impl IntoInterface<Box<AuthorInterface>> for Author {
