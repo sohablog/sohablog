@@ -37,8 +37,10 @@ push-github:
     - ssh-keyscan github.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - git remote set-url origin git@github.com:sohablog/sohablog.git
+    - git config --global user.email "gitlab-ci+deploy@tianhai.info"
+    - git config --global user.name "Tianhai Deploy"
   script:
-    - git fetch
-    - git push '*:*'
-    - git push --tags
+    - git fetch origin
+    - git push origin '*:*'
+    - git push origin --tags
   when: manual
