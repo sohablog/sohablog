@@ -8,7 +8,7 @@ edition = "2018"
 main = [ "serde", "serde_derive", "serde_json", "rocket", "diesel", "libloading" ]
 
 [dependencies]
-chrono = { version = "0.4.6", default-features = false }
+chrono = { version = "0.4.7", default-features = false }
 uuid = { version = "0.7.4", default-features = false, features = [ "v4" ] }
 mime = "0.3.13"
 time = "0.1.42"
@@ -16,9 +16,9 @@ time = "0.1.42"
 libloading = { version = "0.5.1", optional = true }
 rocket = { version = "0.4.1", default-features = false, optional = true }
 diesel = { version = "1.4.2", default-features = false, optional = true }
-serde = { version = "1.0.91", default-features = false, optional = true }
+serde = { version = "1.0.93", default-features = false, optional = true }
+serde_derive = { version = "1.0.93", default-features = false, optional = true }
 serde_json = { version = "1.0.39", default-features = false, optional = true }
-serde_derive = { version = "1.0.91", default-features = false, optional = true }
 
 [lib]
 path = "src/lib.rs"
