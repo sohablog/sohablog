@@ -48,7 +48,7 @@ fn main() {
 		is_prod: rocket_config.environment.is_prod(),
 		theme_name: String::from("my-notebook"),
 	};
-	std::fs::create_dir_all(system_config.upload_dir.as_str()).unwrap();
+	std::fs::create_dir_all(&system_config.upload_dir).unwrap();
 	plugin_manager
 		.load_from_dir(&system_config.plugin_dir)
 		.unwrap();
@@ -81,8 +81,8 @@ fn main() {
 					],
 				)
 				.mount(
-					system_config.upload_route.as_str(),
-					StaticFiles::from(system_config.upload_dir.as_str()),
+					&system_config.upload_route,
+					StaticFiles::from(&system_config.upload_dir),
 				)
 				.mount(
 					"/static/",

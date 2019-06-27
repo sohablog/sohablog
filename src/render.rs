@@ -99,7 +99,7 @@ pub mod theme {
 		ctx: &GlobalContext,
 		title: &str,
 		page: Page,
-		posts: Vec<Box<Content>>,
+		posts: Vec<Box<dyn Content>>,
 	) -> Result<RenderResult> {
 		let theme_name = &ctx.system_config.theme_name;
 		let theme_context: TemplateContext = ctx.get_template_context();
@@ -117,8 +117,8 @@ pub mod theme {
 	pub fn post_show(
 		ctx: &GlobalContext,
 		title: &str,
-		post: Box<Content>,
-		previous_author: Option<Box<Author>>,
+		post: Box<dyn Content>,
+		previous_author: Option<Box<dyn Author>>,
 	) -> Result<RenderResult> {
 		let theme_name = &ctx.system_config.theme_name;
 		let theme_context: TemplateContext = ctx.get_template_context();
@@ -139,12 +139,12 @@ pub mod theme {
 		)
 	}
 
-	pub fn get_static(ctx: &GlobalContext, name: &str) -> Option<Box<StaticFile>> {
+	pub fn get_static(ctx: &GlobalContext, name: &str) -> Option<Box<dyn StaticFile>> {
 		let theme_name = &ctx.system_config.theme_name;
 		if let Some(theme) = &ctx.plugin_manager.get_theme(theme_name) {
 			theme.static_file(name)
 		} else if let Some(f) = templates::statics::StaticFile::get(name) {
-			Some(Box::new(f) as Box<StaticFile>)
+			Some(Box::new(f) as Box<dyn StaticFile>)
 		} else {
 			None
 		}

@@ -116,9 +116,9 @@ impl UserInterface for RepositoryWrapper<User, Box<Database>> {
 	}
 }
 
-impl IntoInterface<Box<UserInterface>> for User {
-	fn into_interface(self, db: &Box<Database>) -> Box<UserInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<UserInterface>
+impl IntoInterface<Box<dyn UserInterface>> for User {
+	fn into_interface(self, db: &Box<Database>) -> Box<dyn UserInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn UserInterface>
 	}
 }
 

@@ -207,25 +207,25 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 		self.0.category
 	}
 
-	fn user(&self) -> Box<UserInterface> {
+	fn user(&self) -> Box<dyn UserInterface> {
 		Box::new(RepositoryWrapper(
 			self.0.get_user(&self.1).unwrap(),
 			self.1.clone(),
-		)) as Box<UserInterface>
+		)) as Box<dyn UserInterface>
 	}
-	fn category(&self) -> Option<Box<CategoryInterface>> {
+	fn category(&self) -> Option<Box<dyn CategoryInterface>> {
 		self.0
 			.get_category(&self.1)
 			.unwrap()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<CategoryInterface>)
+			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CategoryInterface>)
 	}
-	fn tags(&self) -> Vec<Box<TagInterface>> {
+	fn tags(&self) -> Vec<Box<dyn TagInterface>> {
 		self.0
 			.get_tags(&self.1)
 			.unwrap()
 			.into_iter()
-			.map(|t| Box::new(RepositoryWrapper(t, self.1.clone())) as Box<TagInterface>)
-			.collect::<Vec<Box<TagInterface>>>()
+			.map(|t| Box::new(RepositoryWrapper(t, self.1.clone())) as Box<dyn TagInterface>)
+			.collect::<Vec<Box<dyn TagInterface>>>()
 	}
 
 	fn link(&self) -> String {
@@ -242,24 +242,24 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 			.map(|t| t.name.to_owned())
 			.collect::<Vec<String>>()
 	}
-	fn get_neighbor_post(&self, prev: bool) -> Option<Box<ContentInterface>> {
+	fn get_neighbor_post(&self, prev: bool) -> Option<Box<dyn ContentInterface>> {
 		self.0
 			.find_neighbor_post(&self.1, prev, 1)
 			.unwrap()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<ContentInterface>)
+			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn ContentInterface>)
 	}
-	fn get_parent_comments(&self) -> Vec<Box<CommentInterface>> {
+	fn get_parent_comments(&self) -> Vec<Box<dyn CommentInterface>> {
 		Comment::find_parents_by_content_id(&self.1, self.0.id)
 			.unwrap()
 			.into_iter()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<CommentInterface>)
-			.collect::<Vec<Box<CommentInterface>>>()
+			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CommentInterface>)
+			.collect::<Vec<Box<dyn CommentInterface>>>()
 	}
 }
 
-impl IntoInterface<Box<ContentInterface>> for Content {
-	fn into_interface(self, db: &Box<Database>) -> Box<ContentInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<ContentInterface>
+impl IntoInterface<Box<dyn ContentInterface>> for Content {
+	fn into_interface(self, db: &Box<Database>) -> Box<dyn ContentInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn ContentInterface>
 	}
 }
 

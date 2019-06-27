@@ -34,9 +34,9 @@ pub struct SystemConfig {
 
 pub struct TemplateContext<'a> {
 	pub ip: &'a VisitorIP,
-	pub user: Option<Box<User>>,
+	pub user: Option<Box<dyn User>>,
 	pub system_config: &'a SystemConfig,
 	pub user_agent: Option<&'a String>,
 	pub session_info: &'a SessionInfo,
-	pub render_helper: Box<RenderHelper>,
+	pub render_helper: Box<dyn RenderHelper>,
 }

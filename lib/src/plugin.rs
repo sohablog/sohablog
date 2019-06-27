@@ -35,23 +35,23 @@ pub trait Theme: PluginMetadata {
 	/// This function should write the render result for post list page to `out`
 	fn post_list(
 		&self,
-		out: &mut io::Write,
+		out: &mut dyn io::Write,
 		ctx: &TemplateContext,
 		title: &str,
 		page: Page,
-		posts: Vec<Box<Content>>,
+		posts: Vec<Box<dyn Content>>,
 	) -> io::Result<()>;
 	/// This function should write the render result for post detail page to `out`
 	fn post_show(
 		&self,
-		out: &mut io::Write,
+		out: &mut dyn io::Write,
 		ctx: &TemplateContext,
 		title: &str,
-		post: Box<Content>,
-		previous_author: Option<Box<Author>>,
+		post: Box<dyn Content>,
+		previous_author: Option<Box<dyn Author>>,
 	) -> io::Result<()>;
 	/// This function should return `StaticFile` struct for server to serve static files
-	fn static_file(&self, name: &str) -> Option<Box<StaticFile>>;
+	fn static_file(&self, name: &str) -> Option<Box<dyn StaticFile>>;
 }
 
 pub const PLUGIN_TRAIT_VERSION: u32 = 0;
@@ -86,8 +86,8 @@ macro_rules! declare_plugin {
 
 #[cfg(feature = "main")]
 pub struct PluginManager {
-	plugins: Vec<Box<Plugin>>,
-	themes: HashMap<String, Box<Theme>>,
+	plugins: Vec<Box<dyn Plugin>>,
+	themes: HashMap<String, Box<dyn Theme>>,
 	loaded_libraries: Vec<Library>,
 }
 #[allow(unreachable_patterns)]
@@ -101,7 +101,7 @@ impl PluginManager {
 		}
 	}
 
-	pub fn get_theme(&self, name: &String) -> Option<&Box<Theme>> {
+	pub fn get_theme(&self, name: &String) -> Option<&Box<dyn Theme>> {
 		self.themes.get(name)
 	}
 
@@ -110,30 +110,30 @@ impl PluginManager {
 		self.loaded_libraries.push(lib);
 		let lib = self.loaded_libraries.last().unwrap();
 
-		let constructor: Symbol<unsafe extern "C" fn() -> *mut PluginMetadata> = lib
+		let constructor: Symbol<unsafe extern "C" fn() -> *mut dyn PluginMetadata> = lib
 			.get(b"_plugin_metadata")
 			.map_err(|_| "Not a valid plugin library")?;
 		let raw_box = constructor();
-		let metadata: Box<PluginMetadata> = Box::from_raw(raw_box);
+		let metadata: Box<dyn PluginMetadata> = Box::from_raw(raw_box);
 
 		match metadata.r#type() {
 			PluginType::Theme => {
-				let constructor: Symbol<unsafe extern "C" fn() -> *mut Theme> = lib
+				let constructor: Symbol<unsafe extern "C" fn() -> *mut dyn Theme> = lib
 					.get(b"_plugin_create")
 					.map_err(|_| "Not a valid plugin library")?;
 				let raw_box = constructor();
-				let theme: Box<Theme> = Box::from_raw(raw_box);
+				let theme: Box<dyn Theme> = Box::from_raw(raw_box);
 				if theme.plugin_version() != THEME_TRAIT_VERSION {
 					return Err("Theme version is not compatible.");
 				}
 				self.themes.insert(String::from(theme.identity()), theme);
 			}
 			_ => {
-				let constructor: Symbol<unsafe extern "C" fn() -> *mut Plugin> = lib
+				let constructor: Symbol<unsafe extern "C" fn() -> *mut dyn Plugin> = lib
 					.get(b"_plugin_create")
 					.map_err(|_| "Not a valid plugin library")?;
 				let raw_box = constructor();
-				let plugin: Box<Plugin> = Box::from_raw(raw_box);
+				let plugin: Box<dyn Plugin> = Box::from_raw(raw_box);
 				if plugin.plugin_version() != PLUGIN_TRAIT_VERSION {
 					return Err("Plugin version is not compatible.");
 				}

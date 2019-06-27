@@ -56,19 +56,19 @@ impl CategoryInterface for RepositoryWrapper<Category, Box<Database>> {
 		self.0.parent
 	}
 
-	fn parent(&self) -> Option<Box<CategoryInterface>> {
+	fn parent(&self) -> Option<Box<dyn CategoryInterface>> {
 		self.0.parent.map(|id| {
 			Box::new(RepositoryWrapper(
 				Category::find(&self.1, id).unwrap(),
 				self.1.clone(),
-			)) as Box<CategoryInterface>
+			)) as Box<dyn CategoryInterface>
 		})
 	}
 }
 
-impl IntoInterface<Box<CategoryInterface>> for Category {
-	fn into_interface(self, db: &Box<Database>) -> Box<CategoryInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<CategoryInterface>
+impl IntoInterface<Box<dyn CategoryInterface>> for Category {
+	fn into_interface(self, db: &Box<Database>) -> Box<dyn CategoryInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn CategoryInterface>
 	}
 }
 

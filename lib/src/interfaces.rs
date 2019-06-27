@@ -28,12 +28,12 @@ pub mod models {
 		fn description(&self) -> Option<&String>;
 		fn order(&self) -> i32;
 		fn parent_id(&self) -> Option<i32>;
-		fn parent(&self) -> Option<Box<Category>>;
+		fn parent(&self) -> Option<Box<dyn Category>>;
 	}
 
 	pub trait Content {
 		fn id(&self) -> i32;
-		fn user(&self) -> Box<User>;
+		fn user(&self) -> Box<dyn User>;
 		fn created_at(&self) -> &NaiveDateTime;
 		fn modified_at(&self) -> &NaiveDateTime;
 		fn time(&self) -> &NaiveDateTime;
@@ -46,14 +46,14 @@ pub mod models {
 		fn status(&self) -> ContentStatus;
 		fn allow_comment(&self) -> bool;
 		fn category_id(&self) -> Option<i32>;
-		fn category(&self) -> Option<Box<Category>>;
-		fn tags(&self) -> Vec<Box<Tag>>;
+		fn category(&self) -> Option<Box<dyn Category>>;
+		fn tags(&self) -> Vec<Box<dyn Tag>>;
 
 		fn link(&self) -> String;
 		fn get_tags_name(&self) -> Vec<String>;
-		fn get_neighbor_post(&self, prev: bool) -> Option<Box<Content>>;
+		fn get_neighbor_post(&self, prev: bool) -> Option<Box<dyn Content>>;
 		fn get_comment_url(&self) -> String;
-		fn get_parent_comments(&self) -> Vec<Box<Comment>>;
+		fn get_parent_comments(&self) -> Vec<Box<dyn Comment>>;
 	}
 
 	pub trait Author {
@@ -65,17 +65,17 @@ pub mod models {
 
 	pub trait Comment {
 		fn id(&self) -> i32;
-		fn author(&self) -> Box<Author>;
+		fn author(&self) -> Box<dyn Author>;
 		fn ip(&self) -> Option<&String>;
 		fn user_agent(&self) -> Option<&String>;
 		fn text(&self) -> &String;
 		fn time(&self) -> &NaiveDateTime;
 		fn status(&self) -> CommentStatus;
 		fn reply_to(&self) -> Option<i32>;
-		fn parent(&self) -> Option<Box<Comment>>;
-		fn content(&self) -> Box<Content>;
+		fn parent(&self) -> Option<Box<dyn Comment>>;
+		fn content(&self) -> Box<dyn Content>;
 
-		fn children(&self) -> Vec<Box<Comment>>;
+		fn children(&self) -> Vec<Box<dyn Comment>>;
 	}
 
 }

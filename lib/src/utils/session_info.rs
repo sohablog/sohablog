@@ -54,7 +54,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for SessionInfo {
 		let system_config = request.guard::<State<SystemConfig>>().unwrap();
 		let mut cookies = request.cookies();
 		let session = cookies
-			.get_private(&system_config.session_name.as_str())
+			.get_private(&system_config.session_name)
 			.and_then(|c| serde_json::from_str::<SessionInfo>(c.value()).ok())
 			.unwrap_or_default();
 		session.persist(&mut cookies, &system_config);

@@ -151,7 +151,7 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	fn id(&self) -> i32 {
 		self.0.id
 	}
-	fn author(&self) -> Box<AuthorInterface> {
+	fn author(&self) -> Box<dyn AuthorInterface> {
 		Box::new(
 			if let Some(user) = self.0.user.and_then(|uid| User::find(&self.1, uid).ok()) {
 				Author::from_user(&user)
@@ -164,7 +164,7 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 					link: self.0.author_link.to_owned(),
 				}
 			},
-		) as Box<AuthorInterface>
+		) as Box<dyn AuthorInterface>
 	}
 	fn ip(&self) -> Option<&String> {
 		self.0.ip.as_ref()
@@ -185,33 +185,33 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 		self.0.reply_to
 	}
 
-	fn parent(&self) -> Option<Box<CommentInterface>> {
+	fn parent(&self) -> Option<Box<dyn CommentInterface>> {
 		self.0.parent.map(|id| {
 			Box::new(RepositoryWrapper(
 				Comment::find(&self.1, id).unwrap(),
 				self.1.clone(),
-			)) as Box<CommentInterface>
+			)) as Box<dyn CommentInterface>
 		})
 	}
-	fn content(&self) -> Box<ContentInterface> {
+	fn content(&self) -> Box<dyn ContentInterface> {
 		Box::new(RepositoryWrapper(
 			Content::find(&self.1, self.0.content).unwrap(),
 			self.1.clone(),
-		)) as Box<ContentInterface>
+		)) as Box<dyn ContentInterface>
 	}
-	fn children(&self) -> Vec<Box<CommentInterface>> {
+	fn children(&self) -> Vec<Box<dyn CommentInterface>> {
 		self.0
 			.get_children(&self.1)
 			.unwrap()
 			.into_iter()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<CommentInterface>)
-			.collect::<Vec<Box<CommentInterface>>>()
+			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CommentInterface>)
+			.collect::<Vec<Box<dyn CommentInterface>>>()
 	}
 }
 
-impl IntoInterface<Box<CommentInterface>> for Comment {
-	fn into_interface(self, db: &Box<Database>) -> Box<CommentInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<CommentInterface>
+impl IntoInterface<Box<dyn CommentInterface>> for Comment {
+	fn into_interface(self, db: &Box<Database>) -> Box<dyn CommentInterface> {
+		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn CommentInterface>
 	}
 }
 
@@ -267,9 +267,9 @@ impl AuthorInterface for Author {
 	}
 }
 
-impl IntoInterface<Box<AuthorInterface>> for Author {
-	fn into_interface(self, _: &Box<Database>) -> Box<AuthorInterface> {
-		Box::new(self) as Box<AuthorInterface>
+impl IntoInterface<Box<dyn AuthorInterface>> for Author {
+	fn into_interface(self, _: &Box<Database>) -> Box<dyn AuthorInterface> {
+		Box::new(self) as Box<dyn AuthorInterface>
 	}
 }
 

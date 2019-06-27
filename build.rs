@@ -20,13 +20,13 @@ fn compile_templates(src: String, statics: String, out: String) -> Result<()> {
 
 fn main() -> Result<()> {
 	compile_templates(
-		format!("{}/templates-system", env::var("CARGO_MANIFEST_DIR").unwrap()),
-		format!("{}/statics-system", env::var("CARGO_MANIFEST_DIR").unwrap()),
+		format!("{}/templates/system", env::var("CARGO_MANIFEST_DIR").unwrap()),
+		format!("{}/templates/static-system", env::var("CARGO_MANIFEST_DIR").unwrap()),
 		format!("{}/templates-system", env::var("OUT_DIR").unwrap()),
 	)?;
 	compile_templates(
-		format!("{}/templates-theme", env::var("CARGO_MANIFEST_DIR").unwrap()),
-		format!("{}/statics-theme", env::var("CARGO_MANIFEST_DIR").unwrap()),
+		format!("{}/templates/theme", env::var("CARGO_MANIFEST_DIR").unwrap()),
+		format!("{}/templates/static-theme", env::var("CARGO_MANIFEST_DIR").unwrap()),
 		format!("{}/templates-theme", env::var("OUT_DIR").unwrap()),
 	)?;
 	Ok(())

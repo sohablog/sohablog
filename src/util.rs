@@ -32,7 +32,7 @@ impl<'a> GlobalContext<'a> {
 			system_config: &self.system_config,
 			user_agent: self.user_agent.as_ref(),
 			session_info: &self.session_info,
-			render_helper: Box::new(RenderFunctions::default()) as Box<RenderHelper>,
+			render_helper: Box::new(RenderFunctions::default()) as Box<dyn RenderHelper>,
 		}
 	}
 }
@@ -103,7 +103,7 @@ impl Fairing for CSRFTokenValidation {
 						s.find('=').and_then(|l| {
 							let (key, value) = s.split_at(l + 1);
 							let key = &key[0..l];
-							if key == system_config.csrf_field_name.as_str() {
+							if key == &system_config.csrf_field_name {
 								Some(value)
 							} else {
 								None
