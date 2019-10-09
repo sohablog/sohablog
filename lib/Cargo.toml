@@ -1,6 +1,6 @@
 [package]
 name = "sohablog_lib"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Soha Jin <soha@lohu.info>"]
 edition = "2018"
 
@@ -8,17 +8,18 @@ edition = "2018"
 main = [ "serde", "serde_derive", "serde_json", "rocket", "diesel", "libloading" ]
 
 [dependencies]
-chrono = { version = "0.4.7", default-features = false }
+chrono = { version = "0.4.9", default-features = false, features = [ "clock" ] }
 uuid = { version = "0.7.4", default-features = false, features = [ "v4" ] }
-mime = "0.3.13"
+mime = "0.3.14"
 time = "0.1.42"
+ipnetwork = "0.15.0"
 
-libloading = { version = "0.5.1", optional = true }
-rocket = { version = "0.4.1", default-features = false, optional = true }
+libloading = { version = "0.5.2", optional = true }
+rocket = { version = "0.4.2", default-features = false, optional = true }
 diesel = { version = "1.4.2", default-features = false, optional = true }
-serde = { version = "1.0.93", default-features = false, optional = true }
-serde_derive = { version = "1.0.93", default-features = false, optional = true }
-serde_json = { version = "1.0.39", default-features = false, optional = true }
+serde = { version = "1.0.101", default-features = false, optional = true }
+serde_derive = { version = "1.0.101", default-features = false, optional = true }
+serde_json = { version = "1.0.41", default-features = false, optional = true }
 
 [lib]
 path = "src/lib.rs"
