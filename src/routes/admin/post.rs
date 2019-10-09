@@ -132,8 +132,13 @@ pub fn edit_post(
 				post.content = form.content.to_owned();
 				post.draft_content = None;
 			}
-			post.time =
-				chrono::NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?;
+			post.time = chrono::DateTime::from_utc(
+					chrono::NaiveDateTime::parse_from_str(
+						form.time.as_str(),
+						"%Y-%m-%d %H:%M:%S",
+					)?,
+					chrono::Local::now().offset().to_owned()
+				);
 			post.category = category;
 			post.update(&db)?;
 			post
@@ -142,11 +147,14 @@ pub fn edit_post(
 			let ctxt = &form.content;
 			// TODO: set view_password
 			let content = content::NewContent {
-				user: current_user.id,
-				time: chrono::NaiveDateTime::parse_from_str(
-					form.time.as_str(),
-					"%Y-%m-%d %H:%M:%S",
-				)?,
+				user: Some(current_user.id),
+				time: chrono::DateTime::from_utc(
+					chrono::NaiveDateTime::parse_from_str(
+						form.time.as_str(),
+						"%Y-%m-%d %H:%M:%S",
+					)?,
+					chrono::Local::now().offset().to_owned()
+				),
 				title: title,
 				slug: slug,
 				content: if form.save_draft {
