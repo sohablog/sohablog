@@ -171,14 +171,14 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	fn id(&self) -> i32 {
 		self.0.id
 	}
-	fn created_at(&self) -> &DateTime<Local> {
-		&self.0.created_at.into()
+	fn created_at(&self) -> DateTime<Local> {
+		self.0.created_at.into()
 	}
-	fn modified_at(&self) -> &DateTime<Local> {
-		&self.0.modified_at.into()
+	fn modified_at(&self) -> DateTime<Local> {
+		self.0.modified_at.into()
 	}
-	fn time(&self) -> &DateTime<Local> {
-		&self.0.time.into()
+	fn time(&self) -> DateTime<Local> {
+		self.0.time.into()
 	}
 	fn title(&self) -> Option<&String> {
 		self.0.title.as_ref()

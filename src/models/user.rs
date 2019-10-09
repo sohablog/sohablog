@@ -103,14 +103,14 @@ impl UserInterface for RepositoryWrapper<User, Box<Database>> {
 	fn permission(&self) -> i32 {
 		self.0.permission
 	}
-	fn created_at(&self) -> &DateTime<Local> {
-		&self.0.created_at.into()
+	fn created_at(&self) -> DateTime<Local> {
+		self.0.created_at.into()
 	}
-	fn modified_at(&self) -> &DateTime<Local> {
-		&self.0.modified_at.into()
+	fn modified_at(&self) -> DateTime<Local> {
+		self.0.modified_at.into()
 	}
-	fn last_login_time(&self) -> &DateTime<Local> {
-		&self.0.last_login_time.into()
+	fn last_login_time(&self) -> DateTime<Local> {
+		self.0.last_login_time.into()
 	}
 	fn status(&self) -> UserStatus {
 		self.0.status

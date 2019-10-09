@@ -167,8 +167,8 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 			},
 		) as Box<dyn AuthorInterface>
 	}
-	fn ip(&self) -> Option<&String> {
-		self.0.ip.map(|ip| ip.to_string()).as_ref()
+	fn ip(&self) -> Option<&IpNetwork> {
+		self.0.ip.as_ref()
 	}
 	fn user_agent(&self) -> Option<&String> {
 		self.0.user_agent.as_ref()
@@ -176,8 +176,8 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	fn text(&self) -> &String {
 		&self.0.text
 	}
-	fn time(&self) -> &DateTime<Local> {
-		&self.0.time.into()
+	fn time(&self) -> DateTime<Local> {
+		self.0.time.into()
 	}
 	fn status(&self) -> CommentStatus {
 		self.0.status

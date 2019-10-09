@@ -3,7 +3,6 @@
 	decl_macro,
 	custom_attribute,
 	never_type,
-	type_alias_enum_variants,
 	vec_remove_item,
 	try_trait
 )]
