@@ -109,8 +109,8 @@ CREATE TABLE public."comment" (
 	"user_agent" text NULL,
 	"text" text NOT NULL,
 	"status" int4 NOT NULL DEFAULT 0,
-	"reply_to" int4 NULL, -- This indicates which comment is this replys to.
-	"parent" int4 NULL, -- Only ONE or NO parent-child relation is allowed.
+	"reply_to" int4 NULL,
+	"parent" int4 NULL,
 	"content" int4 NOT NULL,
 	CONSTRAINT "pk_comment" PRIMARY KEY ("id"),
 	CONSTRAINT "fk_comment__content" FOREIGN KEY ("content") REFERENCES "content"("id"),
