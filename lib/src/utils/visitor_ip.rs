@@ -5,7 +5,7 @@ use std::convert::Into;
 #[derive(Debug)]
 pub struct VisitorIP(pub IpAddr);
 impl VisitorIP {
-	fn to_ipnetwork(self) -> IpNetwork {
+	pub fn to_ipnetwork(self) -> IpNetwork {
 		IpNetwork::new(self.0.to_owned(), match self.0 {
 			IpAddr::V4(_) => 32,
 			IpAddr::V6(_) => 128,
