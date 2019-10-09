@@ -5,7 +5,7 @@
 @use crate::interfaces::models::Category as CategoryInterface;
 @use crate::types::ContentStatus;
 @use rocket_codegen::*;
-@use chrono::prelude::Utc;
+@use chrono::prelude::Local;
 @use crate::render::*;
 
 @(ctx: &TemplateContext, title: &str, post: Option<Box<ContentInterface>>, categories: Vec<Box<CategoryInterface>>)
@@ -31,7 +31,7 @@
 			<input type="radio" name="category" value="@cat.id()" @if let Some(p) = &post {@if let Some(cid) = p.category_id() {@if cid == cat.id() {checked }}}/>&nbsp;@cat.name() <br />}
 		</p>
 		<br />
-		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time()} else {@ctx.render_helper.date_format(&Utc::now().naive_local(), "%Y-%m-%d %H:%M:%S")}" />
+		<input type="text" placeholder="Time" name="time" value="@if let Some(p) = &post {@p.time()} else {@ctx.render_helper.date_format(&Local::now().naive_local(), "%Y-%m-%d %H:%M:%S")}" />
 		<br />
 		<input type="text" placeholder="Tags (split with comma)" name="tags" @if let Some(p) = &post {value="@(p.get_tags_name().join(", "))" }/>
 		<br />
