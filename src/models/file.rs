@@ -2,7 +2,7 @@ use super::{Error, Result};
 use crate::{db::Database, schema::*};
 use diesel::prelude::*;
 use serde_derive::*;
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Utc};
 
 #[derive(Identifiable, Debug, Queryable, Clone, Serialize)]
 #[primary_key(id)]
@@ -13,7 +13,7 @@ pub struct File {
 	pub filename: String,
 	pub content: Option<i32>,
 	pub user: i32,
-	pub time: DateTime<Local>,
+	pub time: DateTime<Utc>,
 }
 #[derive(Insertable, Debug)]
 #[table_name = "file"]

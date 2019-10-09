@@ -4,7 +4,7 @@ use ipnetwork::IpNetwork;
 
 use super::{content::Content, user::User, Error, IntoInterface, RepositoryWrapper, Result};
 use crate::{db::Database, schema::*, utils::*};
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, Utc};
 
 #[derive(Debug, Queryable, Associations, Clone, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]
@@ -21,7 +21,7 @@ pub struct Comment {
 	pub author_mail: Option<String>,
 	pub author_link: Option<String>,
 	pub ip: Option<IpNetwork>,
-	pub time: DateTime<Local>,
+	pub time: DateTime<Utc>,
 	pub user_agent: Option<String>,
 	pub text: String,
 	pub status: CommentStatus,
@@ -51,7 +51,7 @@ pub struct CommentSerializedNormal {
 	pub mail: Option<String>,
 	pub link: Option<String>,
 	pub text: String,
-	pub time: DateTime<Local>,
+	pub time: DateTime<Utc>,
 	pub reply_to: Option<i32>,
 }
 impl Comment {
@@ -177,7 +177,7 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 		&self.0.text
 	}
 	fn time(&self) -> &DateTime<Local> {
-		&self.0.time
+		&self.0.time.into()
 	}
 	fn status(&self) -> CommentStatus {
 		self.0.status

@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 use serde_derive::*;
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, Utc};
 
 use super::{Error, IntoInterface, RepositoryWrapper, Result};
 use crate::{db::Database, schema::*, utils::*};
@@ -34,9 +34,9 @@ pub struct User {
 	pub website: Option<String>,
 	pub avatar_url: Option<String>,
 	pub permission: i32,
-	pub created_at: DateTime<Local>,
-	pub modified_at: DateTime<Local>,
-	pub last_login_time: DateTime<Local>,
+	pub created_at: DateTime<Utc>,
+	pub modified_at: DateTime<Utc>,
+	pub last_login_time: DateTime<Utc>,
 	pub status: UserStatus,
 }
 impl User {
@@ -104,13 +104,13 @@ impl UserInterface for RepositoryWrapper<User, Box<Database>> {
 		self.0.permission
 	}
 	fn created_at(&self) -> &DateTime<Local> {
-		&self.0.created_at
+		&self.0.created_at.into()
 	}
 	fn modified_at(&self) -> &DateTime<Local> {
-		&self.0.modified_at
+		&self.0.modified_at.into()
 	}
 	fn last_login_time(&self) -> &DateTime<Local> {
-		&self.0.last_login_time
+		&self.0.last_login_time.into()
 	}
 	fn status(&self) -> UserStatus {
 		self.0.status

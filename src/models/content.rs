@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use rocket_codegen::uri;
 use serde_derive::*;
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, Utc};
 
 use super::{
 	category::Category,
@@ -22,9 +22,9 @@ use crate::{db::Database, schema::*, utils::*};
 pub struct Content {
 	pub id: i32,
 	pub user: Option<i32>,
-	pub created_at: DateTime<Local>,
-	pub modified_at: DateTime<Local>,
-	pub time: DateTime<Local>,
+	pub created_at: DateTime<Utc>,
+	pub modified_at: DateTime<Utc>,
+	pub time: DateTime<Utc>,
 	pub title: Option<String>,
 	#[column_name = "content_"]
 	pub content: String,
@@ -172,13 +172,13 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 		self.0.id
 	}
 	fn created_at(&self) -> &DateTime<Local> {
-		&self.0.created_at
+		&self.0.created_at.into()
 	}
 	fn modified_at(&self) -> &DateTime<Local> {
-		&self.0.modified_at
+		&self.0.modified_at.into()
 	}
 	fn time(&self) -> &DateTime<Local> {
-		&self.0.time
+		&self.0.time.into()
 	}
 	fn title(&self) -> Option<&String> {
 		self.0.title.as_ref()
@@ -268,7 +268,7 @@ impl IntoInterface<Box<dyn ContentInterface>> for Content {
 #[table_name = "content"]
 pub struct NewContent {
 	pub user: Option<i32>,
-	pub time: chrono::DateTime<Local>,
+	pub time: DateTime<Utc>,
 	pub title: Option<String>,
 	pub slug: Option<String>,
 	#[column_name = "content_"]
