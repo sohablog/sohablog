@@ -11,7 +11,7 @@
 	<link href="/static/theme/@statics::comment_css.name" rel="stylesheet" />
 }, {
 	<h1><a href="@post.link()">@if let Some(t) = post.title() {@t} else {Untitled}</a></h1>
-	<small>by @(post.user().name()) in @if let Some(cat) = &post.category() {@cat.name()} else {Uncategorized} · @ctx.render_helper.date_format(post.time(), "%Y-%m-%d")</small>
+	<small>by @(post.user().name()) in @if let Some(cat) = &post.category() {@cat.name()} else {Uncategorized} · @ctx.render_helper.date_format(&post.time().naive_local(), "%Y-%m-%d")</small>
 	<article>
 		@:markdown_to_html(ctx, post.content().as_str())
 	</article>
@@ -51,10 +51,10 @@
 		</div>
 		@for comment in post.get_parent_comments() {<div class="comment">
 			<p>@:nl2br(ctx, comment.text().as_str())</p>
-			<small>by @comment.author().name() @@ @ctx.render_helper.date_format(comment.time(), "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id()">Reply</button>
+			<small>by @comment.author().name() @@ @ctx.render_helper.date_format(&comment.time().naive_local(), "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id()">Reply</button>
 			@for comment in comment.children() {<div class="comment">
 				<p>@:nl2br(ctx, comment.text().as_str())</p>
-				<small>by @comment.author().name() @@ @ctx.render_helper.date_format(comment.time(), "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id()">Reply</button>
+				<small>by @comment.author().name() @@ @ctx.render_helper.date_format(&comment.time().naive_local(), "%Y-%m-%d %H:%M:%S")</small> <button class="reply-to-comment" data-id="@comment.id()">Reply</button>
 			</div>
 		}</div>}
 	</div>

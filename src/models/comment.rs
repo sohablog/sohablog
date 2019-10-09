@@ -1,9 +1,10 @@
 use diesel::prelude::*;
 use serde_derive::*;
+use ipnetwork::IpNetwork;
 
 use super::{content::Content, user::User, Error, IntoInterface, RepositoryWrapper, Result};
 use crate::{db::Database, schema::*, utils::*};
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Local};
 
 #[derive(Debug, Queryable, Associations, Clone, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]
@@ -19,10 +20,10 @@ pub struct Comment {
 	pub author_name: String,
 	pub author_mail: Option<String>,
 	pub author_link: Option<String>,
-	pub ip: Option<String>,
+	pub ip: Option<IpNetwork>,
+	pub time: DateTime<Local>,
 	pub user_agent: Option<String>,
 	pub text: String,
-	pub time: NaiveDateTime,
 	pub status: CommentStatus,
 	pub reply_to: Option<i32>,
 	pub parent: Option<i32>,
@@ -35,7 +36,7 @@ pub struct NewComment {
 	pub author_name: String,
 	pub author_mail: Option<String>,
 	pub author_link: Option<String>,
-	pub ip: Option<String>,
+	pub ip: Option<IpNetwork>,
 	pub user_agent: Option<String>,
 	pub text: String,
 	pub status: CommentStatus,
@@ -50,7 +51,7 @@ pub struct CommentSerializedNormal {
 	pub mail: Option<String>,
 	pub link: Option<String>,
 	pub text: String,
-	pub time: DateTime<Utc>,
+	pub time: DateTime<Local>,
 	pub reply_to: Option<i32>,
 }
 impl Comment {
@@ -100,7 +101,7 @@ impl Comment {
 			mail: self.author_mail.to_owned(),
 			link: self.author_link.to_owned(),
 			text: self.text.to_owned(),
-			time: DateTime::<Utc>::from_utc(self.time.to_owned(), Utc),
+			time: self.time.to_owned(),
 			reply_to: self.reply_to,
 		}
 	}
@@ -120,7 +121,7 @@ impl Comment {
 
 	pub fn new(
 		author: Author,
-		ip: Option<String>,
+		ip: Option<IpNetwork>,
 		ua: Option<String>,
 		text: String,
 		reply_to: Option<i32>,
@@ -167,7 +168,7 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 		) as Box<dyn AuthorInterface>
 	}
 	fn ip(&self) -> Option<&String> {
-		self.0.ip.as_ref()
+		self.0.ip.map(|ip| ip.to_string()).as_ref()
 	}
 	fn user_agent(&self) -> Option<&String> {
 		self.0.user_agent.as_ref()
@@ -175,7 +176,7 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	fn text(&self) -> &String {
 		&self.0.text
 	}
-	fn time(&self) -> &chrono::NaiveDateTime {
+	fn time(&self) -> &DateTime<Local> {
 		&self.0.time
 	}
 	fn status(&self) -> CommentStatus {

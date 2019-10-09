@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use rocket_codegen::uri;
 use serde_derive::*;
+use chrono::{DateTime, Local};
 
 use super::{
 	category::Category,
@@ -20,15 +21,16 @@ use crate::{db::Database, schema::*, utils::*};
 #[belongs_to(Category, foreign_key = "category")]
 pub struct Content {
 	pub id: i32,
-	pub user: i32,
-	pub created_at: chrono::NaiveDateTime,
-	pub modified_at: chrono::NaiveDateTime,
-	pub time: chrono::NaiveDateTime,
+	pub user: Option<i32>,
+	pub created_at: DateTime<Local>,
+	pub modified_at: DateTime<Local>,
+	pub time: DateTime<Local>,
 	pub title: Option<String>,
-	pub slug: Option<String>,
 	#[column_name = "content_"]
 	pub content: String,
 	pub draft_content: Option<String>,
+	pub slug: Option<String>,
+	pub category: Option<i32>,
 	pub order_level: i32,
 	#[column_name = "type_"]
 	pub r#type: ContentType,
@@ -37,7 +39,6 @@ pub struct Content {
 	pub allow_comment: bool,
 	pub allow_feed: bool,
 	pub parent: Option<i32>,
-	pub category: Option<i32>,
 }
 impl Content {
 	last!(content);
@@ -117,7 +118,7 @@ impl Content {
 	}
 
 	pub fn get_user(&self, db: &Database) -> Result<User> {
-		User::find(db, self.user)
+		User::find(db, self.user.unwrap()) // FIXME: not safe
 	}
 
 	pub fn user_has_access(&self, user: Option<&User>) -> bool {
@@ -170,13 +171,13 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	fn id(&self) -> i32 {
 		self.0.id
 	}
-	fn created_at(&self) -> &chrono::NaiveDateTime {
+	fn created_at(&self) -> &DateTime<Local> {
 		&self.0.created_at
 	}
-	fn modified_at(&self) -> &chrono::NaiveDateTime {
+	fn modified_at(&self) -> &DateTime<Local> {
 		&self.0.modified_at
 	}
-	fn time(&self) -> &chrono::NaiveDateTime {
+	fn time(&self) -> &DateTime<Local> {
 		&self.0.time
 	}
 	fn title(&self) -> Option<&String> {
@@ -266,8 +267,8 @@ impl IntoInterface<Box<dyn ContentInterface>> for Content {
 #[derive(Insertable, Debug)]
 #[table_name = "content"]
 pub struct NewContent {
-	pub user: i32,
-	pub time: chrono::NaiveDateTime,
+	pub user: Option<i32>,
+	pub time: chrono::DateTime<Local>,
 	pub title: Option<String>,
 	pub slug: Option<String>,
 	#[column_name = "content_"]
