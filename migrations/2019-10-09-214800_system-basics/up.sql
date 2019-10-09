@@ -106,7 +106,7 @@ CREATE TABLE public."comment" (
 	"author_link" varchar(200) NULL,
 	"ip" inet NULL,
 	"time" timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	"user_agent" text NOT NULL,
+	"user_agent" text NULL,
 	"text" text NOT NULL,
 	"status" int4 NOT NULL DEFAULT 0,
 	"reply_to" int4 NULL, -- This indicates which comment is this replys to.
