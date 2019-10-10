@@ -55,7 +55,6 @@ pub struct CommentSerializedNormal {
 	pub reply_to: Option<i32>,
 }
 impl Comment {
-	last!(comment);
 	insert!(comment, NewComment);
 	find_pk!(comment);
 	find_by!(comment, find_by_content_id, content as i32);

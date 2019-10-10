@@ -16,7 +16,6 @@ pub struct Category {
 	pub parent: Option<i32>,
 }
 impl Category {
-	last!(category);
 	insert!(category, NewCategory);
 	find_pk!(category);
 	find_one_by!(category, find_by_name, name as &str);

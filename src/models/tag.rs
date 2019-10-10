@@ -16,7 +16,6 @@ pub struct NewTag {
 	pub name: String,
 }
 impl Tag {
-	last!(tag);
 	insert!(tag, NewTag);
 	find_pk!(tag);
 

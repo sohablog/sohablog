@@ -24,7 +24,6 @@ pub struct NewFile {
 	pub content: Option<i32>,
 }
 impl File {
-	last!(file);
 	insert!(file, NewFile);
 	find_pk!(file);
 	delete!();

@@ -41,7 +41,6 @@ pub struct Content {
 	pub parent: Option<i32>,
 }
 impl Content {
-	last!(content);
 	insert!(content, NewContent);
 	find_pk!(content);
 	find_one_by!(content, find_by_slug, slug as &str);
