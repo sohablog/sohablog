@@ -77,8 +77,8 @@ macro_rules! insert {
 			use crate::utils::DatabaseConnection;
 			diesel::insert_into($table::table)
 				.values(new)
-				.execute(&db.conn()?)?;
-			Self::last(db)
+				.get_result(&db.conn()?)
+				.map_err(Error::from)
 		}
 	};
 }
