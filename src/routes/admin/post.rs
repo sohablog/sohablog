@@ -116,7 +116,7 @@ pub fn edit_post(
 	} else {
 		None
 	};
-	let parsedTime = Local.from_local_datetime(&NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?).unwrap().into();
+	let parsed_time = Local.from_local_datetime(&NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?).unwrap().into();
 	let post = match form.id {
 		Some(id) => {
 			let mut post: Content = Content::find(&db, id)?;
@@ -134,7 +134,7 @@ pub fn edit_post(
 				post.content = form.content.to_owned();
 				post.draft_content = None;
 			}
-			post.time = parsedTime;
+			post.time = parsed_time;
 			post.category = category;
 			post.update(&db)?;
 			post
@@ -144,7 +144,7 @@ pub fn edit_post(
 			// TODO: set view_password
 			let content = content::NewContent {
 				user: Some(current_user.id),
-				time: parsedTime,
+				time: parsed_time,
 				title: title,
 				slug: slug,
 				content: if form.save_draft {
