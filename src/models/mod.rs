@@ -62,6 +62,15 @@ where
 			.collect::<Vec<T>>()
 	}
 }
+macro_rules! create_into_interface {
+	($type:ty, $origin:ty) => {
+		impl crate::models::IntoInterface<Box<$type>> for $origin {
+			fn into_interface(self, db: &Box<Database>) -> Box<$type> {
+				Box::new(RepositoryWrapper(self, db.clone())) as Box<$type>
+			}
+		}
+	};
+}
 
 /**
  * Insert a new row

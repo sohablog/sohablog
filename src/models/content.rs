@@ -208,24 +208,13 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	}
 
 	fn user(&self) -> Box<dyn UserInterface> {
-		Box::new(RepositoryWrapper(
-			self.0.get_user(&self.1).unwrap(),
-			self.1.clone(),
-		)) as Box<dyn UserInterface>
+		self.0.get_user(&self.1).unwrap().into_interface(&self.1)
 	}
 	fn category(&self) -> Option<Box<dyn CategoryInterface>> {
-		self.0
-			.get_category(&self.1)
-			.unwrap()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CategoryInterface>)
+		self.0.get_category(&self.1).unwrap().into_interface(&self.1)
 	}
 	fn tags(&self) -> Vec<Box<dyn TagInterface>> {
-		self.0
-			.get_tags(&self.1)
-			.unwrap()
-			.into_iter()
-			.map(|t| Box::new(RepositoryWrapper(t, self.1.clone())) as Box<dyn TagInterface>)
-			.collect::<Vec<Box<dyn TagInterface>>>()
+		self.0.get_tags(&self.1).unwrap().into_interface(&self.1)
 	}
 
 	fn link(&self) -> String {
@@ -243,25 +232,13 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 			.collect::<Vec<String>>()
 	}
 	fn get_neighbor_post(&self, prev: bool) -> Option<Box<dyn ContentInterface>> {
-		self.0
-			.find_neighbor_post(&self.1, prev, 1)
-			.unwrap()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn ContentInterface>)
+		self.0.find_neighbor_post(&self.1, prev, 1).unwrap().into_interface(&self.1)
 	}
 	fn get_parent_comments(&self) -> Vec<Box<dyn CommentInterface>> {
-		Comment::find_parents_by_content_id(&self.1, self.0.id)
-			.unwrap()
-			.into_iter()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CommentInterface>)
-			.collect::<Vec<Box<dyn CommentInterface>>>()
+		Comment::find_parents_by_content_id(&self.1, self.0.id).unwrap().into_interface(&self.1)
 	}
 }
-
-impl IntoInterface<Box<dyn ContentInterface>> for Content {
-	fn into_interface(self, db: &Box<Database>) -> Box<dyn ContentInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn ContentInterface>
-	}
-}
+create_into_interface!(dyn ContentInterface, Content);
 
 #[derive(Insertable, Debug)]
 #[table_name = "content"]

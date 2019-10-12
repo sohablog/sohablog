@@ -186,34 +186,16 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	}
 
 	fn parent(&self) -> Option<Box<dyn CommentInterface>> {
-		self.0.parent.map(|id| {
-			Box::new(RepositoryWrapper(
-				Comment::find(&self.1, id).unwrap(),
-				self.1.clone(),
-			)) as Box<dyn CommentInterface>
-		})
+		self.0.parent.map(|id| Comment::find(&self.1, id).unwrap().into_interface(&self.1))
 	}
 	fn content(&self) -> Box<dyn ContentInterface> {
-		Box::new(RepositoryWrapper(
-			Content::find(&self.1, self.0.content).unwrap(),
-			self.1.clone(),
-		)) as Box<dyn ContentInterface>
+		Content::find(&self.1, self.0.content).unwrap().into_interface(&self.1)
 	}
 	fn children(&self) -> Vec<Box<dyn CommentInterface>> {
-		self.0
-			.get_children(&self.1)
-			.unwrap()
-			.into_iter()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CommentInterface>)
-			.collect::<Vec<Box<dyn CommentInterface>>>()
+		self.0.get_children(&self.1).unwrap().into_interface(&self.1)
 	}
 }
-
-impl IntoInterface<Box<dyn CommentInterface>> for Comment {
-	fn into_interface(self, db: &Box<Database>) -> Box<dyn CommentInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn CommentInterface>
-	}
-}
+create_into_interface!(dyn CommentInterface, Comment);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Author {
@@ -266,7 +248,6 @@ impl AuthorInterface for Author {
 		)
 	}
 }
-
 impl IntoInterface<Box<dyn AuthorInterface>> for Author {
 	fn into_interface(self, _: &Box<Database>) -> Box<dyn AuthorInterface> {
 		Box::new(self) as Box<dyn AuthorInterface>

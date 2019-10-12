@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use serde_derive::*;
 use chrono::{DateTime, Local, Utc};
 
-use super::{Error, IntoInterface, RepositoryWrapper, Result};
+use super::{Error, RepositoryWrapper, Result};
 use crate::{db::Database, schema::*, utils::*};
 
 use bcrypt;
@@ -115,12 +115,7 @@ impl UserInterface for RepositoryWrapper<User, Box<Database>> {
 		self.0.status
 	}
 }
-
-impl IntoInterface<Box<dyn UserInterface>> for User {
-	fn into_interface(self, db: &Box<Database>) -> Box<dyn UserInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn UserInterface>
-	}
-}
+create_into_interface!(dyn UserInterface, User);
 
 #[derive(Insertable)]
 #[table_name = "user"]

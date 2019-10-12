@@ -55,6 +55,7 @@ impl TagInterface for RepositoryWrapper<Tag, Box<Database>> {
 		&self.0.name
 	}
 }
+create_into_interface!(dyn TagInterface, Tag);
 
 /* Things for associations between Tag and Content */
 #[derive(Identifiable, Debug, Queryable, Associations)]
