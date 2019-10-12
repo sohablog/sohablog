@@ -25,26 +25,19 @@ impl Tag {
 		}
 	}
 
-	pub fn find_by_name(db: &Database, tags: Vec<&str>) -> Result<Vec<Tag>> {
-		let exist_tags = tag::table
-			.filter(tag::name.eq_any(&tags))
-			.load::<Self>(&db.conn()?)
-			.map_err(Error::from)?;
-		let mut new_tags: Vec<NewTag> = Vec::new();
-		for tag in &tags {
-			if !exist_tags.iter().any(|t| t.name.as_str() == *tag) {
-				new_tags.push(Self::new(tag));
-			}
-		}
-		diesel::insert_into(tag::table)
-			.values(&new_tags)
-			.execute(&db.conn()?)?;
-
-		// SB MySQL doesn't support `RETURNING` clause
-		tag::table
-			.filter(tag::name.eq_any(&tags))
-			.load::<Self>(&db.conn()?)
-			.map_err(Error::from)
+	pub fn find_by_name(db: &Database, names: Vec<&str>) -> Result<Vec<Tag>> {
+		let names: Vec<NewTag> = names.iter().map(|name| Self::new(name)).collect();
+		let mut tags = tag::table
+			.filter(tag::name.eq_any(names.iter().map(|t| t.name.as_str()).collect::<Vec<&str>>()))
+			.load::<Self>(&db.conn()?)?;
+		tags.extend(
+			diesel::insert_into(tag::table).values(
+				names.iter()
+					.filter(|tag| !tags.iter().any(|t| t.name == tag.name))
+					.collect::<Vec<&NewTag>>()
+			).get_results(&db.conn()?)?
+		);
+		Ok(tags)
 	}
 
 	pub fn find_by_id(db: &Database, tags: Vec<i32>) -> Result<Vec<Tag>> {
