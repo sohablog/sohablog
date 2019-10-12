@@ -1,7 +1,8 @@
 pub mod models {
 
 	use crate::types::*;
-	use chrono::NaiveDateTime;
+	use chrono::{DateTime, Local};
+	use ipnetwork::IpNetwork;
 
 	pub trait User {
 		fn id(&self) -> i32;
@@ -10,10 +11,10 @@ pub mod models {
 		fn email(&self) -> &String;
 		fn website(&self) -> Option<&String>;
 		fn avatar_url(&self) -> Option<&String>;
-		fn permission(&self) -> u32;
-		fn created_at(&self) -> &NaiveDateTime;
-		fn modified_at(&self) -> &NaiveDateTime;
-		fn last_login_time(&self) -> &NaiveDateTime;
+		fn permission(&self) -> i32;
+		fn created_at(&self) -> DateTime<Local>;
+		fn modified_at(&self) -> DateTime<Local>;
+		fn last_login_time(&self) -> DateTime<Local>;
 		fn status(&self) -> UserStatus;
 	}
 
@@ -34,9 +35,9 @@ pub mod models {
 	pub trait Content {
 		fn id(&self) -> i32;
 		fn user(&self) -> Box<dyn User>;
-		fn created_at(&self) -> &NaiveDateTime;
-		fn modified_at(&self) -> &NaiveDateTime;
-		fn time(&self) -> &NaiveDateTime;
+		fn created_at(&self) -> DateTime<Local>;
+		fn modified_at(&self) -> DateTime<Local>;
+		fn time(&self) -> DateTime<Local>;
 		fn title(&self) -> Option<&String>;
 		fn slug(&self) -> Option<&String>;
 		fn content(&self) -> &String;
@@ -66,10 +67,10 @@ pub mod models {
 	pub trait Comment {
 		fn id(&self) -> i32;
 		fn author(&self) -> Box<dyn Author>;
-		fn ip(&self) -> Option<&String>;
+		fn ip(&self) -> Option<&IpNetwork>;
 		fn user_agent(&self) -> Option<&String>;
 		fn text(&self) -> &String;
-		fn time(&self) -> &NaiveDateTime;
+		fn time(&self) -> DateTime<Local>;
 		fn status(&self) -> CommentStatus;
 		fn reply_to(&self) -> Option<i32>;
 		fn parent(&self) -> Option<Box<dyn Comment>>;

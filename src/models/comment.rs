@@ -1,9 +1,10 @@
 use diesel::prelude::*;
 use serde_derive::*;
+use ipnetwork::IpNetwork;
 
 use super::{content::Content, user::User, Error, IntoInterface, RepositoryWrapper, Result};
 use crate::{db::Database, schema::*, utils::*};
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, Local, Utc};
 
 #[derive(Debug, Queryable, Associations, Clone, Identifiable, AsChangeset)]
 #[changeset_options(treat_none_as_null = "true")]
@@ -19,10 +20,10 @@ pub struct Comment {
 	pub author_name: String,
 	pub author_mail: Option<String>,
 	pub author_link: Option<String>,
-	pub ip: Option<String>,
+	pub ip: Option<IpNetwork>,
+	pub time: DateTime<Utc>,
 	pub user_agent: Option<String>,
 	pub text: String,
-	pub time: NaiveDateTime,
 	pub status: CommentStatus,
 	pub reply_to: Option<i32>,
 	pub parent: Option<i32>,
@@ -35,7 +36,7 @@ pub struct NewComment {
 	pub author_name: String,
 	pub author_mail: Option<String>,
 	pub author_link: Option<String>,
-	pub ip: Option<String>,
+	pub ip: Option<IpNetwork>,
 	pub user_agent: Option<String>,
 	pub text: String,
 	pub status: CommentStatus,
@@ -54,7 +55,6 @@ pub struct CommentSerializedNormal {
 	pub reply_to: Option<i32>,
 }
 impl Comment {
-	last!(comment);
 	insert!(comment, NewComment);
 	find_pk!(comment);
 	find_by!(comment, find_by_content_id, content as i32);
@@ -100,7 +100,7 @@ impl Comment {
 			mail: self.author_mail.to_owned(),
 			link: self.author_link.to_owned(),
 			text: self.text.to_owned(),
-			time: DateTime::<Utc>::from_utc(self.time.to_owned(), Utc),
+			time: self.time.to_owned(),
 			reply_to: self.reply_to,
 		}
 	}
@@ -120,7 +120,7 @@ impl Comment {
 
 	pub fn new(
 		author: Author,
-		ip: Option<String>,
+		ip: Option<IpNetwork>,
 		ua: Option<String>,
 		text: String,
 		reply_to: Option<i32>,
@@ -166,7 +166,7 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 			},
 		) as Box<dyn AuthorInterface>
 	}
-	fn ip(&self) -> Option<&String> {
+	fn ip(&self) -> Option<&IpNetwork> {
 		self.0.ip.as_ref()
 	}
 	fn user_agent(&self) -> Option<&String> {
@@ -175,8 +175,8 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	fn text(&self) -> &String {
 		&self.0.text
 	}
-	fn time(&self) -> &chrono::NaiveDateTime {
-		&self.0.time
+	fn time(&self) -> DateTime<Local> {
+		self.0.time.into()
 	}
 	fn status(&self) -> CommentStatus {
 		self.0.status
@@ -186,34 +186,16 @@ impl CommentInterface for RepositoryWrapper<Comment, Box<Database>> {
 	}
 
 	fn parent(&self) -> Option<Box<dyn CommentInterface>> {
-		self.0.parent.map(|id| {
-			Box::new(RepositoryWrapper(
-				Comment::find(&self.1, id).unwrap(),
-				self.1.clone(),
-			)) as Box<dyn CommentInterface>
-		})
+		self.0.parent.map(|id| Comment::find(&self.1, id).unwrap().into_interface(&self.1))
 	}
 	fn content(&self) -> Box<dyn ContentInterface> {
-		Box::new(RepositoryWrapper(
-			Content::find(&self.1, self.0.content).unwrap(),
-			self.1.clone(),
-		)) as Box<dyn ContentInterface>
+		Content::find(&self.1, self.0.content).unwrap().into_interface(&self.1)
 	}
 	fn children(&self) -> Vec<Box<dyn CommentInterface>> {
-		self.0
-			.get_children(&self.1)
-			.unwrap()
-			.into_iter()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CommentInterface>)
-			.collect::<Vec<Box<dyn CommentInterface>>>()
+		self.0.get_children(&self.1).unwrap().into_interface(&self.1)
 	}
 }
-
-impl IntoInterface<Box<dyn CommentInterface>> for Comment {
-	fn into_interface(self, db: &Box<Database>) -> Box<dyn CommentInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn CommentInterface>
-	}
-}
+create_into_interface!(dyn CommentInterface, Comment);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Author {
@@ -266,7 +248,6 @@ impl AuthorInterface for Author {
 		)
 	}
 }
-
 impl IntoInterface<Box<dyn AuthorInterface>> for Author {
 	fn into_interface(self, _: &Box<Database>) -> Box<dyn AuthorInterface> {
 		Box::new(self) as Box<dyn AuthorInterface>

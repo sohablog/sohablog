@@ -106,7 +106,7 @@ pub fn new_content_comment(
 	);
 	let new_comment = Comment::new(
 		author,
-		Some(gctx.ip.to_string()),
+		Some(gctx.ip.to_ipnetwork()),
 		gctx.user_agent.to_owned(),
 		comment_text.to_string(),
 		reply_to,

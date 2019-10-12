@@ -1,4 +1,4 @@
-use diesel::{mysql::MysqlConnection, r2d2::ConnectionManager};
+use diesel::{pg::PgConnection, r2d2::ConnectionManager};
 use r2d2::{Pool, PooledConnection};
 use std::error;
 use std::fmt;
@@ -42,7 +42,7 @@ impl From<r2d2::Error> for Error {
 	}
 }
 
-type DatabasePool = Pool<ConnectionManager<MysqlConnection>>;
+type DatabasePool = Pool<ConnectionManager<PgConnection>>;
 pub use crate::utils::DatabaseConnection;
 
 #[derive(Clone)]
@@ -72,10 +72,10 @@ impl Database {
 	}
 }
 impl DatabaseConnection for Database {
-	type Connection = PooledConnection<ConnectionManager<MysqlConnection>>;
+	type Connection = PooledConnection<ConnectionManager<PgConnection>>;
 	type Error = r2d2::Error;
 
-	fn conn(&self) -> Result<PooledConnection<ConnectionManager<MysqlConnection>>, Self::Error> {
+	fn conn(&self) -> Result<PooledConnection<ConnectionManager<PgConnection>>, Self::Error> {
 		self.pool().get()
 	}
 }

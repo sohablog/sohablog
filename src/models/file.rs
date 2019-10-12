@@ -2,6 +2,7 @@ use super::{Error, Result};
 use crate::{db::Database, schema::*};
 use diesel::prelude::*;
 use serde_derive::*;
+use chrono::{DateTime, Utc};
 
 #[derive(Identifiable, Debug, Queryable, Clone, Serialize)]
 #[primary_key(id)]
@@ -10,9 +11,9 @@ pub struct File {
 	pub id: i32,
 	pub key: String,
 	pub filename: String,
-	pub user: i32,
 	pub content: Option<i32>,
-	pub time: chrono::NaiveDateTime,
+	pub user: i32,
+	pub time: DateTime<Utc>,
 }
 #[derive(Insertable, Debug)]
 #[table_name = "file"]
@@ -23,7 +24,6 @@ pub struct NewFile {
 	pub content: Option<i32>,
 }
 impl File {
-	last!(file);
 	insert!(file, NewFile);
 	find_pk!(file);
 	delete!();

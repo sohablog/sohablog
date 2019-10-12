@@ -16,7 +16,6 @@ pub struct Category {
 	pub parent: Option<i32>,
 }
 impl Category {
-	last!(category);
 	insert!(category, NewCategory);
 	find_pk!(category);
 	find_one_by!(category, find_by_name, name as &str);
@@ -57,20 +56,10 @@ impl CategoryInterface for RepositoryWrapper<Category, Box<Database>> {
 	}
 
 	fn parent(&self) -> Option<Box<dyn CategoryInterface>> {
-		self.0.parent.map(|id| {
-			Box::new(RepositoryWrapper(
-				Category::find(&self.1, id).unwrap(),
-				self.1.clone(),
-			)) as Box<dyn CategoryInterface>
-		})
+		self.0.parent.map(|id| Category::find(&self.1, id).unwrap().into_interface(&self.1))
 	}
 }
-
-impl IntoInterface<Box<dyn CategoryInterface>> for Category {
-	fn into_interface(self, db: &Box<Database>) -> Box<dyn CategoryInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn CategoryInterface>
-	}
-}
+create_into_interface!(dyn CategoryInterface, Category);
 
 #[derive(Insertable, Debug)]
 #[table_name = "category"]

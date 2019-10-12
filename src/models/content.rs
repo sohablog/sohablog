@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use rocket_codegen::uri;
 use serde_derive::*;
+use chrono::{DateTime, Local, Utc};
 
 use super::{
 	category::Category,
@@ -20,15 +21,16 @@ use crate::{db::Database, schema::*, utils::*};
 #[belongs_to(Category, foreign_key = "category")]
 pub struct Content {
 	pub id: i32,
-	pub user: i32,
-	pub created_at: chrono::NaiveDateTime,
-	pub modified_at: chrono::NaiveDateTime,
-	pub time: chrono::NaiveDateTime,
+	pub user: Option<i32>,
+	pub created_at: DateTime<Utc>,
+	pub modified_at: DateTime<Utc>,
+	pub time: DateTime<Utc>,
 	pub title: Option<String>,
-	pub slug: Option<String>,
 	#[column_name = "content_"]
 	pub content: String,
 	pub draft_content: Option<String>,
+	pub slug: Option<String>,
+	pub category: Option<i32>,
 	pub order_level: i32,
 	#[column_name = "type_"]
 	pub r#type: ContentType,
@@ -37,10 +39,8 @@ pub struct Content {
 	pub allow_comment: bool,
 	pub allow_feed: bool,
 	pub parent: Option<i32>,
-	pub category: Option<i32>,
 }
 impl Content {
-	last!(content);
 	insert!(content, NewContent);
 	find_pk!(content);
 	find_one_by!(content, find_by_slug, slug as &str);
@@ -117,7 +117,7 @@ impl Content {
 	}
 
 	pub fn get_user(&self, db: &Database) -> Result<User> {
-		User::find(db, self.user)
+		User::find(db, self.user.unwrap()) // FIXME: not safe
 	}
 
 	pub fn user_has_access(&self, user: Option<&User>) -> bool {
@@ -170,14 +170,14 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	fn id(&self) -> i32 {
 		self.0.id
 	}
-	fn created_at(&self) -> &chrono::NaiveDateTime {
-		&self.0.created_at
+	fn created_at(&self) -> DateTime<Local> {
+		self.0.created_at.into()
 	}
-	fn modified_at(&self) -> &chrono::NaiveDateTime {
-		&self.0.modified_at
+	fn modified_at(&self) -> DateTime<Local> {
+		self.0.modified_at.into()
 	}
-	fn time(&self) -> &chrono::NaiveDateTime {
-		&self.0.time
+	fn time(&self) -> DateTime<Local> {
+		self.0.time.into()
 	}
 	fn title(&self) -> Option<&String> {
 		self.0.title.as_ref()
@@ -208,24 +208,13 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 	}
 
 	fn user(&self) -> Box<dyn UserInterface> {
-		Box::new(RepositoryWrapper(
-			self.0.get_user(&self.1).unwrap(),
-			self.1.clone(),
-		)) as Box<dyn UserInterface>
+		self.0.get_user(&self.1).unwrap().into_interface(&self.1)
 	}
 	fn category(&self) -> Option<Box<dyn CategoryInterface>> {
-		self.0
-			.get_category(&self.1)
-			.unwrap()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CategoryInterface>)
+		self.0.get_category(&self.1).unwrap().into_interface(&self.1)
 	}
 	fn tags(&self) -> Vec<Box<dyn TagInterface>> {
-		self.0
-			.get_tags(&self.1)
-			.unwrap()
-			.into_iter()
-			.map(|t| Box::new(RepositoryWrapper(t, self.1.clone())) as Box<dyn TagInterface>)
-			.collect::<Vec<Box<dyn TagInterface>>>()
+		self.0.get_tags(&self.1).unwrap().into_interface(&self.1)
 	}
 
 	fn link(&self) -> String {
@@ -243,31 +232,19 @@ impl ContentInterface for RepositoryWrapper<Content, Box<Database>> {
 			.collect::<Vec<String>>()
 	}
 	fn get_neighbor_post(&self, prev: bool) -> Option<Box<dyn ContentInterface>> {
-		self.0
-			.find_neighbor_post(&self.1, prev, 1)
-			.unwrap()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn ContentInterface>)
+		self.0.find_neighbor_post(&self.1, prev, 1).unwrap().into_interface(&self.1)
 	}
 	fn get_parent_comments(&self) -> Vec<Box<dyn CommentInterface>> {
-		Comment::find_parents_by_content_id(&self.1, self.0.id)
-			.unwrap()
-			.into_iter()
-			.map(|c| Box::new(RepositoryWrapper(c, self.1.clone())) as Box<dyn CommentInterface>)
-			.collect::<Vec<Box<dyn CommentInterface>>>()
+		Comment::find_parents_by_content_id(&self.1, self.0.id).unwrap().into_interface(&self.1)
 	}
 }
-
-impl IntoInterface<Box<dyn ContentInterface>> for Content {
-	fn into_interface(self, db: &Box<Database>) -> Box<dyn ContentInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn ContentInterface>
-	}
-}
+create_into_interface!(dyn ContentInterface, Content);
 
 #[derive(Insertable, Debug)]
 #[table_name = "content"]
 pub struct NewContent {
-	pub user: i32,
-	pub time: chrono::NaiveDateTime,
+	pub user: Option<i32>,
+	pub time: DateTime<Utc>,
 	pub title: Option<String>,
 	pub slug: Option<String>,
 	#[column_name = "content_"]

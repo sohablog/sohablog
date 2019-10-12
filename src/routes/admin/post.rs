@@ -14,6 +14,7 @@ use crate::{
 };
 use rocket::{request::LenientForm, response::Redirect, State};
 use rocket_codegen::*;
+use chrono::{NaiveDateTime, Local, offset::TimeZone};
 
 pub const ITEMS_PER_PAGE: i32 = 25;
 
@@ -115,6 +116,7 @@ pub fn edit_post(
 	} else {
 		None
 	};
+	let parsed_time = Local.from_local_datetime(&NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?).unwrap().into();
 	let post = match form.id {
 		Some(id) => {
 			let mut post: Content = Content::find(&db, id)?;
@@ -132,8 +134,7 @@ pub fn edit_post(
 				post.content = form.content.to_owned();
 				post.draft_content = None;
 			}
-			post.time =
-				chrono::NaiveDateTime::parse_from_str(form.time.as_str(), "%Y-%m-%d %H:%M:%S")?;
+			post.time = parsed_time;
 			post.category = category;
 			post.update(&db)?;
 			post
@@ -142,11 +143,8 @@ pub fn edit_post(
 			let ctxt = &form.content;
 			// TODO: set view_password
 			let content = content::NewContent {
-				user: current_user.id,
-				time: chrono::NaiveDateTime::parse_from_str(
-					form.time.as_str(),
-					"%Y-%m-%d %H:%M:%S",
-				)?,
+				user: Some(current_user.id),
+				time: parsed_time,
 				title: title,
 				slug: slug,
 				content: if form.save_draft {

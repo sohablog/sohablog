@@ -1,11 +1,11 @@
 @use super::super::super::base;
 @use super::super::super::misc::paginator;
-@use crate::interfaces::models::Content as ContentInterface;
+@use crate::interfaces::models::Content as TheContentInterface;
 @use crate::utils::Page;
 @use rocket_codegen::*;
 @use crate::render::*;
 
-@(ctx: &TemplateContext, page: Page, posts: Vec<Box<ContentInterface>>)
+@(ctx: &TemplateContext, page: Page, posts: Vec<Box<dyn TheContentInterface>>)
 
 @:base(ctx, "Post List", {}, {}, {
 	<p>

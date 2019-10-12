@@ -1,0 +1,7 @@
+DROP TABLE "comment" CASCADE;
+DROP TABLE "file" CASCADE;
+DROP TABLE "category" CASCADE;
+DROP TABLE "user" CASCADE;
+DROP TABLE "assoc_tag_content" CASCADE;
+DROP TABLE "tag" CASCADE;
+DROP TABLE "content" CASCADE;

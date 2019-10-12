@@ -62,6 +62,15 @@ where
 			.collect::<Vec<T>>()
 	}
 }
+macro_rules! create_into_interface {
+	($type:ty, $origin:ty) => {
+		impl crate::models::IntoInterface<Box<$type>> for $origin {
+			fn into_interface(self, db: &Box<Database>) -> Box<$type> {
+				Box::new(RepositoryWrapper(self, db.clone())) as Box<$type>
+			}
+		}
+	};
+}
 
 /**
  * Insert a new row
@@ -77,28 +86,8 @@ macro_rules! insert {
 			use crate::utils::DatabaseConnection;
 			diesel::insert_into($table::table)
 				.values(new)
-				.execute(&db.conn()?)?;
-			Self::last(db)
-		}
-	};
-}
-/**
- * Insert a new row
- *
- * impl User{
- *     insert!(table,NewUser);
- * }
- * User::insert(db,NewUser::new());
- */
-#[allow(unused_macros)]
-macro_rules! insert_non_incremental {
-	($table:ident, $from:ident, $pk_field:ident) => {
-		pub fn insert(db: &crate::db::Database, new: $from) -> Result<Self> {
-			use crate::utils::DatabaseConnection;
-			diesel::insert_into($table::table)
-				.values(&new)
-				.execute(&db.conn()?)?;
-			Self::find(db, &new.$pk_field)
+				.get_result(&db.conn()?)
+				.map_err(Error::from)
 		}
 	};
 }
@@ -129,31 +118,6 @@ macro_rules! delete {
 			diesel::delete(self)
 				.execute(&db.conn()?)?;
 			Ok(())
-		}
-	};
-}
-/**
- * Get last row
- *
- * impl User{
- *     last!(table);
- * }
- * User::last(db);
- */
-macro_rules! last {
-	($table:ident) => {
-		last!($table, id);
-	};
-	($table:ident, $field:ident) => {
-		pub fn last(db: &crate::db::Database) -> Result<Self> {
-			use crate::utils::DatabaseConnection;
-			$table::table
-				.order_by($table::$field.desc())
-				.limit(1)
-				.load::<Self>(&db.conn()?)?
-				.into_iter()
-				.next()
-				.ok_or(Error::NotFound)
 		}
 	};
 }

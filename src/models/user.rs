@@ -1,23 +1,24 @@
 use diesel::prelude::*;
 use serde_derive::*;
+use chrono::{DateTime, Local, Utc};
 
-use super::{Error, IntoInterface, RepositoryWrapper, Result};
+use super::{Error, RepositoryWrapper, Result};
 use crate::{db::Database, schema::*, utils::*};
 
 use bcrypt;
 
 #[allow(dead_code)]
-pub const PERM_LOGIN: u32 = 1 << 0; // login only
+pub const PERM_LOGIN: i32 = 1 << 0; // login only
 #[allow(dead_code)]
-pub const PERM_POST_VIEW: u32 = 1 << 1; // view all posts (such as hidden post)
+pub const PERM_POST_VIEW: i32 = 1 << 1; // view all posts (such as hidden post)
 #[allow(dead_code)]
-pub const PERM_POST_EDIT: u32 = 1 << 2; // create & edit post
+pub const PERM_POST_EDIT: i32 = 1 << 2; // create & edit post
 #[allow(dead_code)]
-pub const PERM_POST_DELETE: u32 = 1 << 3; // delete post
+pub const PERM_POST_DELETE: i32 = 1 << 3; // delete post
 #[allow(dead_code)]
-pub const PERM_CATEGORY_MANAGE: u32 = 1 << 4; // manage category
+pub const PERM_CATEGORY_MANAGE: i32 = 1 << 4; // manage category
 #[allow(dead_code)]
-pub const PERM_COMMENT_MANAGE: u32 = 1 << 5; // manage category
+pub const PERM_COMMENT_MANAGE: i32 = 1 << 5; // manage category
 
 #[derive(Identifiable, Debug, Queryable, Clone, Serialize)]
 #[primary_key(id)]
@@ -32,14 +33,13 @@ pub struct User {
 	pub email_lower: String,
 	pub website: Option<String>,
 	pub avatar_url: Option<String>,
-	pub permission: u32,
-	pub created_at: chrono::NaiveDateTime,
-	pub modified_at: chrono::NaiveDateTime,
-	pub last_login_time: chrono::NaiveDateTime,
+	pub permission: i32,
+	pub created_at: DateTime<Utc>,
+	pub modified_at: DateTime<Utc>,
+	pub last_login_time: DateTime<Utc>,
 	pub status: UserStatus,
 }
 impl User {
-	last!(user);
 	insert!(user, NewUser);
 	find_pk!(user);
 	find_one_by!(user, find_by_username, username as &str);
@@ -60,11 +60,11 @@ impl User {
 		bcrypt::verify(pwd, self.password_hash.as_ref()).unwrap_or(false)
 	}
 
-	pub fn has_permission(&self, perm: u32) -> bool {
+	pub fn has_permission(&self, perm: i32) -> bool {
 		(self.permission & perm) != 0
 	}
 
-	pub fn check_permission(&self, perm: u32) -> Result<()> {
+	pub fn check_permission(&self, perm: i32) -> Result<()> {
 		match self.has_permission(perm) {
 			true => Ok(()),
 			false => Err(Error::UserHasNoPermission),
@@ -99,28 +99,23 @@ impl UserInterface for RepositoryWrapper<User, Box<Database>> {
 	fn avatar_url(&self) -> Option<&String> {
 		self.0.avatar_url.as_ref()
 	}
-	fn permission(&self) -> u32 {
+	fn permission(&self) -> i32 {
 		self.0.permission
 	}
-	fn created_at(&self) -> &chrono::NaiveDateTime {
-		&self.0.created_at
+	fn created_at(&self) -> DateTime<Local> {
+		self.0.created_at.into()
 	}
-	fn modified_at(&self) -> &chrono::NaiveDateTime {
-		&self.0.modified_at
+	fn modified_at(&self) -> DateTime<Local> {
+		self.0.modified_at.into()
 	}
-	fn last_login_time(&self) -> &chrono::NaiveDateTime {
-		&self.0.last_login_time
+	fn last_login_time(&self) -> DateTime<Local> {
+		self.0.last_login_time.into()
 	}
 	fn status(&self) -> UserStatus {
 		self.0.status
 	}
 }
-
-impl IntoInterface<Box<dyn UserInterface>> for User {
-	fn into_interface(self, db: &Box<Database>) -> Box<dyn UserInterface> {
-		Box::new(RepositoryWrapper(self, db.clone())) as Box<dyn UserInterface>
-	}
-}
+create_into_interface!(dyn UserInterface, User);
 
 #[derive(Insertable)]
 #[table_name = "user"]
@@ -131,7 +126,7 @@ pub struct NewUser {
 	pub email_lower: String,
 	pub password_hash: String,
 	pub name: String,
-	pub permission: u32,
+	pub permission: i32,
 }
 
 use rocket::outcome::IntoOutcome;
