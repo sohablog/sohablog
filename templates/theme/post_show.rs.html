@@ -1,11 +1,11 @@
 @use super::misc::base;
 @use super::misc::csrf_input;
 @use super::statics;
-@use crate::interfaces::models::Content as ContentInterface;
+@use crate::interfaces::models::Content as TheContentInterface;
 @use crate::interfaces::models::Author as AuthorInterface;
 @use crate::render::*;
 
-@(ctx: &TemplateContext, title: &str, post: Box<ContentInterface>, previous_author: Option<Box<AuthorInterface>>)
+@(ctx: &TemplateContext, title: &str, post: Box<dyn TheContentInterface>, previous_author: Option<Box<dyn AuthorInterface>>)
 
 @:base(ctx, title, {}, {
 	<link href="/static/theme/@statics::comment_css.name" rel="stylesheet" />

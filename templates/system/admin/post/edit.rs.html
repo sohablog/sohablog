@@ -1,14 +1,14 @@
 @use super::super::super::statics;
 @use super::super::super::base;
 @use super::super::super::misc::csrf_hidden_input;
-@use crate::interfaces::models::Content as ContentInterface;
+@use crate::interfaces::models::Content as TheContentInterface;
 @use crate::interfaces::models::Category as CategoryInterface;
 @use crate::types::ContentStatus;
 @use rocket_codegen::*;
 @use chrono::prelude::Local;
 @use crate::render::*;
 
-@(ctx: &TemplateContext, title: &str, post: Option<Box<ContentInterface>>, categories: Vec<Box<CategoryInterface>>)
+@(ctx: &TemplateContext, title: &str, post: Option<Box<dyn TheContentInterface>>, categories: Vec<Box<dyn CategoryInterface>>)
 
 @:base(ctx, title, {}, {
 	<link href="/static/system/@statics::markdown_palettes_0_4_11_css.name" rel="stylesheet" />

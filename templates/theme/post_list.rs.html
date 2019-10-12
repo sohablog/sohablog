@@ -1,10 +1,10 @@
 @use super::misc::base;
 @use super::misc::paginator;
-@use crate::interfaces::models::Content as ContentInterface;
+@use crate::interfaces::models::Content as TheContentInterface;
 @use crate::utils::Page;
 @use crate::render::*;
 
-@(ctx: &TemplateContext, title: &str, page: Page, posts: Vec<Box<ContentInterface>>)
+@(ctx: &TemplateContext, title: &str, page: Page, posts: Vec<Box<dyn TheContentInterface>>)
 
 @:base(ctx, title, {}, {}, {
 	@for post in posts {<div>
