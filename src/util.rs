@@ -14,6 +14,8 @@ use rocket::{
 
 use crate::routes::error::Error; // temp solution
 
+pub struct RobotsTxt(pub Option<String>);
+
 /// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
 pub struct GlobalContext<'a> {
 	pub ip: VisitorIP,

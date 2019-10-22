@@ -25,6 +25,7 @@ pub struct SystemConfig {
 	pub upload_dir: String,
 	pub upload_route: String,
 	pub session_name: String,
+	pub robots_txt_path: String,
 	pub real_ip_header: Option<String>,
 	pub csrf_cookie_name: Option<String>,
 	pub csrf_field_name: String,

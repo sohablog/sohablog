@@ -41,12 +41,16 @@ fn main() {
 		upload_dir: env::var("SOHABLOG_UPLOAD_DIR").unwrap_or(String::from("upload/")),
 		upload_route: env::var("SOHABLOG_UPLOAD_ROUTE").unwrap_or(String::from("/static/upload")),
 		session_name: env::var("SOHABLOG_SESSION_NAME").unwrap_or(String::from("SOHABLOG_SESSION")),
+		robots_txt_path: env::var("SOHABLOG_ROBOTS_TXT_PATH").unwrap_or(String::from("robots.txt")),
 		csrf_field_name: env::var("SOHABLOG_CSRF_FIELD_NAME").unwrap_or(String::from("_token")),
 		real_ip_header: env::var("SOHABLOG_REAL_IP_HEADER").ok(),
 		csrf_cookie_name: env::var("SOHABLOG_CSRF_COOKIE_NAME").ok(),
 		is_prod: rocket_config.environment.is_prod(),
 		theme_name: String::from("my-notebook"),
 	};
+	let robots_txt = get_robot_txt(&system_config.robots_txt_path);
+	
+	let robots_txt = util::RobotsTxt(robots_txt);
 	std::fs::create_dir_all(&system_config.upload_dir).unwrap();
 	plugin_manager
 		.load_from_dir(&system_config.plugin_dir)
@@ -59,6 +63,7 @@ fn main() {
 					"/",
 					routes![
 						router::root::index,
+						router::root::robots_txt,
 						router::post::post_show,
 						router::root::page_show,
 						router::user::login_get,
@@ -97,10 +102,22 @@ fn main() {
 				.manage(Box::new(db))
 				.manage(system_config)
 				.manage(plugin_manager)
+				.manage(robots_txt)
 				.launch();
 		}
 		Err(e) => println!("Met an error while initializing database: {}", e),
 	};
+}
+
+fn get_robot_txt(path: &str) -> Option<String> {
+	use std::{path::Path, fs::read_to_string};
+	let p = Path::new(path);
+
+	if p.exists() && p.is_file() {
+		read_to_string(p).map_err(|e| { dbg!(e); }).ok()
+	} else {
+		None
+	}
 }
 
 // system templates
