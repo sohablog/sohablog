@@ -25,7 +25,7 @@ fn main() {
 	use crate::db::Database;
 	use crate::routes as router;
 	use crate::util::*;
-	use rocket::{config::Config as RocketConfig, fairing::AdHoc, routes};
+	use rocket::{config::Config as RocketConfig, fairing::AdHoc, routes, http::Method};
 	use rocket_contrib::serve::StaticFiles;
 	use sohablog_lib::plugin::PluginManager;
 	use std::env;
@@ -48,9 +48,8 @@ fn main() {
 		is_prod: rocket_config.environment.is_prod(),
 		theme_name: String::from("my-notebook"),
 	};
-	let robots_txt = get_robot_txt(&system_config.robots_txt_path);
 	
-	let robots_txt = util::RobotsTxt(robots_txt);
+	let robots_txt = util::RobotsTxt::new(get_robot_txt(&system_config.robots_txt_path));
 	std::fs::create_dir_all(&system_config.upload_dir).unwrap();
 	plugin_manager
 		.load_from_dir(&system_config.plugin_dir)
@@ -59,31 +58,28 @@ fn main() {
 	match db.init() {
 		Ok(_) => {
 			rocket::ignite()
-				.mount(
-					"/",
-					routes![
-						router::root::index,
-						router::root::robots_txt,
-						router::post::post_show,
-						router::root::page_show,
-						router::user::login_get,
-						router::user::login_post,
-						router::comment::new_content_comment,
-						router::admin::root::generate_password_hash,
-						router::admin::root::index,
-						router::admin::post::list,
-						router::admin::post::new_get,
-						router::admin::post::edit_get,
-						router::admin::post::edit_post,
-						router::admin::comment::list,
-						router::admin::comment::set_status,
-						router::admin::category::list,
-						router::admin::category::update,
-						router::admin::file::upload,
-						router::admin::file::find_by_content,
-						router::admin::file::delete_by_id
-					],
-				)
+				.mount("/", routes![
+					router::root::index,
+					router::post::post_show,
+					router::root::page_show,
+					router::user::login_get,
+					router::user::login_post,
+					router::comment::new_content_comment,
+					router::admin::root::generate_password_hash,
+					router::admin::root::index,
+					router::admin::post::list,
+					router::admin::post::new_get,
+					router::admin::post::edit_get,
+					router::admin::post::edit_post,
+					router::admin::comment::list,
+					router::admin::comment::set_status,
+					router::admin::category::list,
+					router::admin::category::update,
+					router::admin::file::upload,
+					router::admin::file::find_by_content,
+					router::admin::file::delete_by_id
+				])
+				.mount("/", vec![rocket::Route::new(Method::Get, "/robots.txt", robots_txt)])
 				.mount(
 					&system_config.upload_route,
 					StaticFiles::from(&system_config.upload_dir),
@@ -102,7 +98,6 @@ fn main() {
 				.manage(Box::new(db))
 				.manage(system_config)
 				.manage(plugin_manager)
-				.manage(robots_txt)
 				.launch();
 		}
 		Err(e) => println!("Met an error while initializing database: {}", e),

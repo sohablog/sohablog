@@ -7,14 +7,35 @@ use crate::{
 };
 use rocket::{
 	fairing::{Fairing, Info as FairingInfo, Kind as FairingKind},
-	http::{Method, Status},
+	http::{self, Method, Status},
 	request::{FromRequest, Outcome, Request, State},
+	response::Response,
 	Data,
+	handler::{Handler, Outcome as HandlerOutcome},
 };
 
 use crate::routes::error::Error; // temp solution
 
-pub struct RobotsTxt(pub Option<String>);
+#[derive(Clone)]
+pub struct RobotsTxt(Option<String>);
+impl RobotsTxt {
+	pub fn new(txt: Option<String>) -> Self {
+		Self(txt)
+	}
+}
+impl Handler for RobotsTxt {
+	fn handle<'r>(&self, _req: &'r Request, _data: Data) -> HandlerOutcome<'r> {
+		match self.0.as_ref() {
+			None => HandlerOutcome::Failure(Status::NotFound),
+			Some(s) => HandlerOutcome::Success(
+				Response::build()
+					.header(http::ContentType::Plain)
+					.sized_body(std::io::Cursor::new(String::from(s)))
+					.finalize()
+			)
+		}
+    }
+}
 
 /// `GlobalContext` is a struct contained some globally useful items, such as user and database connection.
 pub struct GlobalContext<'a> {

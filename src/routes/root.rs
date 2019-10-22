@@ -4,7 +4,7 @@ use crate::{
 	render::{theme, RenderResult},
 	util::*,
 };
-use rocket::{http::{Cookies, Status}, request::State};
+use rocket::http::Cookies;
 use rocket_codegen::*;
 
 #[get("/?<page>")]
@@ -64,9 +64,4 @@ pub fn page_show(
 		post.into_interface(&gctx.db),
 		previous_author.into_interface(&gctx.db),
 	)?)
-}
-
-#[get("/robots.txt")]
-pub fn robots_txt(txt: State<RobotsTxt>) -> Result<&str, Status> {
-	txt.inner().0.as_ref().map(|s| s.as_str()).ok_or(Status::NotFound)
 }
