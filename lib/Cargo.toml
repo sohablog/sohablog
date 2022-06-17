@@ -16,7 +16,7 @@ ipnetwork = "0.15.0" # should be same as ../Cargo.toml, lock for diesel
 
 libloading = { version = "0.5.2", optional = true }
 rocket = { version = "0.4.2", default-features = false, optional = true }
-diesel = { version = "1.4.3", default-features = false, optional = true }
+diesel = { version = "1.4.6", default-features = false, optional = true }
 serde = { version = "1.0.101", default-features = false, optional = true }
 serde_derive = { version = "1.0.101", default-features = false, optional = true }
 serde_json = { version = "1.0.41", default-features = false, optional = true }
