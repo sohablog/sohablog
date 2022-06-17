@@ -8,7 +8,7 @@ edition = "2018"
 ructe = { version = "0.7.2", features = [ "mime03" ] }
 
 [dependencies]
-diesel = { version = "1.4.3", features = [ "postgres", "r2d2", "chrono", "network-address" ] }
+diesel = { version = "1.4.6", features = [ "postgres", "r2d2", "chrono", "network-address" ] }
 r2d2 = "0.8.5"
 rocket = { version = "0.4.2", features = [ "private-cookies" ] }
 rocket_codegen = "0.4.2"
