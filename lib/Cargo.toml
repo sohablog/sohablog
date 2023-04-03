@@ -11,7 +11,7 @@ main = [ "serde", "serde_derive", "serde_json", "rocket", "diesel", "libloading"
 chrono = { version = "0.4.9", default-features = false, features = [ "clock" ] }
 uuid = { version = "0.7.4", default-features = false, features = [ "v4" ] }
 mime = "0.3.14"
-time = "0.1.42"
+time = "0.2.0"
 ipnetwork = "0.15.0" # should be same as ../Cargo.toml, lock for diesel
 
 libloading = { version = "0.5.2", optional = true }
